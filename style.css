@@ -323,29 +323,34 @@ header h1 span {
     border-color: transparent;
 }
 
-.download-btn {
+.button-group {
+    display: flex;
+    gap: 12px;
+}
+
+.action-btn {
     background: var(--wk-blue);
     border: none;
     color: white;
-    padding: 12px 24px;
+    padding: 12px 20px;
     border-radius: 6px;
     font-family: inherit;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     transition: opacity 0.15s;
 }
 
-.download-btn:hover {
+.action-btn:hover {
     opacity: 0.85;
 }
 
-.download-btn svg {
-    width: 20px;
-    height: 20px;
+.action-btn svg {
+    width: 18px;
+    height: 18px;
 }
 
 .search-box input {
