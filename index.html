@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaniKani Readathon Stats Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main class="container">
+        <header>
+            <h1><span>WaniKani</span> / 24-hour Readathon</h1>
+            <p class="subtitle">Statistics for Taiyousea's reading challenges</p>
+            <div class="info-toggle">
+                <button id="infoBtn" class="info-btn">What is this?</button>
+            </div>
+            <div id="infoPanel" class="info-panel" style="display: none;">
+                <div class="info-content">
+                    <p>The <strong>24-hour Readathon</strong> is a community event hosted by <strong>taiyousea</strong>
+                        on the WaniKani forums.
+                        Participants attempt to read as much Japanese as they can within a 24-hour period, tracking
+                        pages,
+                        characters, or time. Participants then report their final numbers to the community.
+                        These stats are then tallied together to see how much we can accomplish as a group!</p>
+                    <p>Whether you're finishing a book club pick or just squeezing in a few pages, every contribution
+                        boosts our collective averages.</p>
+                    <a href="https://community.wanikani.com/t/%E2%9D%84%EF%B8%8F-winter-solstice-24-hour-readathon-results-out/72793"
+                        target="_blank" class="info-link">Join the discussion on the WaniKani Forums!</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="search-section">
+            <div class="search-box">
+                <input type="text" id="usernameInput" list="userList" placeholder="Enter your WaniKani username..."
+                    autocomplete="off">
+                <datalist id="userList"></datalist>
+                <div class="search-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </div>
+            </div>
+            <div class="range-toggle">
+                <button class="toggle-btn active" data-range="all">All Time</button>
+                <button class="toggle-btn" data-range="year">Last Year</button>
+            </div>
+        </section>
+
+        <section id="summary-section" class="summary-section" style="display: none;">
+            <div class="customizer-controls">
+                <div class="color-picker-group">
+                    <span>Accent Color:</span>
+                    <div id="colorPicker" class="color-picker">
+                        <!-- Colors will be generated here -->
+                    </div>
+                </div>
+                <div class="background-picker-group">
+                    <span>Background:</span>
+                    <div id="bgButtons" class="bg-buttons">
+                        <!-- Buttons will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-wrapper" id="achievementCardOuter">
+                <div class="card-overlay"></div>
+                <canvas id="summaryCardCanvas" width="800" height="400"></canvas>
+            </div>
+
+            <button id="downloadBtn" class="download-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download Achievement Card
+            </button>
+        </section>
+
+        <section id="chart-section" class="chart-section" style="display: none;">
+            <div class="chart-controls">
+                <button class="chart-tab active" data-metric="time">Time</button>
+                <button class="chart-tab" data-metric="characters">Characters</button>
+                <button class="chart-tab" data-metric="pages">Pages</button>
+                <button class="chart-tab" data-metric="sources">Sources</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="historyChart"></canvas>
+            </div>
+        </section>
+
+        <section id="results" class="results-grid">
+            <div class="placeholder">
+                <p>Search for a user to see their marathon history</p>
+            </div>
+        </section>
+
+        <footer>
+            <p>Data curated by <strong>GolyBidoof</strong>. Not affiliated with Tofugu LLC.</p>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
