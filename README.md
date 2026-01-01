@@ -1,6 +1,6 @@
 # WaniKani Reading Marathon Stats
 
-A statistics explorer for the WaniKani community's 24-hour reading marathons, hosted by **Taiyousea** on the WaniKani forums.
+A statistics explorer for the WaniKani community's 24-hour reading marathons, hosted by **taiyousea** on the WaniKani forums.
 
 ## What is the 24-hour Readathon?
 
@@ -33,13 +33,13 @@ Then open `http://localhost:3000` in your browser.
 
 ## Data
 
-Stats are curated by **GolyBidoof** from participant reports in each marathon thread.
+Stats are manually recalculated by **GolyBidoof** from participant reports in each marathon thread.
 
 ## Credits
 
-- **Taiyousea** – Event host
-- **GolyBidoof** – Data curation
-- Not affiliated with Tofugu LLC.
+- **taiyousea** – Event host
+- **GolyBidoof** – Frontend
+- Built with assistance from **Gemini 3.0 Flash**
 
 ## License
 
