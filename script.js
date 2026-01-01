@@ -346,8 +346,8 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
 
         // Gradient overlay for export (matches CSS .card-overlay)
         const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        grad.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0.75)');
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0.2)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
