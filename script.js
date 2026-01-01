@@ -434,24 +434,52 @@ function downloadCanvas() {
     const names = getMarathonOrder();
     let tTime = 0, tPages = 0, tChars = 0, tSources = 0, count = 0, uName = '';
     const participatedMarathons = [];
-    names.forEach(n => {
-        const e = allStats[n].find(x => x.user.toLowerCase() === currentQuery);
-        if (e) {
-            uName = e.user; count++;
-            participatedMarathons.push(n);
-            if (e.time) { const p = e.time.split(':'); tTime += (parseInt(p[0]) || 0) + (parseInt(p[1]) || 0) / 60; }
-            tPages += parseInt(e.pages) || 0; tChars += parseInt(e.characters) || 0; tSources += parseInt(e.sources) || 0;
+
+    if (!currentQuery) {
+        // Community view: aggregate stats for the selected marathon
+        const selectedMarathon = names.find(n => (n.toLowerCase().replace(' ', '') + '.gif') === currentBg);
+        if (selectedMarathon) {
+            const participants = allStats[selectedMarathon];
+            uName = selectedMarathon;
+            count = participants.length;
+            participatedMarathons.push(selectedMarathon);
+
+            participants.forEach(entry => {
+                if (entry.time && typeof entry.time === 'string') {
+                    const parts = entry.time.split(':');
+                    tTime += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0) / 60;
+                }
+                tPages += parseInt(entry.pages) || 0;
+                tChars += parseInt(entry.characters) || 0;
+                tSources += parseInt(entry.sources) || 0;
+            });
         }
-    });
+    } else {
+        // User view: aggregate stats for the searched user
+        names.forEach(n => {
+            const e = allStats[n].find(x => x.user.toLowerCase() === currentQuery);
+            if (e) {
+                uName = e.user;
+                count++;
+                participatedMarathons.push(n);
+                if (e.time) {
+                    const p = e.time.split(':');
+                    tTime += (parseInt(p[0]) || 0) + (parseInt(p[1]) || 0) / 60;
+                }
+                tPages += parseInt(e.pages) || 0;
+                tChars += parseInt(e.characters) || 0;
+                tSources += parseInt(e.sources) || 0;
+            }
+        });
+    }
 
     const bgItem = gifBackgrounds.find(g => g === currentBg);
-    // Format: "Season Year"
     const label = bgItem ? bgItem.replace('.gif', '').replace(/([a-z]+)(\d+)/i, (m, s, y) => s.charAt(0).toUpperCase() + s.slice(1) + ' ' + y) : '';
 
     drawCanvas(uName, tTime, count, tPages, tChars, tSources, true, label, participatedMarathons);
     const canvas = document.getElementById('summaryCardCanvas');
     const link = document.createElement('a');
-    link.download = `${currentQuery}_achievement.png`;
+    link.download = `${currentQuery || 'community'}_achievement.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
     drawCanvas(uName, tTime, count, tPages, tChars, tSources, false, label, participatedMarathons);
