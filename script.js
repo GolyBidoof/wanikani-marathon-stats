@@ -344,8 +344,33 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (forExport) {
-        if (bgImages[currentBg]) ctx.drawImage(bgImages[currentBg], 0, 0, canvas.width, canvas.height);
-        else { ctx.fillStyle = '#232323'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+        if (bgImages[currentBg] && bgImages[currentBg].complete) {
+            // Draw background with "cover" behavior (match CSS background-size: cover)
+            const img = bgImages[currentBg];
+            const imgRatio = img.naturalWidth / img.naturalHeight;
+            const canvasRatio = canvas.width / canvas.height;
+
+            let drawWidth, drawHeight, offsetX, offsetY;
+
+            if (imgRatio > canvasRatio) {
+                // Image is wider - fit height, crop width
+                drawHeight = canvas.height;
+                drawWidth = img.naturalWidth * (canvas.height / img.naturalHeight);
+                offsetX = (canvas.width - drawWidth) / 2;
+                offsetY = 0;
+            } else {
+                // Image is taller - fit width, crop height
+                drawWidth = canvas.width;
+                drawHeight = img.naturalHeight * (canvas.width / img.naturalWidth);
+                offsetX = 0;
+                offsetY = (canvas.height - drawHeight) / 2;
+            }
+
+            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        } else {
+            ctx.fillStyle = '#232323';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
 
         // Gradient overlay for export (matches CSS .card-overlay)
         const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
