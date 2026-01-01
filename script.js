@@ -344,10 +344,10 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
         if (bgImages[currentBg]) ctx.drawImage(bgImages[currentBg], 0, 0, canvas.width, canvas.height);
         else { ctx.fillStyle = '#232323'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
 
-        // Gradient overlay for export
+        // Gradient overlay for export (matches CSS .card-overlay)
         const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        grad.addColorStop(0, 'rgba(0, 0, 0, 0.4)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+        grad.addColorStop(0, 'rgba(0, 0, 0, 0.45)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0.75)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
