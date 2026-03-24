@@ -157,8 +157,8 @@ function setAccentColor(color) {
     });
 
     updateSummaryCard();
+    updateChart();
     if (currentQuery) {
-        updateChart();
         renderResults(currentQuery);
     }
 }
@@ -175,9 +175,9 @@ function handleSearch() {
 
     if (!query) {
         resultsContainer.innerHTML = '';
-        chartSection.style.display = 'none';
         currentQuery = '';
         updateSummaryCard();
+        updateChart();
         return;
     }
 
@@ -206,35 +206,70 @@ function getMarathonOrder() {
 }
 
 function updateChart() {
-    if (!currentQuery) return;
-
     const marathonNames = getMarathonOrder();
     const labels = [];
     const dataPoints = [];
 
-    marathonNames.forEach(name => {
-        const entries = allStats[name];
-        const entry = entries.find(e => e.user.toLowerCase() === currentQuery);
-
-        if (entry) {
-            labels.push(name);
-            let value = entry[currentMetric] || 0;
-
-            if (currentMetric === 'time' && typeof value === 'string') {
-                const parts = value.split(':');
-                if (parts.length >= 2) {
-                    // Convert HH:MM:SS to decimal hours
-                    const h = parseInt(parts[0]) || 0;
-                    const m = parseInt(parts[1]) || 0;
-                    const s = parseInt(parts[2]) || 0;
-                    value = h + (m / 60) + (s / 3600);
+    if (!currentQuery) {
+        // Community totals chart
+        marathonNames.forEach(name => {
+            const entries = allStats[name];
+            if (entries && entries.length > 0) {
+                labels.push(name);
+                if (currentMetric === 'participants') {
+                    dataPoints.push(entries.length);
                 } else {
-                    value = parseFloat(value) || 0;
+                    let totalValue = 0;
+                    entries.forEach(entry => {
+                        let value = entry[currentMetric] || 0;
+                        if (currentMetric === 'time' && typeof value === 'string') {
+                            const parts = value.split(':');
+                            if (parts.length >= 2) {
+                                const h = parseInt(parts[0]) || 0;
+                                const m = parseInt(parts[1]) || 0;
+                                const s = parseInt(parts[2]) || 0;
+                                value = h + (m / 60) + (s / 3600);
+                            } else {
+                                value = parseFloat(value) || 0;
+                            }
+                        }
+                        totalValue += parseFloat(value) || 0;
+                    });
+                    dataPoints.push(totalValue);
                 }
             }
-            dataPoints.push(parseFloat(value) || 0);
-        }
-    });
+        });
+    } else {
+        // Individual user chart
+        marathonNames.forEach(name => {
+            const entries = allStats[name];
+            const entry = entries.find(e => e.user.toLowerCase() === currentQuery);
+
+            if (entry) {
+                labels.push(name);
+                
+                if (currentMetric === 'participants') {
+                    dataPoints.push(1); // Or don't show participants for individuals, but we'll show 1 just in case
+                } else {
+                    let value = entry[currentMetric] || 0;
+
+                    if (currentMetric === 'time' && typeof value === 'string') {
+                        const parts = value.split(':');
+                        if (parts.length >= 2) {
+                            // Convert HH:MM:SS to decimal hours
+                            const h = parseInt(parts[0]) || 0;
+                            const m = parseInt(parts[1]) || 0;
+                            const s = parseInt(parts[2]) || 0;
+                            value = h + (m / 60) + (s / 3600);
+                        } else {
+                            value = parseFloat(value) || 0;
+                        }
+                    }
+                    dataPoints.push(parseFloat(value) || 0);
+                }
+            }
+        });
+    }
 
     if (dataPoints.length > 0) {
         chartSection.style.display = 'block';
