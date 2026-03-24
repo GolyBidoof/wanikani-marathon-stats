@@ -130,10 +130,32 @@ async function init() {
     }
 }
 
+let bgLoadPromise = null;
+
 function setBackground(gif) {
     currentBg = gif;
-    const bgImg = document.getElementById('bgGifImage');
-    if (bgImg) bgImg.src = gif;
+    const oldCanvas = document.getElementById('bgGifCanvas');
+    
+    bgLoadPromise = new Promise((resolve) => {
+        if (oldCanvas) {
+            const newCanvas = document.createElement('canvas');
+            newCanvas.id = 'bgGifCanvas';
+            newCanvas.className = 'bg-gif';
+            oldCanvas.replaceWith(newCanvas);
+            
+            // Allow gifler to inject frames to our new DOM canvas overlay backing
+            gifler(gif).get(a => {
+                if (currentBg === gif) {
+                    a.animateInCanvas(newCanvas);
+                    resolve();
+                } else {
+                    resolve();
+                }
+            });
+        } else {
+            resolve();
+        }
+    });
 
     document.querySelectorAll('.bg-btn').forEach(btn => {
         const btnGif = btn.dataset.gif;
@@ -146,13 +168,8 @@ function setBackground(gif) {
 }
 
 function ensureBgLoaded() {
-    const bgImg = document.getElementById('bgGifImage');
-    if (!bgImg || !bgImg.src) return Promise.resolve();
-    if (bgImg.complete && bgImg.naturalWidth > 0) return Promise.resolve();
-    return new Promise((resolve) => {
-        bgImg.onload = resolve;
-        bgImg.onerror = resolve;
-    });
+    if (!bgLoadPromise) return Promise.resolve();
+    return bgLoadPromise;
 }
 
 function setAccentColor(color) {
@@ -346,8 +363,8 @@ function updateSummaryCard() {
             }
         });
 
-        const bgImg = document.getElementById('bgGifImage');
-        if (bgImg) bgImg.src = currentBg;
+        const bgImg = document.getElementById('bgGifCanvas');
+        // No need to set .src here, gifler is animating it or setting it.
 
         const optionsGroup = document.getElementById('optionsGroup');
         if (optionsGroup) optionsGroup.style.display = 'none';
@@ -407,8 +424,8 @@ function updateSummaryCard() {
             if (!availableGifs.some(g => g.gif === currentBg)) {
                 currentBg = availableGifs[availableGifs.length - 1].gif;
             }
-            const bgImg = document.getElementById('bgGifImage');
-            if (bgImg) bgImg.src = currentBg;
+            const bgImg = document.getElementById('bgGifCanvas');
+            // No need to set .src here since setBackground called above handles gifler
             document.querySelectorAll('.bg-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.gif === currentBg));
 
             const currentBgItem = availableGifs.find(g => g.gif === currentBg);
@@ -427,28 +444,27 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (forExport) {
-        const bgImg = document.getElementById('bgGifImage');
-        if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
-            // Draw from the live DOM <img> to capture current GIF frame
-            const img = bgImg;
-            const imgRatio = img.naturalWidth / img.naturalHeight;
+        const bgImg = document.getElementById('bgGifCanvas');
+        if (bgImg && bgImg.width > 0) {
+            // Draw from the live DOM <canvas> to capture current GIF frame
+            const imgRatio = bgImg.width / bgImg.height;
             const canvasRatio = canvas.width / canvas.height;
 
             let drawWidth, drawHeight, offsetX, offsetY;
 
             if (imgRatio > canvasRatio) {
                 drawHeight = canvas.height;
-                drawWidth = img.naturalWidth * (canvas.height / img.naturalHeight);
+                drawWidth = bgImg.width * (canvas.height / bgImg.height);
                 offsetX = (canvas.width - drawWidth) / 2;
                 offsetY = 0;
             } else {
                 drawWidth = canvas.width;
-                drawHeight = img.naturalHeight * (canvas.width / img.naturalWidth);
+                drawHeight = bgImg.height * (canvas.width / bgImg.width);
                 offsetX = 0;
                 offsetY = (canvas.height - drawHeight) / 2;
             }
 
-            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+            ctx.drawImage(bgImg, offsetX, offsetY, drawWidth, drawHeight);
         } else {
             ctx.fillStyle = '#232323';
             ctx.fillRect(0, 0, canvas.width, canvas.height);

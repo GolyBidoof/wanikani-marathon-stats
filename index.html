@@ -11,6 +11,7 @@
         href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&family=Outfit:wght@300;400;600;800&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/gifler@0.1.0/gifler.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -85,7 +86,7 @@
             </div>
 
             <div class="canvas-wrapper" id="achievementCardOuter">
-                <img id="bgGifImage" class="bg-gif" src="" alt="" />
+                <canvas id="bgGifCanvas" class="bg-gif"></canvas>
                 <div class="card-overlay"></div>
                 <canvas id="summaryCardCanvas" width="800" height="400"></canvas>
             </div>
