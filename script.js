@@ -422,10 +422,9 @@ function updateSummaryCard() {
 
         if (availableGifs.length > 0) {
             if (!availableGifs.some(g => g.gif === currentBg)) {
-                currentBg = availableGifs[availableGifs.length - 1].gif;
+                setBackground(availableGifs[availableGifs.length - 1].gif);
             }
-            const bgImg = document.getElementById('bgGifCanvas');
-            // No need to set .src here since setBackground called above handles gifler
+            
             document.querySelectorAll('.bg-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.gif === currentBg));
 
             const currentBgItem = availableGifs.find(g => g.gif === currentBg);
