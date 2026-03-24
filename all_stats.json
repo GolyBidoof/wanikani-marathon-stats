@@ -42,7 +42,7 @@
       "sources": 1
     },
     {
-      "user": "RebBlue",
+      "user": "Reb",
       "time": "04:23:00",
       "pages": 100,
       "sources": 10
@@ -69,7 +69,7 @@
       "time": "02:30:00"
     },
     {
-      "user": "SpiderWeb",
+      "user": "Spiderweb",
       "time": "04:00:00",
       "pages": 80,
       "sources": 1
@@ -269,7 +269,7 @@
       "sources": 1
     },
     {
-      "user": "RebBlue",
+      "user": "Reb",
       "time": "06:47:00",
       "pages": 128,
       "characters": 5000,
@@ -281,13 +281,13 @@
       "sources": 1
     },
     {
-      "user": "Sasabonsam",
+      "user": "sasabonsam",
       "time": "07:00:00",
       "pages": 110,
       "sources": 1
     },
     {
-      "user": "MaraVos",
+      "user": "Mara",
       "time": "04:45:00",
       "pages": 159,
       "sources": 5
@@ -298,7 +298,7 @@
       "characters": 65800
     },
     {
-      "user": "SpiderWeb",
+      "user": "Spiderweb",
       "time": "02:05:00",
       "pages": 64,
       "characters": 16000,
@@ -371,7 +371,7 @@
       "sources": 2
     },
     {
-      "user": "RebBlue",
+      "user": "Reb",
       "time": "05:37:00",
       "pages": 231,
       "characters": 5400,
@@ -596,7 +596,7 @@
       "sources": 2
     },
     {
-      "user": "RebBlue",
+      "user": "Reb",
       "time": "08:31:00",
       "pages": 418,
       "characters": 5800,
@@ -635,7 +635,7 @@
       "sources": 3
     },
     {
-      "user": "Dunlewy",
+      "user": "dunlewy",
       "time": "03:18:00",
       "pages": 5,
       "sources": 1
@@ -739,7 +739,7 @@
       "sources": 2
     },
     {
-      "user": "Dunlewy",
+      "user": "dunlewy",
       "time": "08:53:00",
       "pages": 62,
       "characters": 0,
@@ -791,7 +791,7 @@
       "sources": 6
     },
     {
-      "user": "MaraVos",
+      "user": "Mara",
       "time": "04:30:00",
       "pages": 167,
       "sources": 1
@@ -884,7 +884,7 @@
       "sources": 3
     },
     {
-      "user": "RebBlue",
+      "user": "Reb",
       "time": "07:56:00",
       "pages": 587,
       "sources": 17
@@ -909,7 +909,7 @@
       "sources": 1
     },
     {
-      "user": "SpiderWeb",
+      "user": "Spiderweb",
       "time": "03:30:00",
       "pages": 78,
       "sources": 1
@@ -997,7 +997,7 @@
       "sources": 1
     },
     {
-      "user": "Dunlewy",
+      "user": "dunlewy",
       "time": "10:23:00",
       "pages": 38,
       "characters": 0,
@@ -1090,7 +1090,7 @@
       "sources": 10
     },
     {
-      "user": "SpiderWeb",
+      "user": "Spiderweb",
       "url": "https://community.wanikani.com/t/x/71481/374",
       "time": "01:15:00",
       "pages": 23,
@@ -1227,7 +1227,7 @@
       "sources": 1
     },
     {
-      "user": "MaraVos",
+      "user": "Mara",
       "time": "02:10:00",
       "pages": 47,
       "sources": 5
@@ -1274,7 +1274,7 @@
       "sources": 1
     },
     {
-      "user": "Catwithcookiesandtea",
+      "user": "catwithcookiesandtea",
       "time": "05:00:00",
       "pages": 23,
       "sources": 1
@@ -1307,7 +1307,7 @@
       "sources": 26
     },
     {
-      "user": "Dunlewy",
+      "user": "dunlewy",
       "time": "05:00:00",
       "pages": 31,
       "sources": 3
@@ -1326,7 +1326,7 @@
       "sources": 10
     },
     {
-      "user": "RebBlue",
+      "user": "Reb",
       "url": "https://community.wanikani.com/t/%E2%9D%84%EF%B8%8F-winter-solstice-24-hour-readathon-now/72793/286",
       "time": "08:29:00",
       "pages": 623,
@@ -1375,7 +1375,7 @@
       "sources": 1
     },
     {
-      "user": "Mioneko",
+      "user": "mioneko",
       "time": "07:00:00",
       "pages": 81,
       "sources": 2
@@ -1439,14 +1439,14 @@
       "sources": 2
     },
     {
-      "user": "SpiderWeb",
+      "user": "Spiderweb",
       "url": "https://community.wanikani.com/t/%E2%9D%84%EF%B8%8F-winter-solstice-24-hour-readathon-now/72793/466",
       "time": "03:35:00",
       "pages": 382,
       "sources": 1
     },
     {
-      "user": "Cryss",
+      "user": "cryss",
       "url": "https://community.wanikani.com/t/%E2%9D%84%EF%B8%8F-winter-solstice-24-hour-readathon-now/72793/406",
       "time": "01:30:00",
       "pages": 71,
@@ -1562,7 +1562,7 @@
       "sources": 1
     },
     {
-      "user": "MaraVos",
+      "user": "Mara",
       "time": "01:13:00",
       "pages": 54
     },
@@ -1589,6 +1589,349 @@
       "time": "10:24:00",
       "pages": 1133,
       "sources": 7
+    }
+  ],
+  "Spring 2026": [
+    {
+      "user": "Alvi",
+      "time": "06:50:00",
+      "pages": 104,
+      "sources": 1
+    },
+    {
+      "user": "coraldragonstar",
+      "time": "06:50:00",
+      "pages": 418,
+      "sources": 6
+    },
+    {
+      "user": "Daisoujou",
+      "time": "04:00:00",
+      "characters": 61200,
+      "sources": 1
+    },
+    {
+      "user": "latepatate",
+      "time": "06:51:00",
+      "pages": 777,
+      "sources": 6
+    },
+    {
+      "user": "Lisaveeta",
+      "time": "07:29:00",
+      "pages": 220,
+      "sources": 1
+    },
+    {
+      "user": "Javerend",
+      "time": "03:00:00",
+      "characters": 35000,
+      "sources": 1
+    },
+    {
+      "user": "Jintor",
+      "time": "06:00:00",
+      "characters": 22300,
+      "sources": 1
+    },
+    {
+      "user": "Malinkal",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/475",
+      "time": "08:58:57",
+      "pages": 80,
+      "characters": 136500,
+      "sources": 2
+    },
+    {
+      "user": "Maurice620",
+      "time": "03:15:00",
+      "pages": 158,
+      "sources": 2
+    },
+    {
+      "user": "Meme456",
+      "time": "06:49:00",
+      "pages": 196,
+      "sources": 2
+    },
+    {
+      "user": "Enigma",
+      "time": "03:30:00",
+      "pages": 123,
+      "sources": 3
+    },
+    {
+      "user": "NicoleIsEnough",
+      "time": "04:20:00",
+      "pages": 46,
+      "sources": 2
+    },
+    {
+      "user": "mioneko",
+      "time": "09:16:00",
+      "pages": 182,
+      "sources": 2
+    },
+    {
+      "user": "mycatslikerock",
+      "time": "03:00:00",
+      "characters": 12000,
+      "sources": 1
+    },
+    {
+      "user": "dunlewy",
+      "time": "11:39:00",
+      "pages": 29,
+      "sources": 4
+    },
+    {
+      "user": "Kigi",
+      "time": "03:02:00",
+      "pages": 35,
+      "sources": 3
+    },
+    {
+      "user": "sasabonsam",
+      "time": "06:30:00",
+      "pages": 73,
+      "sources": 1
+    },
+    {
+      "user": "Shin",
+      "time": "04:00:00",
+      "characters": 22000,
+      "sources": 1
+    },
+    {
+      "user": "shuly",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-mar-21/73789/10",
+      "time": "08:40:00",
+      "pages": 114,
+      "characters": 23400,
+      "sources": 8
+    },
+    {
+      "user": "taiyousea",
+      "time": "03:35:00",
+      "pages": 45,
+      "sources": 1
+    },
+    {
+      "user": "tenizey",
+      "time": "05:00:00",
+      "pages": 25,
+      "sources": 1
+    },
+    {
+      "user": "NekoKanjimaster27",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/217",
+      "time": "05:16:00",
+      "pages": 213,
+      "sources": 1
+    },
+    {
+      "user": "downtimes",
+      "time": "08:17:00",
+      "pages": 295,
+      "characters": 6736,
+      "sources": 7
+    },
+    {
+      "user": "pocketcalamity",
+      "time": "09:07:00",
+      "pages": 491,
+      "sources": 4
+    },
+    {
+      "user": "Reb",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/393",
+      "time": "06:47:00",
+      "pages": 400,
+      "characters": 2300,
+      "sources": 8
+    },
+    {
+      "user": "mitrac",
+      "time": "01:00:00",
+      "pages": 3,
+      "characters": 2600,
+      "sources": 4
+    },
+    {
+      "user": "GolyBidoof",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/399",
+      "time": "12:15:33",
+      "pages": 596,
+      "sources": 5
+    },
+    {
+      "user": "Tan Tan",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/396",
+      "time": "04:40:00",
+      "pages": 414,
+      "sources": 2
+    },
+    {
+      "user": "eefara",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/414",
+      "time": "09:27:00",
+      "pages": 1136,
+      "sources": 7
+    },
+    {
+      "user": "shitsurei",
+      "url": "https://community.wanikani.com/t/73789/469",
+      "time": "06:31:00",
+      "pages": 43,
+      "characters": 21700,
+      "sources": 4
+    },
+    {
+      "user": "soggyboy",
+      "time": "03:35:00",
+      "pages": 90,
+      "sources": 2
+    },
+    {
+      "user": "Spiderweb",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/459",
+      "time": "01:00:00",
+      "pages": 20,
+      "sources": 1
+    },
+    {
+      "user": "hrudey",
+      "time": "03:30:00",
+      "pages": 324,
+      "sources": 2
+    },
+    {
+      "user": "araigoshi",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/429",
+      "time": "05:40:00",
+      "pages": 1008,
+      "sources": 7
+    },
+    {
+      "user": "mickeyp",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/434",
+      "time": "05:00:41",
+      "pages": 164,
+      "sources": 12
+    },
+    {
+      "user": "pocketcat",
+      "time": "03:45:00",
+      "pages": 97,
+      "sources": 1
+    },
+    {
+      "user": "catwithcookiesandtea",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/140",
+      "time": "05:30:00",
+      "pages": 359,
+      "sources": 3
+    },
+    {
+      "user": "Kelsyy",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/440",
+      "time": "10:41:00",
+      "pages": 1020,
+      "sources": 6
+    },
+    {
+      "user": "LumisEterne",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/445",
+      "time": "06:59:00",
+      "pages": 187,
+      "characters": 3370,
+      "sources": 3
+    },
+    {
+      "user": "Midnightblue",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/449",
+      "time": "09:21:00",
+      "characters": 105200,
+      "sources": 1
+    },
+    {
+      "user": "lifev",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/149",
+      "time": "11:40:00",
+      "pages": 425,
+      "characters": 66000,
+      "sources": 5
+    },
+    {
+      "user": "Neon_Kitsune",
+      "time": "03:30:00",
+      "pages": 131,
+      "characters": 1900,
+      "sources": 2
+    },
+    {
+      "user": "Redglare",
+      "url": "https://community.wanikani.com/t/x/73789/458",
+      "time": "05:42:00",
+      "pages": 179,
+      "sources": 1
+    },
+    {
+      "user": "hotdogsuplex",
+      "time": "03:45:00",
+      "pages": 212,
+      "sources": 4
+    },
+    {
+      "user": "voi",
+      "time": "07:53:00",
+      "pages": 139,
+      "characters": 30300,
+      "sources": 2
+    },
+    {
+      "user": "WeepingWeeb",
+      "url": "https://community.wanikani.com/t/x/73789/482",
+      "time": "02:30:00",
+      "pages": 337,
+      "sources": 3
+    },
+    {
+      "user": "Ditto20",
+      "time": "05:15:00",
+      "pages": 231,
+      "sources": 1
+    },
+    {
+      "user": "TheNerdyNova",
+      "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/477",
+      "time": "06:01:00",
+      "pages": 912,
+      "sources": 6
+    },
+    {
+      "user": "Mara",
+      "time": "03:59:00",
+      "pages": 107,
+      "sources": 5
+    },
+    {
+      "user": "cryss",
+      "time": "04:40:00",
+      "pages": 324,
+      "sources": 3
+    },
+    {
+      "user": "NihongoLearner19",
+      "time": "01:00:00",
+      "pages": 60,
+      "sources": 1
+    },
+    {
+      "user": "Natsuha",
+      "time": "04:00:00",
+      "pages": 130,
+      "sources": 2
     }
   ]
 }

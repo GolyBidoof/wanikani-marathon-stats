@@ -18,6 +18,7 @@ const gifBackgrounds = [
     'fall2024.gif',
     'autumn2025.gif',
     'spring2025.gif',
+    'spring2026.gif',
     'summer2024.gif',
     'summer2025.gif',
     'winter2024.gif',
@@ -50,8 +51,8 @@ async function init() {
         const usersRes = await fetch('users.json');
         allUsers = await usersRes.json();
 
-        // Populate datalist
-        allUsers.forEach(user => {
+        // Populate datalist (alphabetically)
+        allUsers.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })).forEach(user => {
             const opt = document.createElement('option');
             opt.value = user;
             userList.appendChild(opt);
@@ -113,22 +114,27 @@ async function init() {
 
 function setBackground(gif) {
     currentBg = gif;
-    const outer = document.getElementById('achievementCardOuter');
-    if (outer) outer.style.backgroundImage = `url(${gif})`;
+    const bgImg = document.getElementById('bgGifImage');
+    if (bgImg) bgImg.src = gif;
 
     document.querySelectorAll('.bg-btn').forEach(btn => {
         const btnGif = btn.dataset.gif;
         btn.classList.toggle('active', btnGif === gif);
     });
 
-    if (!bgImages[gif]) {
-        bgImages[gif] = new Image();
-        bgImages[gif].src = gif;
-    }
-
     if (!currentQuery) {
         updateSummaryCard();
     }
+}
+
+function ensureBgLoaded() {
+    const bgImg = document.getElementById('bgGifImage');
+    if (!bgImg || !bgImg.src) return Promise.resolve();
+    if (bgImg.complete && bgImg.naturalWidth > 0) return Promise.resolve();
+    return new Promise((resolve) => {
+        bgImg.onload = resolve;
+        bgImg.onerror = resolve;
+    });
 }
 
 function setAccentColor(color) {
@@ -270,8 +276,8 @@ function updateSummaryCard() {
             }
         });
 
-        const outer = document.getElementById('achievementCardOuter');
-        if (outer) outer.style.backgroundImage = `url(${currentBg})`;
+        const bgImg = document.getElementById('bgGifImage');
+        if (bgImg) bgImg.src = currentBg;
 
         drawCanvas(userName, totalTime, participatedCount, totalPages, totalChars, totalSources, false, selectedMarathon || '', participatedMarathons);
         return;
@@ -322,10 +328,10 @@ function updateSummaryCard() {
 
         if (availableGifs.length > 0) {
             if (!availableGifs.some(g => g.gif === currentBg)) {
-                currentBg = availableGifs[Math.floor(Math.random() * availableGifs.length)].gif;
+                currentBg = availableGifs[availableGifs.length - 1].gif;
             }
-            const outer = document.getElementById('achievementCardOuter');
-            if (outer) outer.style.backgroundImage = `url(${currentBg})`;
+            const bgImg = document.getElementById('bgGifImage');
+            if (bgImg) bgImg.src = currentBg;
             document.querySelectorAll('.bg-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.gif === currentBg));
 
             const currentBgItem = availableGifs.find(g => g.gif === currentBg);
@@ -344,22 +350,21 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (forExport) {
-        if (bgImages[currentBg] && bgImages[currentBg].complete) {
-            // Draw background with "cover" behavior (match CSS background-size: cover)
-            const img = bgImages[currentBg];
+        const bgImg = document.getElementById('bgGifImage');
+        if (bgImg && bgImg.complete && bgImg.naturalWidth > 0) {
+            // Draw from the live DOM <img> to capture current GIF frame
+            const img = bgImg;
             const imgRatio = img.naturalWidth / img.naturalHeight;
             const canvasRatio = canvas.width / canvas.height;
 
             let drawWidth, drawHeight, offsetX, offsetY;
 
             if (imgRatio > canvasRatio) {
-                // Image is wider - fit height, crop width
                 drawHeight = canvas.height;
                 drawWidth = img.naturalWidth * (canvas.height / img.naturalHeight);
                 offsetX = (canvas.width - drawWidth) / 2;
                 offsetY = 0;
             } else {
-                // Image is taller - fit width, crop height
                 drawWidth = canvas.width;
                 drawHeight = img.naturalHeight * (canvas.width / img.naturalWidth);
                 offsetX = 0;
@@ -393,26 +398,26 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
 
     // Top left: Username
     ctx.textAlign = 'left';
-    ctx.font = '700 42px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.font = '700 42px Outfit, Open Sans, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.fillText(name.toUpperCase(), leftX, 85);
 
     // Tagline under username
-    ctx.font = '600 14px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.font = '600 14px Outfit, Open Sans, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.fillText('WaniKani Reading Marathon', leftX, 110);
 
     // Center: Big time display
     ctx.textAlign = 'center';
     ctx.shadowBlur = 15;
-    ctx.font = '800 90px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.font = '800 90px Outfit, Open Sans, sans-serif';
     ctx.fillStyle = '#ffffff';
     const h = Math.floor(time);
     const m = Math.round((time - h) * 60);
     ctx.fillText(`${h}h ${m}m`, canvas.width / 2, 220);
 
     ctx.shadowBlur = 5;
-    ctx.font = '700 18px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.font = '700 18px Outfit, Open Sans, sans-serif';
     ctx.fillStyle = currentAccentColor;
     ctx.fillText('TOTAL TIME READ', canvas.width / 2, 250);
 
@@ -433,32 +438,46 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
         const x = spacing * (i + 1);
         ctx.fillStyle = '#ffffff';
         ctx.shadowBlur = 6;
-        ctx.font = '700 26px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.font = '700 26px Outfit, Open Sans, sans-serif';
         ctx.fillText(s.value, x, statY);
         ctx.shadowBlur = 2;
-        ctx.font = '600 10px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.font = '600 10px Outfit, Open Sans, sans-serif';
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         ctx.fillText(s.label, x, statY + 18);
     });
 
-    // Top right: Participation history (for individual users)
+    // Top right: Participation history with times (for individual users)
     if (history.length > 0 && currentQuery) {
         ctx.textAlign = 'right';
         ctx.shadowBlur = 0;
-        ctx.font = '600 11px -apple-system, BlinkMacSystemFont, sans-serif';
         let yStart = 75;
+        const lineHeight = 24;
 
         history.forEach((hItem, i) => {
             const [s, year] = hItem.split(' ');
             const emoji = seasonEmojis[s] || '';
             const shortYear = year.slice(-2);
+
+            // Marathon label
+            ctx.font = '600 11px Outfit, Open Sans, sans-serif';
             ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.fillText(`${emoji} ${s.substring(0, 3).toUpperCase()} '${shortYear}`, rightX, yStart + (i * 16));
+            ctx.fillText(`${emoji} ${s.substring(0, 3).toUpperCase()} '${shortYear}`, rightX, yStart + (i * lineHeight));
+
+            // Reading time below the label
+            const entry = allStats[hItem]?.find(e => e.user.toLowerCase() === currentQuery);
+            if (entry && entry.time) {
+                const parts = entry.time.split(':');
+                const hrs = parseInt(parts[0]) || 0;
+                const mins = parseInt(parts[1]) || 0;
+                ctx.font = '700 9px Outfit, Open Sans, sans-serif';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.fillText(`${hrs}h ${mins}m`, rightX, yStart + (i * lineHeight) + 11);
+            }
         });
     }
 }
 
-function downloadCanvas() {
+async function downloadCanvas() {
     const names = getMarathonOrder();
     let tTime = 0, tPages = 0, tChars = 0, tSources = 0, count = 0, uName = '';
     const participatedMarathons = [];
@@ -504,6 +523,7 @@ function downloadCanvas() {
     const bgItem = gifBackgrounds.find(g => g === currentBg);
     const label = bgItem ? bgItem.replace('.gif', '').replace(/([a-z]+)(\d+)/i, (m, s, y) => s.charAt(0).toUpperCase() + s.slice(1) + ' ' + y) : '';
 
+    await ensureBgLoaded();
     drawCanvas(uName, tTime, count, tPages, tChars, tSources, true, label, participatedMarathons);
     const canvas = document.getElementById('summaryCardCanvas');
     const link = document.createElement('a');
@@ -556,6 +576,7 @@ async function copyCanvas() {
     const bgItem = gifBackgrounds.find(g => g === currentBg);
     const label = bgItem ? bgItem.replace('.gif', '').replace(/([a-z]+)(\d+)/i, (m, s, y) => s.charAt(0).toUpperCase() + s.slice(1) + ' ' + y) : '';
 
+    await ensureBgLoaded(currentBg);
     drawCanvas(uName, tTime, count, tPages, tChars, tSources, true, label, participatedMarathons);
     const canvas = document.getElementById('summaryCardCanvas');
 
