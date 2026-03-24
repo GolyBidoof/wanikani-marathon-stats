@@ -45,6 +45,13 @@ let currentAccentColor = accentColors[0];
 
 async function init() {
     try {
+        if (document.fonts) {
+            await Promise.all([
+                document.fonts.load("12px 'Outfit'"),
+                document.fonts.load("12px 'Open Sans'")
+            ]);
+        }
+
         const statsRes = await fetch('all_stats.json');
         allStats = await statsRes.json();
 
@@ -705,6 +712,7 @@ function renderChart(labels, dataPoints) {
                     title: { display: true, text: currentMetric.toUpperCase(), color: '#919191' }, 
                     ticks: { 
                         color: '#919191',
+                        precision: 0,
                         callback: function(value) {
                             if (currentMetric === 'time') return Math.floor(value) + 'h';
                             return value.toLocaleString();
