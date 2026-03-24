@@ -210,6 +210,23 @@ function updateChart() {
     const labels = [];
     const dataPoints = [];
 
+    const participantsTab = document.querySelector('.chart-tab[data-metric="participants"]');
+    if (participantsTab) {
+        if (currentQuery) {
+            participantsTab.style.display = 'none';
+            if (currentMetric === 'participants') {
+                currentMetric = 'time';
+                const timeTab = document.querySelector('.chart-tab[data-metric="time"]');
+                if (timeTab) {
+                    document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+                    timeTab.classList.add('active');
+                }
+            }
+        } else {
+            participantsTab.style.display = 'inline-block';
+        }
+    }
+
     if (!currentQuery) {
         // Community totals chart
         marathonNames.forEach(name => {
@@ -682,10 +699,44 @@ function renderChart(labels, dataPoints) {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, title: { display: true, text: currentMetric.toUpperCase(), color: '#919191' }, ticks: { color: '#919191' } },
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
+                    title: { display: true, text: currentMetric.toUpperCase(), color: '#919191' }, 
+                    ticks: { 
+                        color: '#919191',
+                        callback: function(value) {
+                            if (currentMetric === 'time') return Math.floor(value) + 'h';
+                            return value.toLocaleString();
+                        }
+                    } 
+                },
                 x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, title: { display: true, text: 'MARATHON', color: '#919191' }, ticks: { color: '#919191' } }
             },
-            plugins: { legend: { display: false } }
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let val = context.parsed.y;
+                            if (currentMetric === 'time') {
+                                const hrs = Math.floor(val);
+                                const mins = Math.round((val - hrs) * 60);
+                                return `Time: ${hrs}h ${mins}m`;
+                            } else if (currentMetric === 'characters') {
+                                return `Characters: ${val.toLocaleString()}`;
+                            } else if (currentMetric === 'pages') {
+                                return `Pages: ${val.toLocaleString()}`;
+                            } else if (currentMetric === 'sources') {
+                                return `Sources: ${val.toLocaleString()}`;
+                            } else if (currentMetric === 'participants') {
+                                return `Participants: ${val.toLocaleString()}`;
+                            }
+                            return val;
+                        }
+                    }
+                }
+            }
         }
     });
 }
