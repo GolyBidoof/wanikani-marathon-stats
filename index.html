@@ -51,25 +51,36 @@
                     </svg>
                 </div>
             </div>
-            <div class="range-toggle">
-                <button class="toggle-btn active" data-range="all">All Time</button>
-                <button class="toggle-btn" data-range="year">Last Year</button>
-            </div>
+            <!-- Range toggle moved to customizer-controls -->
         </section>
 
         <section id="summary-section" class="summary-section" style="display: none;">
             <div class="customizer-controls">
-                <div class="color-picker-group">
-                    <span>Accent Color:</span>
+                <div class="customizer-group">
+                    <span>Range:</span>
+                    <div class="range-toggle">
+                        <button class="toggle-btn active" data-range="all">All Time</button>
+                        <button class="toggle-btn" data-range="year">Last Year</button>
+                    </div>
+                </div>
+                <div class="customizer-group">
+                    <span>Accent:</span>
                     <div id="colorPicker" class="color-picker">
                         <!-- Colors will be generated here -->
                     </div>
                 </div>
-                <div class="background-picker-group">
+                <div class="customizer-group">
                     <span>Background:</span>
                     <div id="bgButtons" class="bg-buttons">
                         <!-- Buttons will be generated here -->
                     </div>
+                </div>
+                <div class="customizer-group" id="optionsGroup" style="display: none;">
+                    <span>Options:</span>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showTimesToggle" checked>
+                        Show times in history
+                    </label>
                 </div>
             </div>
 

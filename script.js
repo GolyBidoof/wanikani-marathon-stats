@@ -93,6 +93,17 @@ async function init() {
             infoBtn.textContent = isVisible ? 'What is this?' : 'Hide info';
         });
 
+        // Toggle behavior for reading times in history
+        const showTimesToggle = document.getElementById('showTimesToggle');
+        if (showTimesToggle) {
+            showTimesToggle.addEventListener('change', () => {
+                if (currentQuery) {
+                    // Force the card to re-render picking up the new state
+                    updateSummaryCard();
+                }
+            });
+        }
+
         // Init color picker
         const colorPickerContainer = document.getElementById('colorPicker');
         accentColors.forEach(color => {
@@ -279,6 +290,9 @@ function updateSummaryCard() {
         const bgImg = document.getElementById('bgGifImage');
         if (bgImg) bgImg.src = currentBg;
 
+        const optionsGroup = document.getElementById('optionsGroup');
+        if (optionsGroup) optionsGroup.style.display = 'none';
+
         drawCanvas(userName, totalTime, participatedCount, totalPages, totalChars, totalSources, false, selectedMarathon || '', participatedMarathons);
         return;
     }
@@ -301,6 +315,10 @@ function updateSummaryCard() {
 
     if (participatedCount > 0) {
         summarySection.style.display = 'flex';
+        
+        const optionsGroup = document.getElementById('optionsGroup');
+        if (optionsGroup) optionsGroup.style.display = 'flex';
+        
         const bgButtonsContainer = document.getElementById('bgButtons');
         bgButtonsContainer.innerHTML = '';
 
@@ -450,8 +468,17 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
     if (history.length > 0 && currentQuery) {
         ctx.textAlign = 'right';
         ctx.shadowBlur = 0;
+        const showTimesToggle = document.getElementById('showTimesToggle');
+        const showTimes = showTimesToggle ? showTimesToggle.checked : true;
         let yStart = 75;
-        const lineHeight = 24;
+
+        // Draw section header indicator
+        ctx.font = '800 10px Outfit, Open Sans, sans-serif';
+        ctx.fillStyle = currentAccentColor;
+        ctx.fillText(currentRange === 'all' ? 'ALL TIME' : 'LAST YEAR', rightX, yStart);
+        yStart += 18; // offset below header
+
+        const lineHeight = showTimes ? 24 : 16;
 
         history.forEach((hItem, i) => {
             const [s, year] = hItem.split(' ');
@@ -463,15 +490,17 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
             ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
             ctx.fillText(`${emoji} ${s.substring(0, 3).toUpperCase()} '${shortYear}`, rightX, yStart + (i * lineHeight));
 
-            // Reading time below the label
-            const entry = allStats[hItem]?.find(e => e.user.toLowerCase() === currentQuery);
-            if (entry && entry.time) {
-                const parts = entry.time.split(':');
-                const hrs = parseInt(parts[0]) || 0;
-                const mins = parseInt(parts[1]) || 0;
-                ctx.font = '700 9px Outfit, Open Sans, sans-serif';
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                ctx.fillText(`${hrs}h ${mins}m`, rightX, yStart + (i * lineHeight) + 11);
+            if (showTimes) {
+                // Reading time below the label
+                const entry = allStats[hItem]?.find(e => e.user.toLowerCase() === currentQuery);
+                if (entry && entry.time) {
+                    const parts = entry.time.split(':');
+                    const hrs = parseInt(parts[0]) || 0;
+                    const mins = parseInt(parts[1]) || 0;
+                    ctx.font = '700 9px Outfit, Open Sans, sans-serif';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.fillText(`${hrs}h ${mins}m`, rightX, yStart + (i * lineHeight) + 11);
+                }
             }
         });
     }

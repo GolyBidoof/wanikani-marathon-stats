@@ -262,19 +262,27 @@ header h1 span {
     width: 100%;
     max-width: 800px;
     display: flex;
-    flex-direction: column;
-    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    column-gap: 30px;
+    row-gap: 15px;
     margin-bottom: 20px;
-    text-align: left;
+}
+
+.customizer-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .customizer-controls span {
-    font-size: 0.75rem;
+    font-size: 0.70rem;
     text-transform: uppercase;
     font-weight: 700;
     color: var(--text-secondary);
-    display: block;
-    margin-bottom: 10px;
+    display: inline-block;
+    margin-bottom: 0;
     letter-spacing: 1px;
 }
 
@@ -329,6 +337,23 @@ header h1 span {
     background: var(--accent-color);
     color: white;
     border-color: transparent;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--wk-pink);
 }
 
 .button-group {
