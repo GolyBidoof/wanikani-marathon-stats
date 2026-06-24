@@ -2,6 +2,25 @@ let allStats = {};
 let allUsers = [];
 
 const usernameInput = document.getElementById('usernameInput');
+
+function parseTimeToHours(timeStr) {
+    if (!timeStr || typeof timeStr !== 'string') return 0;
+    const parts = timeStr.split(':');
+    if (parts.length >= 2) {
+        const h = parseInt(parts[0]) || 0;
+        const m = parseInt(parts[1]) || 0;
+        const s = parseInt(parts[2]) || 0;
+        return h + (m / 60) + (s / 3600);
+    }
+    return parseFloat(timeStr) || 0;
+}
+
+function formatHours(time) {
+    const totalMinutes = Math.round(time * 60);
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return `${h}h ${m}m`;
+}
 const userList = document.getElementById('userList');
 const resultsContainer = document.getElementById('results');
 const chartSection = document.getElementById('chart-section');
@@ -276,16 +295,8 @@ function updateChart() {
                     let totalValue = 0;
                     entries.forEach(entry => {
                         let value = entry[currentMetric] || 0;
-                        if (currentMetric === 'time' && typeof value === 'string') {
-                            const parts = value.split(':');
-                            if (parts.length >= 2) {
-                                const h = parseInt(parts[0]) || 0;
-                                const m = parseInt(parts[1]) || 0;
-                                const s = parseInt(parts[2]) || 0;
-                                value = h + (m / 60) + (s / 3600);
-                            } else {
-                                value = parseFloat(value) || 0;
-                            }
+                        if (currentMetric === 'time') {
+                            value = parseTimeToHours(value);
                         }
                         totalValue += parseFloat(value) || 0;
                     });
@@ -307,17 +318,8 @@ function updateChart() {
                 } else {
                     let value = entry[currentMetric] || 0;
 
-                    if (currentMetric === 'time' && typeof value === 'string') {
-                        const parts = value.split(':');
-                        if (parts.length >= 2) {
-                            // Convert HH:MM:SS to decimal hours
-                            const h = parseInt(parts[0]) || 0;
-                            const m = parseInt(parts[1]) || 0;
-                            const s = parseInt(parts[2]) || 0;
-                            value = h + (m / 60) + (s / 3600);
-                        } else {
-                            value = parseFloat(value) || 0;
-                        }
+                    if (currentMetric === 'time') {
+                        value = parseTimeToHours(value);
                     }
                     dataPoints.push(parseFloat(value) || 0);
                 }
@@ -347,10 +349,7 @@ function updateSummaryCard() {
             participatedMarathons.push(selectedMarathon);
 
             participants.forEach(entry => {
-                if (entry.time && typeof entry.time === 'string') {
-                    const parts = entry.time.split(':');
-                    totalTime += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0) / 60;
-                }
+                totalTime += parseTimeToHours(entry.time);
                 totalPages += parseInt(entry.pages) || 0;
                 totalChars += parseInt(entry.characters) || 0;
                 totalSources += parseInt(entry.sources) || 0;
@@ -392,10 +391,7 @@ function updateSummaryCard() {
             userName = entry.user;
             participatedCount++;
             participatedMarathons.push(name);
-            if (entry.time && typeof entry.time === 'string') {
-                const parts = entry.time.split(':');
-                totalTime += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0) / 60;
-            }
+            totalTime += parseTimeToHours(entry.time);
             totalPages += parseInt(entry.pages) || 0;
             totalChars += parseInt(entry.characters) || 0;
             totalSources += parseInt(entry.sources) || 0;
@@ -517,9 +513,7 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
     ctx.shadowBlur = 15;
     ctx.font = '800 90px Outfit, Open Sans, sans-serif';
     ctx.fillStyle = '#ffffff';
-    const h = Math.floor(time);
-    const m = Math.round((time - h) * 60);
-    ctx.fillText(`${h}h ${m}m`, canvas.width / 2, 220);
+    ctx.fillText(formatHours(time), canvas.width / 2, 220);
 
     ctx.shadowBlur = 5;
     ctx.font = '700 18px Outfit, Open Sans, sans-serif';
@@ -581,12 +575,10 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
                 // Reading time below the label
                 const entry = allStats[hItem]?.find(e => e.user.toLowerCase() === currentQuery);
                 if (entry && entry.time) {
-                    const parts = entry.time.split(':');
-                    const hrs = parseInt(parts[0]) || 0;
-                    const mins = parseInt(parts[1]) || 0;
+                    const t = parseTimeToHours(entry.time);
                     ctx.font = '700 9px Outfit, Open Sans, sans-serif';
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                    ctx.fillText(`${hrs}h ${mins}m`, rightX, yStart + (i * lineHeight) + 11);
+                    ctx.fillText(formatHours(t), rightX, yStart + (i * lineHeight) + 11);
                 }
             }
         });
@@ -608,10 +600,7 @@ async function downloadCanvas() {
             participatedMarathons.push(selectedMarathon);
 
             participants.forEach(entry => {
-                if (entry.time && typeof entry.time === 'string') {
-                    const parts = entry.time.split(':');
-                    tTime += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0) / 60;
-                }
+                tTime += parseTimeToHours(entry.time);
                 tPages += parseInt(entry.pages) || 0;
                 tChars += parseInt(entry.characters) || 0;
                 tSources += parseInt(entry.sources) || 0;
@@ -625,10 +614,7 @@ async function downloadCanvas() {
                 uName = e.user;
                 count++;
                 participatedMarathons.push(n);
-                if (e.time) {
-                    const p = e.time.split(':');
-                    tTime += (parseInt(p[0]) || 0) + (parseInt(p[1]) || 0) / 60;
-                }
+                tTime += parseTimeToHours(e.time);
                 tPages += parseInt(e.pages) || 0;
                 tChars += parseInt(e.characters) || 0;
                 tSources += parseInt(e.sources) || 0;
@@ -662,10 +648,7 @@ async function copyCanvas() {
             count = participants.length;
             participatedMarathons.push(selectedMarathon);
             participants.forEach(entry => {
-                if (entry.time && typeof entry.time === 'string') {
-                    const parts = entry.time.split(':');
-                    tTime += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0) / 60;
-                }
+                tTime += parseTimeToHours(entry.time);
                 tPages += parseInt(entry.pages) || 0;
                 tChars += parseInt(entry.characters) || 0;
                 tSources += parseInt(entry.sources) || 0;
@@ -678,10 +661,7 @@ async function copyCanvas() {
                 uName = e.user;
                 count++;
                 participatedMarathons.push(n);
-                if (e.time) {
-                    const p = e.time.split(':');
-                    tTime += (parseInt(p[0]) || 0) + (parseInt(p[1]) || 0) / 60;
-                }
+                tTime += parseTimeToHours(e.time);
                 tPages += parseInt(e.pages) || 0;
                 tChars += parseInt(e.characters) || 0;
                 tSources += parseInt(e.sources) || 0;
@@ -756,9 +736,7 @@ function renderChart(labels, dataPoints) {
                         label: function(context) {
                             let val = context.parsed.y;
                             if (currentMetric === 'time') {
-                                const hrs = Math.floor(val);
-                                const mins = Math.round((val - hrs) * 60);
-                                return `Time: ${hrs}h ${mins}m`;
+                                return `Time: ${formatHours(val)}`;
                             } else if (currentMetric === 'characters') {
                                 return `Characters: ${val.toLocaleString()}`;
                             } else if (currentMetric === 'pages') {
