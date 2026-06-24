@@ -41,25 +41,32 @@ function getMarathonOrder() {
 }
 
 function getSidebarHeaderLabel(participatedMarathons, excludedMarathons) {
-    const included = participatedMarathons.filter(m => !excludedMarathons.has(m));
-    if (included.length === 0) return "NONE";
+    const allMarathons = getMarathonOrder();
+    const checkedMarathons = allMarathons.filter(m => !excludedMarathons.has(m));
 
-    const isAllSelected = participatedMarathons.every(m => !excludedMarathons.has(m));
-    if (isAllSelected) return "ALL TIME";
+    if (checkedMarathons.length === 0) return "NONE";
 
-    const allNames = getMarathonOrder();
-    const last4Marathons = allNames.slice(-4);
+    if (checkedMarathons.length === allMarathons.length) {
+        return "ALL TIME";
+    }
 
-    const isPastYear = included.length === last4Marathons.length &&
-                       included.every(m => last4Marathons.includes(m));
-    if (isPastYear) return "PAST YEAR";
+    const last4 = allMarathons.slice(-4);
+    const isLast4Selected = checkedMarathons.length === 4 && checkedMarathons.every(m => last4.includes(m));
+    if (isLast4Selected) {
+        return "PAST 4";
+    }
 
-    const years = included.map(m => {
-        const parts = m.split(' ');
-        return parts[parts.length - 1];
-    });
-    const uniqueYears = [...new Set(years)];
-    if (uniqueYears.length === 1) return `YEAR ${uniqueYears[0]}`;
+    const years = checkedMarathons.map(m => m.split(' ').pop());
+    const uniqueCheckedYears = [...new Set(years)];
+    if (uniqueCheckedYears.length === 1) {
+        const targetYear = uniqueCheckedYears[0];
+        const allYearMarathons = allMarathons.filter(m => m.endsWith(targetYear));
+        const isOnlyYearSelected = checkedMarathons.length === allYearMarathons.length &&
+                                   checkedMarathons.every(m => allYearMarathons.includes(m));
+        if (isOnlyYearSelected) {
+            return `YEAR ${targetYear}`;
+        }
+    }
 
     return "MANUAL";
 }
