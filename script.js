@@ -1,6 +1,23 @@
 let allStats = {};
 let allUsers = [];
 
+let currentCardState = {
+    name: '',
+    time: 0,
+    count: 0,
+    pages: 0,
+    chars: 0,
+    sources: 0,
+    themeName: '',
+    history: []
+};
+let isContextMenuOpen = false;
+let currentSortMode = 'chrono';
+let excludedMarathons = new Set();
+let lastRenderedUser = '';
+let lastRenderedRange = '';
+let userMarathonsOrder = [];
+
 const usernameInput = document.getElementById('usernameInput');
 
 function parseTimeToHours(timeStr) {
@@ -26,7 +43,7 @@ const resultsContainer = document.getElementById('results');
 const chartSection = document.getElementById('chart-section');
 const summarySection = document.getElementById('summary-section');
 const chartTabs = document.querySelectorAll('.chart-tab');
-const rangeBtns = document.querySelectorAll('.toggle-btn');
+const rangeBtns = document.querySelectorAll('.range-toggle .toggle-btn');
 const downloadBtn = document.getElementById('downloadBtn');
 let historyChart = null;
 let currentMetric = 'time';
@@ -106,6 +123,13 @@ async function init() {
             });
         });
 
+        const sortBtns = document.querySelectorAll('.sort-toggle .toggle-btn');
+        sortBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setSortMode(btn.dataset.sort);
+            });
+        });
+
         downloadBtn.addEventListener('click', downloadCanvas);
 
         const copyBtn = document.getElementById('copyBtn');
@@ -166,6 +190,10 @@ function setBackground(gif) {
             // Allow gifler to inject frames to our new DOM canvas overlay backing
             gifler(gif).get(a => {
                 if (currentBg === gif) {
+                    a.onDrawFrame = (ctx, frame) => {
+                        ctx.drawImage(frame.buffer, frame.x, frame.y);
+                        triggerCardRedraw();
+                    };
                     a.animateInCanvas(newCanvas);
                     resolve();
                 } else {
@@ -197,6 +225,21 @@ function setBackground(gif) {
             updateSummaryCard();
         }
     }
+}
+
+function triggerCardRedraw() {
+    if (!currentCardState || !currentCardState.name) return;
+    drawCanvas(
+        currentCardState.name,
+        currentCardState.time,
+        currentCardState.count,
+        currentCardState.pages,
+        currentCardState.chars,
+        currentCardState.sources,
+        false,
+        currentCardState.themeName,
+        currentCardState.history
+    );
 }
 
 function ensureBgLoaded() {
@@ -232,9 +275,18 @@ function handleSearch() {
     if (!query) {
         resultsContainer.innerHTML = '';
         currentQuery = '';
+        excludedMarathons.clear();
+        userMarathonsOrder = [];
+        lastRenderedUser = '';
+        lastRenderedRange = '';
         updateSummaryCard();
         updateChart();
         return;
+    }
+
+    if (currentQuery !== query) {
+        excludedMarathons.clear();
+        userMarathonsOrder = [];
     }
 
     currentQuery = query;
@@ -335,6 +387,100 @@ function updateChart() {
     }
 }
 
+function setSortMode(mode) {
+    currentSortMode = mode;
+    const sortBtns = document.querySelectorAll('.sort-toggle .toggle-btn');
+    sortBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.sort === mode);
+    });
+    updateSummaryCard();
+}
+
+function updateMarathonCheckboxes(userMarathons) {
+    const container = document.getElementById('marathonCheckboxes');
+    if (!container) return;
+
+    const cacheKeyUser = currentQuery;
+    const cacheKeyRange = currentRange;
+
+    // Only rebuild DOM if the user or range changed
+    if (lastRenderedUser === cacheKeyUser && lastRenderedRange === cacheKeyRange) {
+        return;
+    }
+
+    lastRenderedUser = cacheKeyUser;
+    lastRenderedRange = cacheKeyRange;
+
+    container.innerHTML = '';
+    
+    const activeSet = new Set(userMarathons);
+    const visibleMarathons = userMarathonsOrder.filter(name => activeSet.has(name));
+
+    visibleMarathons.forEach((name, index) => {
+        const label = document.createElement('label');
+        label.className = 'checkbox-label';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = !excludedMarathons.has(name);
+        checkbox.onchange = () => {
+            if (checkbox.checked) {
+                excludedMarathons.delete(name);
+            } else {
+                excludedMarathons.add(name);
+            }
+            updateSummaryCard();
+        };
+
+        const labelText = document.createElement('span');
+        const season = name.split(' ')[0];
+        const emoji = seasonEmojis[season] || '';
+        labelText.textContent = ` ${emoji} ${name}`;
+
+        label.appendChild(checkbox);
+        label.appendChild(labelText);
+
+        const arrowsSpan = document.createElement('span');
+        arrowsSpan.className = 'sort-arrows';
+
+        const upBtn = document.createElement('button');
+        upBtn.className = 'arrow-btn';
+        upBtn.textContent = '▲';
+        upBtn.onclick = (e) => {
+            e.preventDefault();
+            const mainIndex = userMarathonsOrder.indexOf(name);
+            if (mainIndex > 0) {
+                const temp = userMarathonsOrder[mainIndex];
+                userMarathonsOrder[mainIndex] = userMarathonsOrder[mainIndex - 1];
+                userMarathonsOrder[mainIndex - 1] = temp;
+                lastRenderedUser = ''; // Rebuild checkboxes UI to reflect order change
+                setSortMode('manual');
+            }
+        };
+
+        const downBtn = document.createElement('button');
+        downBtn.className = 'arrow-btn';
+        downBtn.textContent = '▼';
+        downBtn.onclick = (e) => {
+            e.preventDefault();
+            const mainIndex = userMarathonsOrder.indexOf(name);
+            if (mainIndex < userMarathonsOrder.length - 1) {
+                const temp = userMarathonsOrder[mainIndex];
+                userMarathonsOrder[mainIndex] = userMarathonsOrder[mainIndex + 1];
+                userMarathonsOrder[mainIndex + 1] = temp;
+                lastRenderedUser = ''; // Rebuild checkboxes UI to reflect order change
+                setSortMode('manual');
+            }
+        };
+
+        arrowsSpan.appendChild(upBtn);
+        arrowsSpan.appendChild(downBtn);
+        label.appendChild(arrowsSpan);
+        
+        container.appendChild(label);
+    });
+}
+
 function updateSummaryCard() {
     const marathonNames = getMarathonOrder();
     let totalTime = 0, totalPages = 0, totalChars = 0, totalSources = 0, participatedCount = 0, userName = '';
@@ -380,17 +526,43 @@ function updateSummaryCard() {
 
         const optionsGroup = document.getElementById('optionsGroup');
         if (optionsGroup) optionsGroup.style.display = 'none';
+        const sortGroup = document.getElementById('sortGroup');
+        if (sortGroup) sortGroup.style.display = 'none';
+        const filterGroup = document.getElementById('filterGroup');
+        if (filterGroup) filterGroup.style.display = 'none';
 
         drawCanvas(userName, totalTime, participatedCount, totalPages, totalChars, totalSources, false, selectedMarathon || '', participatedMarathons);
         return;
     }
 
+    userName = allUsers.find(u => u.toLowerCase() === currentQuery) || currentQuery;
+
+    // Initialize userMarathonsOrder if it's empty or for a different user
+    if (lastRenderedUser !== currentQuery) {
+        const allNames = Object.keys(allStats).sort((a, b) => {
+            const getVal = (s) => {
+                const [season, year] = s.split(' ');
+                const seasonScore = { 'Winter': 4, 'Fall': 3, 'Autumn': 3, 'Summer': 2, 'Spring': 1 }[season] || 0;
+                return parseInt(year) * 10 + seasonScore;
+            };
+            return getVal(a) - getVal(b);
+        });
+        
+        userMarathonsOrder = [];
+        allNames.forEach(name => {
+            const entry = allStats[name].find(e => e.user.toLowerCase() === currentQuery);
+            if (entry) {
+                userMarathonsOrder.push(name);
+            }
+        });
+    }
+
     marathonNames.forEach(name => {
         const entry = allStats[name].find(e => e.user.toLowerCase() === currentQuery);
         if (entry) {
-            userName = entry.user;
-            participatedCount++;
             participatedMarathons.push(name);
+            // Calculate totals using ALL participated marathons in range (ignores checklist exclusions)
+            participatedCount++;
             totalTime += parseTimeToHours(entry.time);
             totalPages += parseInt(entry.pages) || 0;
             totalChars += parseInt(entry.characters) || 0;
@@ -398,11 +570,19 @@ function updateSummaryCard() {
         }
     });
 
-    if (participatedCount > 0) {
+    updateMarathonCheckboxes(participatedMarathons);
+
+    const includedMarathons = participatedMarathons.filter(name => !excludedMarathons.has(name));
+
+    if (participatedMarathons.length > 0) {
         summarySection.style.display = 'flex';
         
         const optionsGroup = document.getElementById('optionsGroup');
         if (optionsGroup) optionsGroup.style.display = 'flex';
+        const sortGroup = document.getElementById('sortGroup');
+        if (sortGroup) sortGroup.style.display = 'flex';
+        const filterGroup = document.getElementById('filterGroup');
+        if (filterGroup) filterGroup.style.display = 'flex';
         
         const bgButtonsContainer = document.getElementById('bgButtons');
         bgButtonsContainer.innerHTML = '';
@@ -439,7 +619,7 @@ function updateSummaryCard() {
             const currentBgItem = availableGifs.find(g => g.gif === currentBg);
             const label = currentBgItem ? currentBgItem.name : '';
 
-            drawCanvas(userName, totalTime, participatedCount, totalPages, totalChars, totalSources, false, label, participatedMarathons);
+            drawCanvas(userName, totalTime, participatedCount, totalPages, totalChars, totalSources, false, label, includedMarathons);
         }
     } else {
         summarySection.style.display = 'none';
@@ -447,44 +627,50 @@ function updateSummaryCard() {
 }
 
 function drawCanvas(name, time, count, pages, chars, sources, forExport = false, themeName = '', history = []) {
+    if (!forExport) {
+        currentCardState = { name, time, count, pages, chars, sources, themeName, history };
+    }
     const canvas = document.getElementById('summaryCardCanvas');
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Reset shadow state to prevent leaks from previous frames
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
 
-    if (forExport) {
-        const bgImg = document.getElementById('bgGifCanvas');
-        if (bgImg && bgImg.width > 0) {
-            // Draw from the live DOM <canvas> to capture current GIF frame
-            const imgRatio = bgImg.width / bgImg.height;
-            const canvasRatio = canvas.width / canvas.height;
+    // Fill with fallback background color to prevent sub-pixel transparent edge bleed
+    ctx.fillStyle = '#232323';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            let drawWidth, drawHeight, offsetX, offsetY;
+    const bgImg = document.getElementById('bgGifCanvas');
+    if (bgImg && bgImg.width > 0) {
+        // Draw from the live DOM <canvas> to capture current GIF frame
+        const imgRatio = bgImg.width / bgImg.height;
+        const canvasRatio = canvas.width / canvas.height;
 
-            if (imgRatio > canvasRatio) {
-                drawHeight = canvas.height;
-                drawWidth = bgImg.width * (canvas.height / bgImg.height);
-                offsetX = (canvas.width - drawWidth) / 2;
-                offsetY = 0;
-            } else {
-                drawWidth = canvas.width;
-                drawHeight = bgImg.height * (canvas.width / bgImg.width);
-                offsetX = 0;
-                offsetY = (canvas.height - drawHeight) / 2;
-            }
+        let drawWidth, drawHeight, offsetX, offsetY;
 
-            ctx.drawImage(bgImg, offsetX, offsetY, drawWidth, drawHeight);
+        if (imgRatio > canvasRatio) {
+            drawHeight = canvas.height;
+            drawWidth = bgImg.width * (canvas.height / bgImg.height);
+            offsetX = (canvas.width - drawWidth) / 2;
+            offsetY = 0;
         } else {
-            ctx.fillStyle = '#232323';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawWidth = canvas.width;
+            drawHeight = bgImg.height * (canvas.width / bgImg.width);
+            offsetX = 0;
+            offsetY = (canvas.height - drawHeight) / 2;
         }
 
-        // Gradient overlay for export (matches CSS .card-overlay)
-        const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        grad.addColorStop(0, 'rgba(0, 0, 0, 0.2)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(bgImg, Math.round(offsetX), Math.round(offsetY), Math.round(drawWidth), Math.round(drawHeight));
     }
+
+    // Gradient overlay
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    grad.addColorStop(0, 'rgba(0, 0, 0, 0.2)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.shadowColor = 'rgba(0, 0, 0, 1)';
     ctx.shadowBlur = 12;
@@ -561,15 +747,55 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
 
         const lineHeight = showTimes ? 24 : 16;
 
-        history.forEach((hItem, i) => {
+        let renderedHistory = [...history];
+        if (currentSortMode === 'time') {
+            renderedHistory.sort((a, b) => {
+                const entryA = allStats[a]?.find(e => e.user.toLowerCase() === currentQuery);
+                const entryB = allStats[b]?.find(e => e.user.toLowerCase() === currentQuery);
+                const timeA = entryA ? parseTimeToHours(entryA.time) : 0;
+                const timeB = entryB ? parseTimeToHours(entryB.time) : 0;
+                return timeB - timeA;
+            });
+        } else if (currentSortMode === 'manual') {
+            renderedHistory.sort((a, b) => {
+                return userMarathonsOrder.indexOf(a) - userMarathonsOrder.indexOf(b);
+            });
+        }
+
+        const limit = showTimes ? 10 : 15;
+        const isTruncated = renderedHistory.length > limit;
+        let displayHistory = [];
+        let showEllipsisAfter = false;
+
+        if (isTruncated) {
+            if (currentSortMode === 'chrono') {
+                displayHistory = renderedHistory.slice(-limit);
+            } else {
+                displayHistory = renderedHistory.slice(0, limit);
+            }
+            showEllipsisAfter = true;
+        } else {
+            displayHistory = renderedHistory;
+        }
+
+        let currentY = yStart;
+
+        displayHistory.forEach((hItem, i) => {
             const [s, year] = hItem.split(' ');
             const emoji = seasonEmojis[s] || '';
             const shortYear = year.slice(-2);
 
-            // Marathon label
+            // Marathon label text
+            const labelText = `${s.substring(0, 3).toUpperCase()} '${shortYear}`;
             ctx.font = '600 11px Outfit, Open Sans, sans-serif';
             ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.fillText(`${emoji} ${s.substring(0, 3).toUpperCase()} '${shortYear}`, rightX, yStart + (i * lineHeight));
+            ctx.fillText(labelText, rightX, currentY);
+
+            // Draw emoji separately to the left of the text using left-alignment to prevent mobile browser alignment/spacing issues
+            const textWidth = ctx.measureText(labelText).width;
+            ctx.textAlign = 'left';
+            ctx.fillText(emoji, rightX - textWidth - 18, currentY);
+            ctx.textAlign = 'right'; // Restore right alignment for subsequent drawings
 
             if (showTimes) {
                 // Reading time below the label
@@ -578,10 +804,18 @@ function drawCanvas(name, time, count, pages, chars, sources, forExport = false,
                     const t = parseTimeToHours(entry.time);
                     ctx.font = '700 9px Outfit, Open Sans, sans-serif';
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                    ctx.fillText(formatHours(t), rightX, yStart + (i * lineHeight) + 11);
+                    ctx.fillText(formatHours(t), rightX, currentY + 11);
                 }
             }
+
+            currentY += lineHeight;
         });
+
+        if (showEllipsisAfter) {
+            ctx.font = '600 11px Outfit, Open Sans, sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fillText('...', rightX, currentY);
+        }
     }
 }
 
@@ -626,13 +860,11 @@ async function downloadCanvas() {
     const label = bgItem ? bgItem.replace('.gif', '').replace(/([a-z]+)(\d+)/i, (m, s, y) => s.charAt(0).toUpperCase() + s.slice(1) + ' ' + y) : '';
 
     await ensureBgLoaded();
-    drawCanvas(uName, tTime, count, tPages, tChars, tSources, true, label, participatedMarathons);
     const canvas = document.getElementById('summaryCardCanvas');
     const link = document.createElement('a');
     link.download = `${currentQuery || 'community'}_achievement.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-    drawCanvas(uName, tTime, count, tPages, tChars, tSources, false, label, participatedMarathons);
 }
 
 async function copyCanvas() {
@@ -673,7 +905,6 @@ async function copyCanvas() {
     const label = bgItem ? bgItem.replace('.gif', '').replace(/([a-z]+)(\d+)/i, (m, s, y) => s.charAt(0).toUpperCase() + s.slice(1) + ' ' + y) : '';
 
     await ensureBgLoaded(currentBg);
-    drawCanvas(uName, tTime, count, tPages, tChars, tSources, true, label, participatedMarathons);
     const canvas = document.getElementById('summaryCardCanvas');
 
     try {
@@ -688,8 +919,6 @@ async function copyCanvas() {
         console.error('Failed to copy:', err);
         alert('Failed to copy image. Try downloading instead.');
     }
-
-    drawCanvas(uName, tTime, count, tPages, tChars, tSources, false, label, participatedMarathons);
 }
 
 function renderChart(labels, dataPoints) {

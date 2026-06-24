@@ -83,6 +83,20 @@
                         Show times in history
                     </label>
                 </div>
+                <div class="customizer-group" id="sortGroup" style="display: none;">
+                    <span>Sort History:</span>
+                    <div class="sort-toggle">
+                        <button class="toggle-btn active" data-sort="chrono">Chrono</button>
+                        <button class="toggle-btn" data-sort="time">Time</button>
+                        <button class="toggle-btn" data-sort="manual">Manual</button>
+                    </div>
+                </div>
+                <div class="customizer-group" id="filterGroup" style="display: none;">
+                    <span>Include:</span>
+                    <div id="marathonCheckboxes" class="marathon-checkboxes">
+                        <!-- Checkboxes will be dynamically generated here -->
+                    </div>
+                </div>
             </div>
 
             <div class="canvas-wrapper" id="achievementCardOuter">
