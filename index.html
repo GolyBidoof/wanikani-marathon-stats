@@ -52,49 +52,77 @@
                     </svg>
                 </div>
             </div>
-            <!-- Range toggle moved to customizer-controls -->
         </section>
 
         <section id="summary-section" class="summary-section" style="display: none;">
-            <div class="customizer-controls">
+            <!-- Appearance Controls (Always Visible) -->
+            <div class="appearance-controls">
                 <div class="customizer-group">
-                    <span>Range:</span>
-                    <div class="range-toggle">
-                        <button class="toggle-btn active" data-range="all">All Time</button>
-                        <button class="toggle-btn" data-range="year">Last Year</button>
-                    </div>
-                </div>
-                <div class="customizer-group">
-                    <span>Accent:</span>
+                    <span>Accent Color</span>
                     <div id="colorPicker" class="color-picker">
                         <!-- Colors will be generated here -->
                     </div>
                 </div>
                 <div class="customizer-group">
-                    <span>Background:</span>
+                    <span>Background Theme</span>
                     <div id="bgButtons" class="bg-buttons">
                         <!-- Buttons will be generated here -->
                     </div>
                 </div>
-                <div class="customizer-group" id="optionsGroup" style="display: none;">
-                    <span>Options:</span>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="showTimesToggle" checked>
-                        Show times in history
-                    </label>
-                </div>
-                <div class="customizer-group" id="sortGroup" style="display: none;">
-                    <span>Sort History:</span>
-                    <div class="sort-toggle">
-                        <button class="toggle-btn active" data-sort="chrono">Chrono</button>
-                        <button class="toggle-btn" data-sort="time">Time</button>
-                        <button class="toggle-btn" data-sort="manual">Manual</button>
-                    </div>
-                </div>
-                <div class="customizer-group" id="filterGroup" style="display: none;">
-                    <span>Include:</span>
-                    <div id="marathonCheckboxes" class="marathon-checkboxes">
-                        <!-- Checkboxes will be dynamically generated here -->
+            </div>
+
+            <div class="customizer-card">
+                <button id="customizerToggleBtn" class="customizer-header">
+                    <span>Customize the Achievements Card</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div id="customizerContent" class="customizer-content" style="display: none;">
+                    <div class="customizer-controls">
+                        <!-- Column 1: Sorting & Options -->
+                        <div class="customizer-column">
+                            <div class="customizer-group" id="sortGroup" style="display: none;">
+                                <span>Sort History</span>
+                                <div class="sort-toggle">
+                                    <button class="toggle-btn active" data-sort="chrono">Chrono</button>
+                                    <button class="toggle-btn" data-sort="metric">Metric</button>
+                                    <button class="toggle-btn" data-sort="manual">Manual</button>
+                                </div>
+                            </div>
+                            <div class="customizer-group" id="optionsGroup" style="display: none;">
+                                <span>Options</span>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="showHistoryToggle" checked>
+                                    Show marathon history
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="filterTotalsToggle">
+                                    Filter totals & charts by checklist
+                                </label>
+                            </div>
+                            <div class="customizer-group" id="metricsGroup" style="display: none;">
+                                <span>Metrics in History</span>
+                                <div id="metricCheckboxes" class="marathon-checkboxes">
+                                    <!-- Metric checkboxes will be dynamically generated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Included Marathons (Checklist) -->
+                        <div class="customizer-column" id="filterGroup" style="display: none;">
+                            <div class="filter-header-row">
+                                <span>Include Marathons</span>
+                                <div class="quick-select-buttons">
+                                    <button id="quickSelectAll" class="quick-btn">All</button>
+                                    <button id="quickSelectYear" class="quick-btn">Last Year</button>
+                                    <button id="quickSelectNone" class="quick-btn">None</button>
+                                </div>
+                            </div>
+                            <div id="marathonCheckboxes" class="marathon-checkboxes">
+                                <!-- Checkboxes will be dynamically generated here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -102,7 +130,7 @@
             <div class="canvas-wrapper" id="achievementCardOuter">
                 <canvas id="bgGifCanvas" class="bg-gif"></canvas>
                 <div class="card-overlay"></div>
-                <canvas id="summaryCardCanvas" width="800" height="400"></canvas>
+                <canvas id="summaryCardCanvas" width="1600" height="800"></canvas>
             </div>
 
             <div class="button-group">
@@ -150,7 +178,16 @@
         </footer>
     </main>
 
-    <script src="script.js"></script>
+    <script src="state.js"></script>
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="background.js"></script>
+    <script src="ui-builders.js"></script>
+    <script src="canvas.js"></script>
+    <script src="stats.js"></script>
+    <script src="exports.js"></script>
+    <script src="chart.js"></script>
+    <script src="init.js"></script>
 </body>
 
 </html>

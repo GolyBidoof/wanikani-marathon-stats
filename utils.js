@@ -1,0 +1,65 @@
+function parseTimeToHours(timeStr) {
+    if (!timeStr || typeof timeStr !== 'string') return 0;
+    const parts = timeStr.split(':');
+    if (parts.length >= 2) {
+        const h = parseInt(parts[0]) || 0;
+        const m = parseInt(parts[1]) || 0;
+        const s = parseInt(parts[2]) || 0;
+        return h + (m / 60) + (s / 3600);
+    }
+    return parseFloat(timeStr) || 0;
+}
+
+function formatHours(time) {
+    const totalMinutes = Math.round(time * 60);
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return `${h}h ${m}m`;
+}
+
+function rgbToHex(rgb) {
+    if (!rgb) return '';
+    const m = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    if (!m) return rgb;
+    return '#' + [1, 2, 3].map(i => parseInt(m[i]).toString(16).padStart(2, '0')).join('');
+}
+
+function ensureBgLoaded() {
+    if (!bgLoadPromise) return Promise.resolve();
+    return bgLoadPromise;
+}
+
+function getMarathonOrder() {
+    return Object.keys(allStats).sort((a, b) => {
+        const getVal = (s) => {
+            const [season, year] = s.split(' ');
+            const seasonScore = { 'Winter': 4, 'Fall': 3, 'Autumn': 3, 'Summer': 2, 'Spring': 1 }[season] || 0;
+            return parseInt(year) * 10 + seasonScore;
+        };
+        return getVal(a) - getVal(b);
+    });
+}
+
+function getSidebarHeaderLabel(participatedMarathons, excludedMarathons) {
+    const included = participatedMarathons.filter(m => !excludedMarathons.has(m));
+    if (included.length === 0) return "NONE";
+
+    const isAllSelected = participatedMarathons.every(m => !excludedMarathons.has(m));
+    if (isAllSelected) return "ALL TIME";
+
+    const allNames = getMarathonOrder();
+    const last4Marathons = allNames.slice(-4);
+
+    const isPastYear = included.length === last4Marathons.length &&
+                       included.every(m => last4Marathons.includes(m));
+    if (isPastYear) return "PAST YEAR";
+
+    const years = included.map(m => {
+        const parts = m.split(' ');
+        return parts[parts.length - 1];
+    });
+    const uniqueYears = [...new Set(years)];
+    if (uniqueYears.length === 1) return `YEAR ${uniqueYears[0]}`;
+
+    return "MANUAL";
+}
