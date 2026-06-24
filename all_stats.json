@@ -37,12 +37,12 @@
       "sources": 1
     },
     {
-      "user": "MarnieDeb",
+      "user": "MarnieDEB",
       "pages": 190,
       "sources": 1
     },
     {
-      "user": "Reb",
+      "user": "RebBlue",
       "time": "04:23:00",
       "pages": 100,
       "sources": 10
@@ -69,7 +69,7 @@
       "time": "02:30:00"
     },
     {
-      "user": "Spiderweb",
+      "user": "SpiderWeb",
       "time": "04:00:00",
       "pages": 80,
       "sources": 1
@@ -231,7 +231,7 @@
       "sources": 4
     },
     {
-      "user": "voi",
+      "user": "Voi",
       "time": "06:30:00",
       "pages": 69,
       "characters": 34200
@@ -269,7 +269,7 @@
       "sources": 1
     },
     {
-      "user": "Reb",
+      "user": "RebBlue",
       "time": "06:47:00",
       "pages": 128,
       "characters": 5000,
@@ -298,7 +298,7 @@
       "characters": 65800
     },
     {
-      "user": "Spiderweb",
+      "user": "SpiderWeb",
       "time": "02:05:00",
       "pages": 64,
       "characters": 16000,
@@ -320,7 +320,7 @@
       "sources": 5
     },
     {
-      "user": "Malinkal",
+      "user": "malinkal",
       "time": "06:46:27",
       "pages": 360,
       "sources": 4
@@ -371,7 +371,7 @@
       "sources": 2
     },
     {
-      "user": "Reb",
+      "user": "RebBlue",
       "time": "05:37:00",
       "pages": 231,
       "characters": 5400,
@@ -519,7 +519,7 @@
       "pages": 111
     },
     {
-      "user": "Malinkal",
+      "user": "malinkal",
       "time": "10:53:00",
       "pages": 410,
       "sources": 7
@@ -596,7 +596,7 @@
       "sources": 2
     },
     {
-      "user": "Reb",
+      "user": "RebBlue",
       "time": "08:31:00",
       "pages": 418,
       "characters": 5800,
@@ -765,7 +765,7 @@
       "sources": 5
     },
     {
-      "user": "Izabelle",
+      "user": "izabelle",
       "time": "02:47:00",
       "pages": 165,
       "sources": 4
@@ -784,7 +784,7 @@
       "sources": 7
     },
     {
-      "user": "Malinkal",
+      "user": "malinkal",
       "time": "09:00:00",
       "pages": 662,
       "characters": 18800,
@@ -797,7 +797,7 @@
       "sources": 1
     },
     {
-      "user": "MarnieDeb",
+      "user": "MarnieDEB",
       "time": "04:00:00",
       "pages": 196,
       "sources": 1
@@ -884,7 +884,7 @@
       "sources": 3
     },
     {
-      "user": "Reb",
+      "user": "RebBlue",
       "time": "07:56:00",
       "pages": 587,
       "sources": 17
@@ -909,7 +909,7 @@
       "sources": 1
     },
     {
-      "user": "Spiderweb",
+      "user": "SpiderWeb",
       "time": "03:30:00",
       "pages": 78,
       "sources": 1
@@ -922,7 +922,7 @@
       "sources": 1
     },
     {
-      "user": "TakeFlite",
+      "user": "Takeflite",
       "time": "02:44:00",
       "pages": 37,
       "sources": 3
@@ -941,7 +941,7 @@
       "sources": 4
     },
     {
-      "user": "voi",
+      "user": "Voi",
       "time": "07:00:00",
       "pages": 468,
       "characters": 0,
@@ -1048,7 +1048,7 @@
       "sources": 4
     },
     {
-      "user": "Malinkal",
+      "user": "malinkal",
       "time": "08:53:02",
       "pages": 315,
       "characters": 0,
@@ -1090,7 +1090,7 @@
       "sources": 10
     },
     {
-      "user": "Spiderweb",
+      "user": "SpiderWeb",
       "url": "https://community.wanikani.com/t/x/71481/374",
       "time": "01:15:00",
       "pages": 23,
@@ -1197,7 +1197,7 @@
       "sources": 2
     },
     {
-      "user": "TakeFlite",
+      "user": "Takeflite",
       "time": "01:20:00",
       "pages": 3,
       "characters": 1700,
@@ -1301,7 +1301,7 @@
       "sources": 2
     },
     {
-      "user": "Izabelle",
+      "user": "izabelle",
       "time": "05:00:00",
       "characters": 14222,
       "sources": 26
@@ -1326,7 +1326,7 @@
       "sources": 10
     },
     {
-      "user": "Reb",
+      "user": "RebBlue",
       "url": "https://community.wanikani.com/t/%E2%9D%84%EF%B8%8F-winter-solstice-24-hour-readathon-now/72793/286",
       "time": "08:29:00",
       "pages": 623,
@@ -1353,7 +1353,7 @@
       "sources": 8
     },
     {
-      "user": "TakeFlite",
+      "user": "Takeflite",
       "url": "https://community.wanikani.com/t/%E2%9D%84%EF%B8%8F-winter-solstice-24-hour-readathon-now/72793/309",
       "time": "02:46:00",
       "pages": 19,
@@ -1361,7 +1361,7 @@
       "sources": 4
     },
     {
-      "user": "Malinkal",
+      "user": "malinkal",
       "url": "https://community.wanikani.com/t/%E2%9D%84%EF%B8%8F-winter-solstice-24-hour-readathon-now/72793/238",
       "time": "08:05:00",
       "pages": 311,
@@ -1375,13 +1375,13 @@
       "sources": 1
     },
     {
-      "user": "mioneko",
+      "user": "Mioneko",
       "time": "07:00:00",
       "pages": 81,
       "sources": 2
     },
     {
-      "user": "Judith",
+      "user": "Judith222",
       "time": "06:45:00",
       "pages": 14,
       "sources": 2
@@ -1394,7 +1394,7 @@
       "sources": 3
     },
     {
-      "user": "voi",
+      "user": "Voi",
       "url": "https://community.wanikani.com/t/72793/121",
       "time": "02:42:00",
       "pages": 325,
@@ -1439,7 +1439,7 @@
       "sources": 2
     },
     {
-      "user": "Spiderweb",
+      "user": "SpiderWeb",
       "url": "https://community.wanikani.com/t/%E2%9D%84%EF%B8%8F-winter-solstice-24-hour-readathon-now/72793/466",
       "time": "03:35:00",
       "pages": 382,
@@ -1635,7 +1635,7 @@
       "sources": 1
     },
     {
-      "user": "Malinkal",
+      "user": "malinkal",
       "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/475",
       "time": "08:58:57",
       "pages": 80,
@@ -1667,7 +1667,7 @@
       "sources": 2
     },
     {
-      "user": "mioneko",
+      "user": "Mioneko",
       "time": "09:16:00",
       "pages": 182,
       "sources": 2
@@ -1743,7 +1743,7 @@
       "sources": 4
     },
     {
-      "user": "Reb",
+      "user": "RebBlue",
       "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/393",
       "time": "06:47:00",
       "pages": 400,
@@ -1793,7 +1793,7 @@
       "sources": 2
     },
     {
-      "user": "Spiderweb",
+      "user": "SpiderWeb",
       "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/459",
       "time": "01:00:00",
       "pages": 20,
@@ -1840,7 +1840,7 @@
       "sources": 6
     },
     {
-      "user": "LumisEterne",
+      "user": "lumiseterne",
       "url": "https://community.wanikani.com/t/%F0%9F%8C%B7-spring-equinox-24-hour-readathon-now/73789/445",
       "time": "06:59:00",
       "pages": 187,
@@ -1883,7 +1883,7 @@
       "sources": 4
     },
     {
-      "user": "voi",
+      "user": "Voi",
       "time": "07:53:00",
       "pages": 139,
       "characters": 30300,
@@ -1932,6 +1932,369 @@
       "time": "04:00:00",
       "pages": 130,
       "sources": 2
+    }
+  ],
+  "Summer 2026": [
+    {
+      "user": "Daisoujou",
+      "time": "08:01:00",
+      "characters": 125000,
+      "sources": 1
+    },
+    {
+      "user": "DecoKat",
+      "time": "00:37:00",
+      "characters": 6252,
+      "sources": 1
+    },
+    {
+      "user": "Kelsyy",
+      "time": "02:01:00",
+      "pages": 190,
+      "sources": 1
+    },
+    {
+      "user": "Lisaveeta",
+      "time": "07:57:00",
+      "pages": 190,
+      "sources": 1
+    },
+    {
+      "user": "NicoleIsEnough",
+      "time": "08:04:00",
+      "pages": 145,
+      "sources": 1
+    },
+    {
+      "user": "soggyboy",
+      "time": "07:00:00",
+      "pages": 384,
+      "sources": 8
+    },
+    {
+      "user": "straille",
+      "time": "05:27:46",
+      "pages": 338,
+      "sources": 1
+    },
+    {
+      "user": "carouseal",
+      "time": "03:48:00",
+      "pages": 205,
+      "sources": 4
+    },
+    {
+      "user": "KrokiSan",
+      "time": "13:59:07",
+      "pages": 2471,
+      "sources": 15
+    },
+    {
+      "user": "catwithcookiesandtea",
+      "time": "06:30:00",
+      "pages": 414,
+      "sources": 4
+    },
+    {
+      "user": "Froggywhiskers",
+      "time": "04:38:00",
+      "pages": 61,
+      "sources": 1
+    },
+    {
+      "user": "dunlewy",
+      "time": "06:25:00",
+      "pages": 31,
+      "sources": 3
+    },
+    {
+      "user": "VioletMoon",
+      "time": "03:01:00",
+      "pages": 113,
+      "sources": 1
+    },
+    {
+      "user": "coraldragonstar",
+      "time": "08:15:00",
+      "pages": 497,
+      "sources": 4
+    },
+    {
+      "user": "Jintor",
+      "time": "05:00:00",
+      "pages": 454,
+      "sources": 3
+    },
+    {
+      "user": "shuly",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/297",
+      "time": "07:41:00",
+      "pages": 491,
+      "sources": 13
+    },
+    {
+      "user": "downtimes",
+      "time": "04:56:00",
+      "pages": 85,
+      "sources": 4
+    },
+    {
+      "user": "pandoravakarian",
+      "time": "09:16:00",
+      "pages": 423,
+      "sources": 3
+    },
+    {
+      "user": "Alvi",
+      "time": "03:00:00",
+      "pages": 77,
+      "sources": 2
+    },
+    {
+      "user": "lumiseterne",
+      "time": "02:50:00",
+      "pages": 125,
+      "sources": 1
+    },
+    {
+      "user": "Takeflite",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/307",
+      "time": "02:35:00",
+      "pages": 50,
+      "characters": 8800,
+      "sources": 3
+    },
+    {
+      "user": "Neon_Kitsune",
+      "time": "06:00:00",
+      "pages": 166,
+      "characters": 1000,
+      "sources": 4
+    },
+    {
+      "user": "Judith222",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/331",
+      "time": "08:47:00",
+      "pages": 37,
+      "sources": 3
+    },
+    {
+      "user": "GolyBidoof",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/332",
+      "time": "14:01:11",
+      "characters": 184000,
+      "sources": 2
+    },
+    {
+      "user": "YandrosTheSane",
+      "time": "05:25:00",
+      "characters": 25000,
+      "sources": 1
+    },
+    {
+      "user": "araigoshi",
+      "url": "https://community.wanikani.com/t/x/74572/336",
+      "time": "07:10:00",
+      "characters": 73100,
+      "sources": 1
+    },
+    {
+      "user": "Midnightblue",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/339",
+      "time": "07:21:00",
+      "pages": 1051,
+      "sources": 2
+    },
+    {
+      "user": "pembo",
+      "time": "01:00:00",
+      "pages": 56,
+      "sources": 1
+    },
+    {
+      "user": "mitrac",
+      "time": "02:10:00",
+      "pages": 46,
+      "sources": 1
+    },
+    {
+      "user": "mycatslikerock",
+      "time": "01:32:00",
+      "characters": 5404,
+      "sources": 1
+    },
+    {
+      "user": "Mioneko",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/360",
+      "time": "09:06:00",
+      "pages": 200,
+      "sources": 1
+    },
+    {
+      "user": "SarahSh",
+      "time": "03:38:00",
+      "pages": 54,
+      "sources": 2
+    },
+    {
+      "user": "sasabonsam",
+      "time": "07:05:00",
+      "pages": 32,
+      "characters": 28609,
+      "sources": 3
+    },
+    {
+      "user": "SpiderWeb",
+      "time": "03:30:00",
+      "pages": 68,
+      "sources": 1
+    },
+    {
+      "user": "MarnieDEB",
+      "time": "05:00:00",
+      "pages": 206,
+      "sources": 1
+    },
+    {
+      "user": "Kigi",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/374",
+      "time": "03:05:00",
+      "sources": 3
+    },
+    {
+      "user": "pocketcalamity",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/380",
+      "time": "07:28:00",
+      "pages": 171,
+      "sources": 2
+    },
+    {
+      "user": "rkd",
+      "time": "03:13:00",
+      "characters": 22249,
+      "sources": 1
+    },
+    {
+      "user": "gigazol",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/385",
+      "time": "03:48:00",
+      "pages": 166,
+      "sources": 2
+    },
+    {
+      "user": "Kami Neko",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/398",
+      "time": "06:04:00",
+      "pages": 102,
+      "sources": 3
+    },
+    {
+      "user": "latepatate",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/401",
+      "time": "06:58:00",
+      "pages": 536,
+      "sources": 5
+    },
+    {
+      "user": "Akashelia",
+      "url": "https://community.wanikani.com/t/x/74572/408",
+      "time": "08:27:00",
+      "characters": 82800,
+      "sources": 1
+    },
+    {
+      "user": "Ditto20",
+      "time": "04:42:00",
+      "characters": 81200,
+      "sources": 1
+    },
+    {
+      "user": "Cathm2",
+      "time": "03:00:00",
+      "pages": 89,
+      "sources": 4
+    },
+    {
+      "user": "eefara",
+      "url": "https://community.wanikani.com/t/x/74572/414",
+      "time": "07:17:00",
+      "pages": 147,
+      "sources": 2
+    },
+    {
+      "user": "malinkal",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/438",
+      "time": "09:05:12",
+      "pages": 514,
+      "sources": 3
+    },
+    {
+      "user": "Natsuha",
+      "time": "06:15:00",
+      "pages": 45,
+      "sources": 2
+    },
+    {
+      "user": "Maravos",
+      "time": "05:02:00",
+      "pages": 79,
+      "sources": 5
+    },
+    {
+      "user": "hotdogsuplex",
+      "time": "04:10:00",
+      "pages": 170,
+      "sources": 7
+    },
+    {
+      "user": "TheNerdyNova",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/427",
+      "time": "06:25:00",
+      "pages": 570,
+      "sources": 3
+    },
+    {
+      "user": "shitsurei",
+      "time": "03:04:00",
+      "pages": 290,
+      "sources": 4
+    },
+    {
+      "user": "Javerend",
+      "time": "02:00:00",
+      "pages": 100,
+      "characters": 16000,
+      "sources": 3
+    },
+    {
+      "user": "Fishfulness",
+      "time": "01:39:00",
+      "pages": 123,
+      "sources": 9
+    },
+    {
+      "user": "polv",
+      "url": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572/356",
+      "time": "07:35:00",
+      "pages": 249,
+      "sources": 3
+    },
+    {
+      "user": "RebBlue",
+      "time": "05:09:00",
+      "pages": 450,
+      "sources": 9
+    },
+    {
+      "user": "Voi",
+      "time": "05:57:00",
+      "pages": 334
+    },
+    {
+      "user": "izabelle",
+      "time": "01:30:00",
+      "characters": 4780,
+      "sources": 4
     }
   ]
 }

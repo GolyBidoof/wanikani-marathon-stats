@@ -21,6 +21,7 @@ const gifBackgrounds = [
     'spring2026.gif',
     'summer2024.gif',
     'summer2025.gif',
+    'summer2026.gif',
     'winter2024.gif',
     'winter2025.gif'
 ];
@@ -162,8 +163,20 @@ function setBackground(gif) {
         btn.classList.toggle('active', btnGif === gif);
     });
 
-    if (!currentQuery) {
-        updateSummaryCard();
+    // Automatically set corresponding season color
+    let foundColor = null;
+    const lowerGif = gif.toLowerCase();
+    if (lowerGif.startsWith('spring')) foundColor = '#ff00aa';
+    else if (lowerGif.startsWith('summer')) foundColor = '#ffb800';
+    else if (lowerGif.startsWith('winter')) foundColor = '#00aaff';
+    else if (lowerGif.startsWith('fall') || lowerGif.startsWith('autumn')) foundColor = '#ff5f00';
+
+    if (foundColor) {
+        setAccentColor(foundColor);
+    } else {
+        if (!currentQuery) {
+            updateSummaryCard();
+        }
     }
 }
 
