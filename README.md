@@ -70,7 +70,7 @@ When updating stats, also set the date in `data_meta.json`:
 - **taiyousea** – Original host who started the tradition
 - **GolyBidoof** – Frontend & data curation
 
-The React/TypeScript rewrite was assisted by **Gemini 3.5 Flash**, **Gemini 3.5 Pro**, and **Auto** (an AI coding assistant). All changes were reviewed and curated by GolyBidoof.
+The React/TypeScript rewrite was assisted by **Gemini 3 Flash**, **Gemini 3.5 Flash**, and **Auto** (an AI coding assistant). All changes were reviewed and curated by GolyBidoof.
 
 ## License
 
