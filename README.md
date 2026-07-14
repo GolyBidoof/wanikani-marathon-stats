@@ -1,6 +1,6 @@
 # WaniKani Reading Marathon Stats
 
-A statistics explorer for the WaniKani community's 24-hour reading marathons, hosted by **taiyousea** on the WaniKani forums.
+A statistics explorer for the WaniKani community's 24-hour reading marathons, now organized by **soggyboy** on the WaniKani forums (originally started by **taiyousea**).
 
 ## What is the 24-hour Readathon?
 
@@ -10,11 +10,13 @@ Whether you're finishing a book club pick or just squeezing in a few pages, ever
 
 ## Features
 
-- 🔍 Search for any participant to see their marathon history
-- 📊 View stats across all marathons or filter by the last year
-- 🎨 Customize your achievement card with different accent colors and backgrounds
-- 📥 Download a shareable achievement card image
-- 📈 Track progress over time with interactive charts
+- Search for any participant to see their marathon history
+- Shareable profile URLs (`?user=username`)
+- Customizable achievement card — accent colors, seasonal GIF backgrounds, English/Japanese formatting
+- Optional pages ↔ characters conversion for mixed tracking styles
+- Download or copy the achievement card image; copy a shareable profile link
+- Progress charts across marathons
+- Preferences saved in your browser between visits
 
 ## Links
 
@@ -23,23 +25,50 @@ Whether you're finishing a book club pick or just squeezing in a few pages, ever
 
 ## Running Locally
 
-Simply serve the files with any static file server:
+Install dependencies and start the Vite dev server:
 
 ```bash
-npx serve .
+npm install
+npm run dev
 ```
 
-Then open `http://localhost:3000` in your browser.
+Then open the URL shown in the terminal (typically `http://localhost:5173`).
+
+To build for production:
+
+```bash
+npm run build
+npm run preview
+```
+
+## Quality checks
+
+```bash
+npm run lint        # ESLint (TypeScript, React Hooks, JSX a11y)
+npm run typecheck   # TypeScript without emit
+npm run test        # Vitest unit tests
+npm run ci          # lint + typecheck + test + build
+```
+
+GitHub Actions runs the same checks on pushes and pull requests to `main` / `master`.
 
 ## Data
 
 Stats are manually recalculated by **GolyBidoof** from participant reports in each marathon thread.
 
+When updating stats, also set the date in `data_meta.json`:
+
+```json
+{
+  "lastUpdated": "2026-07-14"
+}
+```
+
 ## Credits
 
-- **taiyousea** – Event host
-- **GolyBidoof** – Frontend
-- Built with assistance from **Gemini 3.0 Flash**
+- **soggyboy** – Current organizer of the marathon
+- **taiyousea** – Original host who started the tradition
+- **GolyBidoof** – Frontend & data curation
 
 ## License
 
