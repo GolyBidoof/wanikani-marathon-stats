@@ -13,6 +13,7 @@ node_modules/
 # Build artifacts
 dist/
 build/
+.vite/
 
 # Local development
 .env

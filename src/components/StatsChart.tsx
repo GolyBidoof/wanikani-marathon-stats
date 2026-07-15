@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { Chart } from 'chart.js/auto';
 import { useStore } from '../hooks/StoreContext';
 import { useExactUser } from '../hooks/useExactUser';
 import { useChartMetricFade } from '../hooks/useChartMetricFade';
 import { useChartTabKeyboard } from '../hooks/useChartTabKeyboard';
+import { useHistoryChart } from '../hooks/useHistoryChart';
 import { buildChartSeries } from '../utils/statsQueries';
-import { applyChartAccentColor, buildLineChartConfig } from '../utils/chartConfig';
 import { getVolumeChartMetric, isVolumeConversionActive } from '../utils/volumeConversion';
 import { buildChartDescription } from '../utils/a11yDescriptions';
 import FadeSection from './FadeSection';
@@ -33,11 +32,11 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
     resetToTimeMetric,
     switchToMetric,
     resetChartFade,
+    resetForProfileChange,
   } = useChartMetricFade();
 
-  const chartRef = useRef<HTMLCanvasElement>(null);
-  const chartInstanceRef = useRef<Chart<'line'> | null>(null);
   const wasPartialSearchRef = useRef(false);
+  const previousUsernameRef = useRef(exactUsername);
   const volumeActive = isVolumeConversionActive(volumeConversion, isExactMatch);
 
   useEffect(() => {
@@ -63,6 +62,14 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
     }
     wasPartialSearchRef.current = isPartialSearch;
   }, [isPartialSearch, resetChartFade]);
+
+  useEffect(() => {
+    if (previousUsernameRef.current === exactUsername) return;
+    previousUsernameRef.current = exactUsername;
+    resetForProfileChange();
+  }, [exactUsername, resetForProfileChange]);
+
+  const chartReady = fadeState === 'visible' && !isPartialSearch;
 
   const visibleTabs = useMemo(() => {
     return METRIC_TABS.filter((tab) => {
@@ -95,57 +102,20 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
   );
 
   const hasChartData = chartSeries.labels.length > 0;
+  const chartScope = `${exactUsername || 'community'}:${chartMetric}`;
+
+  const { containerRef, canvasRef } = useHistoryChart({
+    scope: chartScope,
+    series: chartSeries,
+    metric: chartMetric,
+    accentColor: currentAccentColor,
+    enabled: hasChartData && chartReady,
+  });
 
   const activeTabLabel = visibleTabs.find((tab) => tab.id === activeTab)?.label ?? activeTab;
   const chartDescription = useMemo(
     () => buildChartDescription(activeTabLabel, chartSeries.labels, chartSeries.values),
     [activeTabLabel, chartSeries.labels, chartSeries.values],
-  );
-
-  useEffect(() => {
-    const canvas = chartRef.current;
-    if (!canvas || !hasChartData) {
-      chartInstanceRef.current?.destroy();
-      chartInstanceRef.current = null;
-      return;
-    }
-
-    const context = canvas.getContext('2d');
-    if (!context) return;
-
-    const chartConfig = buildLineChartConfig(chartSeries, chartMetric, currentAccentColor);
-    const existingChart = chartInstanceRef.current;
-
-    if (!existingChart || existingChart.canvas !== canvas) {
-      existingChart?.destroy();
-      chartInstanceRef.current = new Chart(context, chartConfig);
-      return;
-    }
-
-    existingChart.data.labels = chartSeries.labels;
-    existingChart.data.datasets[0].data = chartSeries.values;
-    existingChart.data.datasets[0].label = chartMetric.toUpperCase();
-
-    const yAxisTitle = existingChart.options.scales?.y?.title;
-    if (yAxisTitle && typeof yAxisTitle === 'object') {
-      yAxisTitle.text = chartMetric.toUpperCase();
-    }
-
-    const yAxisTicks = existingChart.options.scales?.y?.ticks;
-    if (yAxisTicks && typeof yAxisTicks === 'object') {
-      yAxisTicks.callback = chartConfig.options?.scales?.y?.ticks?.callback;
-    }
-
-    applyChartAccentColor(existingChart, currentAccentColor);
-    existingChart.update('none');
-  }, [chartSeries, chartMetric, currentAccentColor, hasChartData]);
-
-  useEffect(
-    () => () => {
-      chartInstanceRef.current?.destroy();
-      chartInstanceRef.current = null;
-    },
-    [],
   );
 
   const handleTabKeyDown = useChartTabKeyboard(
@@ -194,6 +164,7 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
       </div>
 
       <div
+        ref={containerRef}
         id={CHART_PANEL_ID}
         role="tabpanel"
         aria-labelledby={`chart-tab-${activeTab}`}
@@ -203,7 +174,13 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
         <p className="sr-only" id="chart-description">
           {chartDescription}
         </p>
-        <canvas ref={chartRef} id="historyChart" role="img" aria-labelledby="chart-description" />
+        <canvas
+          ref={canvasRef}
+          key={chartScope}
+          id="historyChart"
+          role="img"
+          aria-labelledby="chart-description"
+        />
       </div>
     </FadeSection>
   );

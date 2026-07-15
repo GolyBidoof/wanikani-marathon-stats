@@ -18,7 +18,7 @@ export function useChartMetricFade() {
     const nextMetric = pendingMetricRef.current;
     pendingMetricRef.current = null;
     setChartMetric(nextMetric);
-    requestAnimationFrame(() => setFadeState('visible'));
+    setFadeState('visible');
   }, []);
 
   const requestMetricChange = useCallback(
@@ -27,11 +27,18 @@ export function useChartMetricFade() {
 
       setActiveTab(metric);
       pendingMetricRef.current = metric;
-      if (fadeState === 'hidden') return;
 
-      setFadeState('hidden');
       if (fadeTimeoutRef.current) clearTimeout(fadeTimeoutRef.current);
 
+      if (fadeState === 'hidden') {
+        fadeTimeoutRef.current = setTimeout(() => {
+          fadeTimeoutRef.current = null;
+          finishMetricChange();
+        }, FADE_DURATION_MS);
+        return;
+      }
+
+      setFadeState('hidden');
       fadeTimeoutRef.current = setTimeout(() => {
         fadeTimeoutRef.current = null;
         finishMetricChange();
@@ -54,6 +61,16 @@ export function useChartMetricFade() {
     },
     [fadeState, finishMetricChange],
   );
+
+  const resetForProfileChange = useCallback(() => {
+    if (fadeTimeoutRef.current) {
+      clearTimeout(fadeTimeoutRef.current);
+      fadeTimeoutRef.current = null;
+    }
+
+    pendingMetricRef.current = null;
+    setFadeState('visible');
+  }, []);
 
   const resetChartFade = useCallback(() => {
     if (fadeTimeoutRef.current) {
@@ -99,5 +116,6 @@ export function useChartMetricFade() {
     resetToTimeMetric,
     switchToMetric,
     resetChartFade,
+    resetForProfileChange,
   };
 }

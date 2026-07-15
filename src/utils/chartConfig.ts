@@ -83,6 +83,37 @@ function formatTooltipLabel(metric: ChartMetric, value: number): string {
   return String(value);
 }
 
+export function updateLineChart(
+  chart: import('chart.js/auto').Chart<'line'>,
+  series: ChartSeriesData,
+  metric: ChartMetric,
+  accentColor: string,
+) {
+  const dataset = chart.data.datasets[0];
+  chart.data.labels = series.labels;
+  dataset.data = series.values;
+  dataset.label = metric.toUpperCase();
+
+  const yScale = chart.options.scales?.y;
+  if (yScale && typeof yScale === 'object') {
+    if (yScale.title && typeof yScale.title === 'object') {
+      yScale.title.text = metric.toUpperCase();
+    }
+    if (yScale.ticks && typeof yScale.ticks === 'object') {
+      yScale.ticks.callback = (value) => formatYAxisTick(metric, value);
+    }
+  }
+
+  if (!chart.options.plugins) chart.options.plugins = {};
+  if (!chart.options.plugins.tooltip) chart.options.plugins.tooltip = {};
+  chart.options.plugins.tooltip.callbacks = {
+    label: (context: TooltipItem<'line'>) => formatTooltipLabel(metric, context.parsed.y ?? 0),
+  };
+
+  applyChartAccentColor(chart, accentColor);
+  chart.update('none');
+}
+
 export function applyChartAccentColor(
   chart: import('chart.js/auto').Chart<'line'>,
   accentColor: string,
