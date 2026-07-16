@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { useStore } from '../hooks/StoreContext';
 import {
   useSummaryCardVisibility,
@@ -13,9 +13,78 @@ import { useKeyedFade } from '../hooks/useKeyedFade';
 import { CONTENT_FADE_MS } from '../hooks/useContentFade';
 import type { DataProps } from '../types';
 
-export default function StatsSummaryCard({ allStats, allUsers }: DataProps) {
+/** After docking, ignore layout thrash (customizer expand, scrollbar, spacer) briefly. */
+const PIN_FREEZE_MS = 180;
+
+function clearPinnedPositionStyles(section: HTMLElement) {
+  section.style.removeProperty('left');
+  section.style.removeProperty('width');
+  section.style.removeProperty('top');
+  section.style.removeProperty('bottom');
+  section.style.removeProperty('transform');
+}
+
+function readAnchorBox(
+  pinAnchor: HTMLElement | null,
+  layoutAnchor: HTMLElement | null,
+): { left: number; width: number } | null {
+  const anchor = layoutAnchor ?? pinAnchor;
+  if (!anchor) return null;
+
+  const rect = anchor.getBoundingClientRect();
+  const width = Math.max(0, rect.width);
+  const maxLeft = Math.max(0, window.innerWidth - width);
+  const left = Math.min(Math.max(0, rect.left), maxLeft);
+  return { left, width };
+}
+
+/** Match the in-flow column’s left/width so pinning never recenters or resizes horizontally. */
+function lockPinnedHorizontal(
+  section: HTMLElement,
+  pinAnchor: HTMLElement | null,
+  layoutAnchor: HTMLElement | null,
+  frozen?: { left: number; width: number } | null,
+) {
+  const box = frozen ?? readAnchorBox(pinAnchor, layoutAnchor);
+  if (!box) return null;
+
+  section.style.left = `${box.left}px`;
+  section.style.width = `${box.width}px`;
+  return box;
+}
+
+function readSafeAreaBottom(): number {
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue('--safe-area-bottom')
+    .trim();
+  const value = Number.parseFloat(raw);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function dockPinnedVertically(section: HTMLElement, height: number) {
+  const inset = Math.max(8, readSafeAreaBottom() + 8);
+  const top = Math.max(inset, window.innerHeight - height - inset);
+  section.style.bottom = 'auto';
+  section.style.top = `${top}px`;
+  return top;
+}
+
+export default function StatsSummaryCard({
+  allStats,
+  allUsers,
+  pinned = false,
+  pinAnchorRef,
+  layoutAnchorRef,
+  onPinnedHeightChange,
+}: DataProps & {
+  pinned?: boolean;
+  pinAnchorRef?: RefObject<HTMLDivElement | null>;
+  layoutAnchorRef?: RefObject<HTMLDivElement | null>;
+  onPinnedHeightChange?: (height: number) => void;
+}) {
   const { currentBg } = useStore();
   const summaryRef = useRef<HTMLCanvasElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const wasHiddenRef = useRef(false);
   const prevBgEpochRef = useRef(0);
   const lastDrawKeyRef = useRef('community');
@@ -143,13 +212,125 @@ export default function StatsSummaryCard({ allStats, allUsers }: DataProps) {
 
   const actionsDisabled = isInitialLoad || isCardHidden;
 
+  // Dock immediately when requested; freeze geometry briefly so expand thrash can’t nudge it.
+  const pinnedVisual = pinned && !isFullyHidden;
+  const wasPinnedVisualRef = useRef(false);
+  const freezeUntilRef = useRef(0);
+  const frozenBoxRef = useRef<{ left: number; width: number } | null>(null);
+  const frozenHeightRef = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (!section || !onPinnedHeightChange) return;
+
+    const reportHeight = () => {
+      if (!pinnedVisual) {
+        frozenHeightRef.current = null;
+        onPinnedHeightChange(0);
+        return;
+      }
+
+      // During freeze, keep the first measured dock height so the card doesn’t crawl.
+      if (Date.now() < freezeUntilRef.current && frozenHeightRef.current != null) {
+        onPinnedHeightChange(frozenHeightRef.current);
+        return;
+      }
+
+      const height = section.getBoundingClientRect().height;
+      frozenHeightRef.current = height;
+      onPinnedHeightChange(height);
+    };
+
+    reportHeight();
+    const observer = new ResizeObserver(reportHeight);
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [pinnedVisual, onPinnedHeightChange, isInitialLoad, fadeClass]);
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (!section || !pinnedVisual) {
+      if (section && !pinnedVisual) clearPinnedPositionStyles(section);
+      frozenBoxRef.current = null;
+      freezeUntilRef.current = 0;
+      return;
+    }
+
+    const syncPinnedBox = () => {
+      const freezing = Date.now() < freezeUntilRef.current;
+      const box = lockPinnedHorizontal(
+        section,
+        pinAnchorRef?.current ?? null,
+        layoutAnchorRef?.current ?? null,
+        freezing ? frozenBoxRef.current : null,
+      );
+      if (box && !freezing) frozenBoxRef.current = box;
+
+      const height =
+        freezing && frozenHeightRef.current != null
+          ? frozenHeightRef.current
+          : section.getBoundingClientRect().height;
+      if (!freezing) frozenHeightRef.current = height;
+      dockPinnedVertically(section, height);
+    };
+
+    syncPinnedBox();
+    window.addEventListener('scroll', syncPinnedBox, { passive: true });
+    window.addEventListener('resize', syncPinnedBox);
+    return () => {
+      window.removeEventListener('scroll', syncPinnedBox);
+      window.removeEventListener('resize', syncPinnedBox);
+    };
+  }, [pinnedVisual, pinAnchorRef, layoutAnchorRef]);
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    const wasPinned = wasPinnedVisualRef.current;
+    wasPinnedVisualRef.current = pinnedVisual;
+
+    if (!section || wasPinned === pinnedVisual) return;
+
+    section.getAnimations().forEach((animation) => animation.cancel());
+    section.style.removeProperty('transform');
+
+    if (pinnedVisual) {
+      // Calculate dock geometry now, then ignore layout noise for PIN_FREEZE_MS.
+      const box = lockPinnedHorizontal(
+        section,
+        pinAnchorRef?.current ?? null,
+        layoutAnchorRef?.current ?? null,
+      );
+      frozenBoxRef.current = box;
+      freezeUntilRef.current = Date.now() + PIN_FREEZE_MS;
+
+      const applyDock = () => {
+        const height = section.getBoundingClientRect().height;
+        frozenHeightRef.current = height;
+        dockPinnedVertically(section, height);
+        onPinnedHeightChange?.(height);
+      };
+
+      applyDock();
+      // Second pass after pinned chrome (padding/gap) is fully applied.
+      requestAnimationFrame(applyDock);
+      return;
+    }
+
+    clearPinnedPositionStyles(section);
+    frozenBoxRef.current = null;
+    frozenHeightRef.current = null;
+    freezeUntilRef.current = 0;
+  }, [pinnedVisual, pinAnchorRef, layoutAnchorRef, onPinnedHeightChange]);
+
   return (
     <section
+      ref={sectionRef}
       className={[
         'summary-section',
         'content-fade',
         fadeClass,
         isFullyHidden ? 'summary-section--collapsed' : '',
+        pinnedVisual ? 'summary-section--pinned' : '',
       ]
         .filter(Boolean)
         .join(' ')}

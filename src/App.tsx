@@ -8,8 +8,7 @@ import { goToMainPage } from './utils/urlUser';
 import InfoPanel from './components/InfoPanel';
 import SearchBar from './components/SearchBar';
 import AppearanceControls from './components/AppearanceControls';
-import CardCustomizer from './components/CardCustomizer';
-import StatsSummaryCard from './components/StatsSummaryCard';
+import AchievementCustomizeArea from './components/AchievementCustomizeArea';
 import IndividualCards from './components/IndividualCards';
 import LoadingSkeleton from './components/LoadingSkeleton';
 import { formatLastUpdated } from './utils/formatDate';
@@ -70,8 +69,7 @@ function AppContent({ allStats, allUsers, lastUpdated }: DataProps & { lastUpdat
     <>
       <SearchBar allUsers={allUsers} />
       <AppearanceControls allStats={allStats} allUsers={allUsers} />
-      <CardCustomizer allStats={allStats} allUsers={allUsers} />
-      <StatsSummaryCard allStats={allStats} allUsers={allUsers} />
+      <AchievementCustomizeArea allStats={allStats} allUsers={allUsers} />
       <Suspense
         fallback={
           <div className="chart-section chart-section-loading" aria-busy="true">
