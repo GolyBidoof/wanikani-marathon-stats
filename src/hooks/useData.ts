@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import allStatsData from '../../all_stats.json';
-import allUsersData from '../../users.json';
-import dataMeta from '../../data_meta.json';
+import allStatsData from '../../data/all_stats.json';
+import allUsersData from '../../data/users.json';
+import dataMeta from '../../data/meta.json';
 import { parseAllStats, parseDataMeta, parseUsers } from '../schemas/data';
 import type { AllStats } from '../types';
 

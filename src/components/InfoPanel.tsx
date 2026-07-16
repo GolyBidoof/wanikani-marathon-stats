@@ -1,4 +1,5 @@
 import { useId, useState } from 'react';
+import { SITE } from '../constants';
 
 export default function InfoPanel() {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,7 +40,7 @@ export default function InfoPanel() {
               contribution boosts our collective averages.
             </p>
             <a
-              href="https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572?u=soggyboy"
+              href={SITE.latestMarathon.threadUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="info-link"

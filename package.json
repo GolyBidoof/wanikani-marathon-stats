@@ -8,6 +8,8 @@
     "postinstall": "node scripts/copy-vendor.mjs",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "import-marathon": "node --experimental-strip-types scripts/import-marathon.ts",
+    "sync-data": "node --experimental-strip-types scripts/sync-data.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

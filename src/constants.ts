@@ -1,14 +1,16 @@
-export const gifBackgrounds: string[] = [
-  'fall2024.gif',
-  'autumn2025.gif',
-  'spring2025.gif',
-  'spring2026.gif',
-  'summer2024.gif',
-  'summer2025.gif',
-  'summer2026.gif',
-  'winter2024.gif',
-  'winter2025.gif',
-];
+import site from '../data/site.json';
+import gifs from '../data/gifs.json';
+
+export const SITE = {
+  name: site.name,
+  title: site.title,
+  description: site.description,
+  url: site.url,
+  forumsUrl: site.forumsUrl,
+  latestMarathon: site.latestMarathon,
+} as const;
+
+export const gifBackgrounds: string[] = gifs;
 
 export const seasonEmojis: Record<string, string> = {
   Winter: '❄️',

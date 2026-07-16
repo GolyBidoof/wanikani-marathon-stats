@@ -34,7 +34,7 @@ export interface PersistedPreferences {
 }
 
 const DEFAULT_PREFS: PersistedPreferences = {
-  currentBg: gifBackgrounds[0],
+  currentBg: gifBackgrounds[gifBackgrounds.length - 1] || gifBackgrounds[0] || '',
   currentAccentColor: accentColors[0],
   currentSortMode: 'chrono',
   enabledMetrics: ['time'],

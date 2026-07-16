@@ -1,8 +1,5 @@
 import { useEffect } from 'react';
-
-const SITE_NAME = 'WaniKani 24-hour Readathon Stats';
-const DEFAULT_DESCRIPTION =
-  'Track your WaniKani readathon stats, customize your achievement card, and explore marathon history.';
+import { SITE } from '../constants';
 
 function upsertMeta(selector: string, attributes: Record<string, string>) {
   let element = document.head.querySelector<HTMLMetaElement>(selector);
@@ -25,12 +22,12 @@ export function usePageMeta({
   titleSuffix?: string;
 }) {
   useEffect(() => {
-    const title = username ? `${username} · ${SITE_NAME}` : SITE_NAME;
+    const title = username ? `${username} · ${SITE.name}` : SITE.name;
     document.title = titleSuffix ? `${title} — ${titleSuffix}` : title;
 
     const description = username
       ? `${username}'s WaniKani readathon statistics and achievement card.`
-      : DEFAULT_DESCRIPTION;
+      : SITE.description;
 
     upsertMeta('meta[name="description"]', { name: 'description', content: description });
   }, [username, titleSuffix]);

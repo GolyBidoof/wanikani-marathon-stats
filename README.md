@@ -1,77 +1,29 @@
 # WaniKani Reading Marathon Stats
 
-A statistics explorer for the WaniKani community's 24-hour reading marathons, now organized by **soggyboy** on the WaniKani forums (originally started by **taiyousea**).
+The source of truth and a little achievements portal for the WaniKani community’s **24-hour Readathons**, where we all try to read as much Japanese as we can in a day four times a year, then cheer each other on when the numbers come in.
 
-## What is the 24-hour Readathon?
+The tradition was started by **taiyousea**, and these days the events are organized by **soggyboy** on the forums. This site is just a friendly place to look back on our efforts to learn Japanese together: search for a username, look at the past marathons, and make a shareable achievement card if you like.
 
-The **24-hour Readathon** is a community event where participants attempt to read as much Japanese as they can within a 24-hour period. Participants track pages, characters, or time spent reading, then report their final numbers to the community. These stats are tallied together to celebrate what we can accomplish as a group!
+## Visit us and join the next one here!
 
-Whether you're finishing a book club pick or just squeezing in a few pages, every contribution boosts the collective totals.
-
-## Features
-
-- Search for any participant to see their marathon history
-- Shareable profile URLs (`?user=username`)
-- Customizable achievement card — accent colors, seasonal GIF backgrounds, English/Japanese formatting
-- Optional pages ↔ characters conversion for mixed tracking styles
-- Download or copy the achievement card image; copy a shareable profile link
-- Progress charts across marathons
-- Preferences saved in your browser between visits
-
-## Links
-
-- [Winter 2025 Readathon Thread](https://community.wanikani.com/t/winter-solstice-24-hour-readathon-results-out/72793)
+- [Summer 2026 Readathon Thread](https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572)
 - [WaniKani Community Forums](https://community.wanikani.com/)
 
-## Running Locally
-
-Install dependencies and start the Vite dev server:
+## Running it locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Then open the URL shown in the terminal (typically `http://localhost:5173`).
-
-To build for production:
-
-```bash
-npm run build
-npm run preview
-```
-
-## Quality checks
-
-```bash
-npm run lint        # ESLint (TypeScript, React Hooks, JSX a11y)
-npm run typecheck   # TypeScript without emit
-npm run test        # Vitest unit tests
-npm run ci          # lint + typecheck + test + build
-```
-
-GitHub Actions runs the same checks on pushes and pull requests to `main` / `master`.
-
-## Data
-
-Stats are manually recalculated by **GolyBidoof** from participant reports in each marathon thread.
-
-When updating stats, also set the date in `data_meta.json`:
-
-```json
-{
-  "lastUpdated": "2026-07-14"
-}
-```
+Stats are curated by hand from each marathon thread, there's some cleanup from the data that needs to be done.
 
 ## Credits
 
-- **soggyboy** – Current organizer of the marathon
-- **taiyousea** – Original host who started the tradition
-- **GolyBidoof** – Frontend & data curation
+- **soggyboy** — keeps the readathons going
+- **taiyousea** — started the whole tradition
+- **GolyBidoof** — built and tends this little site
 
-The React/TypeScript rewrite was assisted by **Gemini 3 Flash**, **Gemini 3.5 Flash**, and **Auto** (an AI coding assistant). All changes were reviewed and curated by GolyBidoof.
+Made with care for the WaniKani reading community. MIT licensed. 
 
-## License
-
-MIT
+The code has been written in assistance with Gemini 3 Flash, Gemini 3.5 Flash and Auto.

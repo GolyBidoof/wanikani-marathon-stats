@@ -1,0 +1,11 @@
+{
+  "name": "WaniKani 24-hour Readathon Stats",
+  "title": "WaniKani Readathon Stats Explorer",
+  "description": "A cozy little explorer for WaniKani 24-hour readathon stats — look up your history, celebrate the community, and share an achievement card.",
+  "url": "https://golybidoof.github.io/wanikani-marathon-stats/",
+  "forumsUrl": "https://community.wanikani.com/",
+  "latestMarathon": {
+    "name": "Summer 2026",
+    "threadUrl": "https://community.wanikani.com/t/2026-summer-solstice-24-hour-readathon/74572"
+  }
+}
