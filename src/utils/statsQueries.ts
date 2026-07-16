@@ -1,5 +1,13 @@
 import { getMarathonOrder, parseTimeToHours } from './helpers';
 import { getEntryUnifiedVolume, isVolumeConversionActive } from './volumeConversion';
+import {
+  axisFamilyForMetric,
+  axisIdForFamily,
+  chartMetricColor,
+  CHART_METRIC_LABELS,
+  normalizeSeriesValues,
+  type MultiChartSeriesData,
+} from './chartConfig';
 import type {
   AllStats,
   ChartMetric,
@@ -45,21 +53,17 @@ export function getMetricValue(
 ): number {
   if (!entry || !metric) return 0;
 
-  if (
-    isVolumeConversionActive(
-      volumeConversion ?? { enabled: false, displayAs: 'chars', charsPerPage: 1 },
-      isUserView,
-    ) &&
-    (metric === 'volume' || metric === 'pages' || metric === 'chars' || metric === 'characters')
-  ) {
-    return getEntryUnifiedVolume(entry, volumeConversion!);
+  if (metric === 'volume') {
+    if (!volumeConversion || !isVolumeConversionActive(volumeConversion, isUserView)) {
+      return 0;
+    }
+    return getEntryUnifiedVolume(entry, volumeConversion);
   }
 
   if (metric === 'time') return parseTimeToHours(entry.time);
   if (metric === 'pages') return parseInt(String(entry.pages)) || 0;
   if (metric === 'chars' || metric === 'characters') return parseInt(String(entry.characters)) || 0;
   if (metric === 'sources') return parseInt(String(entry.sources)) || 0;
-  if (metric === 'volume') return 0;
   return 0;
 }
 
@@ -162,6 +166,23 @@ export interface ChartSeries {
   values: number[];
 }
 
+export function getRawChartMetricValue(
+  entry: ParticipantEntry | undefined,
+  metric: ChartMetric,
+  volumeConversion?: VolumeConversionConfig,
+): number {
+  if (!entry) return 0;
+  if (metric === 'time') return parseTimeToHours(entry.time);
+  if (metric === 'pages') return parseInt(String(entry.pages)) || 0;
+  if (metric === 'characters') return parseInt(String(entry.characters)) || 0;
+  if (metric === 'sources') return parseInt(String(entry.sources)) || 0;
+  if (metric === 'volume') {
+    if (!volumeConversion) return 0;
+    return getEntryUnifiedVolume(entry, volumeConversion);
+  }
+  return 0;
+}
+
 export function buildChartSeries(
   allStats: AllStats,
   metric: ChartMetric,
@@ -172,13 +193,33 @@ export function buildChartSeries(
     volumeConversion?: VolumeConversionConfig;
   },
 ): ChartSeries {
+  const multi = buildMultiChartSeries(allStats, [metric], {
+    ...options,
+    accentColor: '#ff00aa',
+    normalized: false,
+    volumeDisplayAs: options.volumeConversion?.displayAs ?? 'chars',
+  });
+  return {
+    labels: multi.labels,
+    values: multi.datasets[0]?.rawValues ?? [],
+  };
+}
+
+export function buildMultiChartSeries(
+  allStats: AllStats,
+  metrics: ChartMetric[],
+  options: {
+    username: string;
+    filterTotals: boolean;
+    excludedMarathons: Set<string>;
+    volumeConversion?: VolumeConversionConfig;
+    volumeDisplayAs?: 'pages' | 'chars';
+    accentColor: string;
+    normalized: boolean;
+  },
+): MultiChartSeriesData {
   const labels: string[] = [];
-  const values: number[] = [];
-  const isUserView = Boolean(options.username);
-  const useVolume = isVolumeConversionActive(
-    options.volumeConversion ?? { enabled: false, displayAs: 'chars', charsPerPage: 1 },
-    isUserView,
-  );
+  const rawByMetric = new Map<ChartMetric, number[]>(metrics.map((metric) => [metric, []]));
 
   for (const marathonName of getMarathonOrder(allStats)) {
     if (!options.username) {
@@ -186,11 +227,24 @@ export function buildChartSeries(
       if (entries.length === 0) continue;
 
       labels.push(marathonName);
-      values.push(
-        metric === 'participants'
-          ? entries.length
-          : entries.reduce((sum, entry) => sum + getMetricValue(entry, metric), 0),
-      );
+      for (const metric of metrics) {
+        const values = rawByMetric.get(metric)!;
+        if (metric === 'participants') {
+          values.push(entries.length);
+        } else if (metric === 'volume') {
+          values.push(
+            entries.reduce(
+              (sum, entry) =>
+                sum + getRawChartMetricValue(entry, 'volume', options.volumeConversion),
+              0,
+            ),
+          );
+        } else {
+          values.push(
+            entries.reduce((sum, entry) => sum + getRawChartMetricValue(entry, metric), 0),
+          );
+        }
+      }
       continue;
     }
 
@@ -199,14 +253,32 @@ export function buildChartSeries(
     if (options.filterTotals && options.excludedMarathons.has(marathonName)) continue;
 
     labels.push(marathonName);
-    if (useVolume && (metric === 'pages' || metric === 'characters')) {
-      values.push(getEntryUnifiedVolume(entry, options.volumeConversion!));
-    } else {
-      values.push(getMetricValue(entry, metric, options.volumeConversion, isUserView));
+    for (const metric of metrics) {
+      rawByMetric
+        .get(metric)!
+        .push(getRawChartMetricValue(entry, metric, options.volumeConversion));
     }
   }
 
-  return { labels, values };
+  const datasets = metrics.map((metric) => {
+    const rawValues = rawByMetric.get(metric) ?? [];
+    const axisFamily = options.normalized ? ('normalized' as const) : axisFamilyForMetric(metric);
+    return {
+      metric,
+      label: CHART_METRIC_LABELS[metric],
+      rawValues,
+      values: options.normalized ? normalizeSeriesValues(rawValues) : rawValues,
+      color: chartMetricColor(metric, options.accentColor),
+      axisFamily,
+      axisId: axisIdForFamily(axisFamily),
+    };
+  });
+
+  return {
+    labels,
+    datasets,
+    normalized: options.normalized,
+  };
 }
 
 export function getLastYearMarathonNames(allStats: AllStats): Set<string> {

@@ -1,8 +1,9 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import StatsChart from './StatsChart';
 import { StoreProvider } from '../hooks/StoreContext';
+import { useAppStore } from '../store/appStore';
 import type { AllStats } from '../types';
 
 vi.mock('../hooks/useHistoryChart', () => ({
@@ -19,35 +20,104 @@ const sampleStats: AllStats = {
 
 describe('StatsChart', () => {
   beforeEach(() => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
+    useAppStore.setState({
+      currentQuery: '',
+      searchDraft: '',
+      volumeConversion: {
+        enabled: false,
+        displayAs: 'chars',
+        charsPerPage: 500,
+      },
+    });
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    cleanup();
   });
 
-  it('exposes tablist semantics, chart description, and keyboard navigation', async () => {
+  it('supports multi-select metrics, compare-shapes mode, and passes axe', async () => {
     const { container } = render(
       <StoreProvider allUsers={['Alice']}>
         <StatsChart allStats={sampleStats} allUsers={['Alice']} />
       </StoreProvider>,
     );
 
-    expect(screen.getByRole('tablist', { name: 'Chart metric' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Time' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByRole('tab', { name: 'Pages' })).toHaveAttribute('tabIndex', '-1');
+    expect(screen.getByRole('toolbar', { name: 'Chart metrics' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Time' })).toHaveAttribute('aria-pressed', 'true');
 
-    const description = screen.getByText(/Line chart of Time across 2 marathons/i);
-    expect(description).toBeInTheDocument();
-    expect(screen.getByRole('img')).toHaveAttribute('aria-labelledby', 'chart-description');
+    fireEvent.click(screen.getByRole('button', { name: 'Pages' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Characters' }));
 
-    const participantsTab = screen.getByRole('tab', { name: 'Participants' });
-    fireEvent.keyDown(screen.getByRole('tablist'), { key: 'ArrowRight' });
-    await act(async () => {
-      vi.advanceTimersByTime(300);
+    expect(screen.getByRole('button', { name: 'Pages' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Characters' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(screen.getByText(/3 metrics/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText('Compare shapes'));
+    expect(screen.getByLabelText('Compare shapes')).toBeChecked();
+    expect(screen.getByText(/normalized/i)).toBeInTheDocument();
+
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it('shows Combined for a user only when volume conversion is enabled', () => {
+    useAppStore.setState({
+      currentQuery: 'Alice',
+      searchDraft: 'Alice',
+      volumeConversion: {
+        enabled: true,
+        displayAs: 'chars',
+        charsPerPage: 500,
+      },
     });
 
-    expect(participantsTab).toHaveAttribute('aria-selected', 'true');
-    expect(await axe(container)).toHaveNoViolations();
+    const { container, rerender } = render(
+      <StoreProvider allUsers={['Alice']}>
+        <StatsChart allStats={sampleStats} allUsers={['Alice']} />
+      </StoreProvider>,
+    );
+
+    expect(container.querySelector('#chart-metric-volume')).toBeTruthy();
+    expect(container.querySelector('#chart-metric-pages')).toBeTruthy();
+    expect(container.querySelector('#chart-metric-characters')).toBeTruthy();
+    expect(container.querySelector('#chart-metric-participants')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Expand' })).toBeInTheDocument();
+
+    useAppStore.setState({
+      volumeConversion: {
+        enabled: false,
+        displayAs: 'chars',
+        charsPerPage: 500,
+      },
+    });
+    rerender(
+      <StoreProvider allUsers={['Alice']}>
+        <StatsChart allStats={sampleStats} allUsers={['Alice']} />
+      </StoreProvider>,
+    );
+    expect(container.querySelector('#chart-metric-volume')).toBeNull();
+  });
+
+  it('hides Combined on the community chart even if conversion prefs are on', () => {
+    useAppStore.setState({
+      currentQuery: '',
+      searchDraft: '',
+      volumeConversion: {
+        enabled: true,
+        displayAs: 'chars',
+        charsPerPage: 500,
+      },
+    });
+
+    const { container } = render(
+      <StoreProvider allUsers={['Alice']}>
+        <StatsChart allStats={sampleStats} allUsers={['Alice']} />
+      </StoreProvider>,
+    );
+
+    expect(container.querySelector('#chart-metric-volume')).toBeNull();
+    expect(container.querySelector('#chart-metric-participants')).toBeTruthy();
   });
 });

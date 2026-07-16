@@ -1,130 +1,188 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import { useStore } from '../hooks/StoreContext';
 import { useExactUser } from '../hooks/useExactUser';
-import { useChartMetricFade } from '../hooks/useChartMetricFade';
-import { useChartTabKeyboard } from '../hooks/useChartTabKeyboard';
+import { useChartMetricSelection } from '../hooks/useChartMetricSelection';
+import { useChartMetricToggleKeyboard } from '../hooks/useChartMetricToggleKeyboard';
 import { useHistoryChart } from '../hooks/useHistoryChart';
-import { buildChartSeries } from '../utils/statsQueries';
-import { getVolumeChartMetric, isVolumeConversionActive } from '../utils/volumeConversion';
-import { buildChartDescription } from '../utils/a11yDescriptions';
+import { buildMultiChartSeries } from '../utils/statsQueries';
+import { buildMultiChartDescription } from '../utils/a11yDescriptions';
+import { chartMetricColor, CHART_METRIC_LABELS } from '../utils/chartConfig';
+import { isVolumeConversionActive } from '../utils/volumeConversion';
 import FadeSection from './FadeSection';
 import type { DataProps, ChartMetric } from '../types';
+import type { MultiChartSeriesData } from '../utils/chartConfig';
 
-const METRIC_TABS: Array<{ id: ChartMetric; label: string; hideForUser?: boolean }> = [
-  { id: 'time', label: 'Time' },
-  { id: 'participants', label: 'Participants', hideForUser: true },
-  { id: 'characters', label: 'Characters' },
-  { id: 'pages', label: 'Pages' },
-  { id: 'sources', label: 'Sources' },
+const METRIC_OPTIONS: Array<{
+  id: ChartMetric;
+  hideForUser?: boolean;
+  /** Combined: only for a selected user while volume conversion is on. */
+  requiresUserVolume?: boolean;
+}> = [
+  { id: 'time' },
+  { id: 'participants', hideForUser: true },
+  { id: 'characters' },
+  { id: 'pages' },
+  { id: 'volume', requiresUserVolume: true },
+  { id: 'sources' },
 ];
 
-const CHART_PANEL_ID = 'history-chart-panel';
+function ChartCanvas({
+  series,
+  scope,
+  enabled,
+  volumeDisplayAs,
+  descriptionId,
+  canvasId,
+  className,
+}: {
+  series: MultiChartSeriesData;
+  scope: string;
+  enabled: boolean;
+  volumeDisplayAs: 'pages' | 'chars';
+  descriptionId: string;
+  canvasId: string;
+  className?: string;
+}) {
+  const { containerRef, canvasRef } = useHistoryChart({
+    scope,
+    series,
+    enabled,
+    volumeDisplayAs,
+  });
+  const description = useMemo(() => buildMultiChartDescription(series), [series]);
+
+  return (
+    <div ref={containerRef} className={className} role="region" aria-label="History chart canvas">
+      <p className="sr-only" id={descriptionId}>
+        {description}
+      </p>
+      <canvas
+        ref={canvasRef}
+        key={scope}
+        id={canvasId}
+        role="img"
+        aria-labelledby={descriptionId}
+      />
+    </div>
+  );
+}
 
 export default function StatsChart({ allStats, allUsers }: DataProps) {
   const { currentAccentColor, excludedMarathons, filterTotals, volumeConversion } = useStore();
   const { exactUsername, isExactMatch, isPartialSearch } = useExactUser(allUsers);
-  const {
-    activeTab,
-    chartMetric,
-    fadeState,
-    requestMetricChange,
-    handleFadeEnd,
-    resetToTimeMetric,
-    switchToMetric,
-    resetChartFade,
-    resetForProfileChange,
-  } = useChartMetricFade();
-
-  const wasPartialSearchRef = useRef(false);
-  const previousUsernameRef = useRef(exactUsername);
   const volumeActive = isVolumeConversionActive(volumeConversion, isExactMatch);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const titleId = useId();
 
-  useEffect(() => {
-    if (isExactMatch && activeTab === 'participants') {
-      resetToTimeMetric();
-    }
-  }, [isExactMatch, activeTab, resetToTimeMetric]);
+  const availableMetrics = useMemo(
+    () =>
+      METRIC_OPTIONS.filter((option) => {
+        if (option.hideForUser && isExactMatch) return false;
+        if (option.requiresUserVolume && !volumeActive) return false;
+        return true;
+      }).map((option) => option.id),
+    [isExactMatch, volumeActive],
+  );
 
-  useEffect(() => {
-    if (!volumeActive) return;
+  const {
+    selectedMetrics,
+    orderedSelectedMetrics,
+    normalizeShapes,
+    setNormalizeShapes,
+    toggleMetric,
+    resetSelection,
+  } = useChartMetricSelection(availableMetrics);
 
-    const volumeMetric = getVolumeChartMetric(volumeConversion);
-    if (activeTab === 'pages' || activeTab === 'characters') {
-      if (activeTab !== volumeMetric) {
-        switchToMetric(volumeMetric);
-      }
-    }
-  }, [volumeActive, volumeConversion, activeTab, switchToMetric]);
-
-  useEffect(() => {
-    if (wasPartialSearchRef.current && !isPartialSearch) {
-      resetChartFade();
-    }
-    wasPartialSearchRef.current = isPartialSearch;
-  }, [isPartialSearch, resetChartFade]);
+  const previousUsernameRef = useRef(exactUsername);
 
   useEffect(() => {
     if (previousUsernameRef.current === exactUsername) return;
     previousUsernameRef.current = exactUsername;
-    resetForProfileChange();
-  }, [exactUsername, resetForProfileChange]);
+    resetSelection();
+  }, [exactUsername, resetSelection]);
 
-  const chartReady = fadeState === 'visible' && !isPartialSearch;
+  useEffect(() => {
+    if (!isExpanded) return;
 
-  const visibleTabs = useMemo(() => {
-    return METRIC_TABS.filter((tab) => {
-      if (tab.hideForUser && isExactMatch) return false;
-      if (!volumeActive) return true;
-      if (tab.id === 'pages' || tab.id === 'characters') {
-        return tab.id === getVolumeChartMetric(volumeConversion);
-      }
-      return true;
-    });
-  }, [isExactMatch, volumeActive, volumeConversion]);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsExpanded(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isExpanded]);
 
   const chartSeries = useMemo(
     () =>
-      buildChartSeries(allStats, chartMetric, {
+      buildMultiChartSeries(allStats, orderedSelectedMetrics, {
         username: exactUsername,
         filterTotals,
         excludedMarathons,
         volumeConversion: volumeActive ? volumeConversion : undefined,
+        volumeDisplayAs: volumeConversion.displayAs,
+        accentColor: currentAccentColor,
+        normalized: normalizeShapes,
       }),
     [
       allStats,
-      chartMetric,
+      orderedSelectedMetrics,
       exactUsername,
       filterTotals,
       excludedMarathons,
       volumeActive,
       volumeConversion,
+      currentAccentColor,
+      normalizeShapes,
     ],
   );
 
-  const hasChartData = chartSeries.labels.length > 0;
-  const chartScope = `${exactUsername || 'community'}:${chartMetric}`;
-
-  const { containerRef, canvasRef } = useHistoryChart({
-    scope: chartScope,
-    series: chartSeries,
-    metric: chartMetric,
-    accentColor: currentAccentColor,
-    enabled: hasChartData && chartReady,
-  });
-
-  const activeTabLabel = visibleTabs.find((tab) => tab.id === activeTab)?.label ?? activeTab;
-  const chartDescription = useMemo(
-    () => buildChartDescription(activeTabLabel, chartSeries.labels, chartSeries.values),
-    [activeTabLabel, chartSeries.labels, chartSeries.values],
-  );
-
-  const handleTabKeyDown = useChartTabKeyboard(
-    visibleTabs.map((tab) => tab.id),
-    activeTab,
-    requestMetricChange,
-  );
+  const hasChartData = chartSeries.labels.length > 0 && chartSeries.datasets.length > 0;
+  const chartScope = `${exactUsername || 'community'}:${orderedSelectedMetrics.join(',')}:${normalizeShapes ? 'norm' : 'abs'}`;
+  const handleMetricKeyDown = useChartMetricToggleKeyboard(availableMetrics, toggleMetric);
 
   if (!hasChartData) return null;
+
+  const metricToolbar = (idPrefix: string) => (
+    <div
+      className="chart-controls"
+      role="toolbar"
+      aria-label="Chart metrics"
+      onKeyDown={handleMetricKeyDown}
+    >
+      {availableMetrics.map((metric) => {
+        const isSelected = selectedMetrics.has(metric);
+        const color = chartMetricColor(metric, currentAccentColor);
+
+        return (
+          <button
+            key={`${idPrefix}-${metric}`}
+            type="button"
+            id={`${idPrefix}-metric-${metric}`}
+            aria-pressed={isSelected}
+            className={`chart-metric-toggle ${isSelected ? 'active' : ''}`}
+            style={
+              {
+                '--metric-color': color,
+              } as CSSProperties
+            }
+            onClick={() => toggleMetric(metric)}
+          >
+            <span className="chart-metric-swatch" aria-hidden="true" />
+            {CHART_METRIC_LABELS[metric]}
+          </button>
+        );
+      })}
+    </div>
+  );
 
   return (
     <FadeSection
@@ -134,54 +192,97 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
       className="chart-section"
       aria-label="Marathon history chart"
     >
-      <div
-        className="chart-controls"
-        role="tablist"
-        aria-label="Chart metric"
-        tabIndex={-1}
-        onKeyDown={handleTabKeyDown}
-      >
-        {visibleTabs.map((tab) => {
-          const tabId = `chart-tab-${tab.id}`;
-          const isSelected = activeTab === tab.id;
+      <div className="chart-toolbar">
+        {metricToolbar('chart')}
 
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              id={tabId}
-              role="tab"
-              aria-selected={isSelected}
-              aria-controls={CHART_PANEL_ID}
-              tabIndex={isSelected ? 0 : -1}
-              className={`chart-tab ${isSelected ? 'active' : ''}`}
-              onClick={() => requestMetricChange(tab.id)}
+        <div className="chart-toolbar-actions">
+          <label className="chart-normalize-toggle">
+            <input
+              type="checkbox"
+              checked={normalizeShapes}
+              onChange={(event) => setNormalizeShapes(event.target.checked)}
+            />
+            <span>Compare shapes</span>
+          </label>
+          <button
+            type="button"
+            className="chart-expand-btn"
+            onClick={() => setIsExpanded(true)}
+            aria-haspopup="dialog"
+          >
+            Expand
+          </button>
+        </div>
+      </div>
+
+      <p className="chart-hint">
+        {normalizeShapes
+          ? 'Each line is scaled to its first marathon (100%). Tooltips still show real values.'
+          : 'Toggle multiple metrics. Each unit family gets its own color-matched axis.'}
+      </p>
+
+      <ChartCanvas
+        series={chartSeries}
+        scope={chartScope}
+        enabled={!isPartialSearch && !isExpanded}
+        volumeDisplayAs={volumeConversion.displayAs}
+        descriptionId="chart-description"
+        canvasId="historyChart"
+        className="chart-container"
+      />
+
+      {isExpanded &&
+        createPortal(
+          <div
+            className="chart-expand-overlay"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setIsExpanded(false);
+            }}
+          >
+            <div
+              className="chart-expand-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
             >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
+              <div className="chart-expand-header">
+                <h2 id={titleId}>Marathon history</h2>
+                <button
+                  ref={closeButtonRef}
+                  type="button"
+                  className="chart-expand-close"
+                  onClick={() => setIsExpanded(false)}
+                >
+                  Close
+                </button>
+              </div>
 
-      <div
-        ref={containerRef}
-        id={CHART_PANEL_ID}
-        role="tabpanel"
-        aria-labelledby={`chart-tab-${activeTab}`}
-        className={`chart-container ${fadeState === 'hidden' ? 'chart-fade-hidden' : ''}`}
-        onTransitionEnd={handleFadeEnd}
-      >
-        <p className="sr-only" id="chart-description">
-          {chartDescription}
-        </p>
-        <canvas
-          ref={canvasRef}
-          key={chartScope}
-          id="historyChart"
-          role="img"
-          aria-labelledby="chart-description"
-        />
-      </div>
+              <div className="chart-expand-toolbar">
+                {metricToolbar('chart-expanded')}
+                <label className="chart-normalize-toggle">
+                  <input
+                    type="checkbox"
+                    checked={normalizeShapes}
+                    onChange={(event) => setNormalizeShapes(event.target.checked)}
+                  />
+                  <span>Compare shapes</span>
+                </label>
+              </div>
+
+              <ChartCanvas
+                series={chartSeries}
+                scope={`expanded:${chartScope}`}
+                enabled
+                volumeDisplayAs={volumeConversion.displayAs}
+                descriptionId="chart-description-expanded"
+                canvasId="historyChartExpanded"
+                className="chart-container chart-container-expanded"
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
     </FadeSection>
   );
 }

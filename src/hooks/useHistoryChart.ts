@@ -1,25 +1,29 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Chart } from 'chart.js/auto';
 import { buildLineChartConfig, updateLineChart } from '../utils/chartConfig';
-import type { ChartSeriesData } from '../utils/chartConfig';
-import type { ChartMetric } from '../types';
+import type { MultiChartSeriesData } from '../utils/chartConfig';
+import type { VolumeDisplayUnit } from '../types';
 
 const MAX_LAYOUT_RETRIES = 8;
 
 interface UseHistoryChartOptions {
   scope: string;
-  series: ChartSeriesData;
-  metric: ChartMetric;
-  accentColor: string;
+  series: MultiChartSeriesData;
   enabled: boolean;
+  volumeDisplayAs?: VolumeDisplayUnit;
+}
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 }
 
 export function useHistoryChart({
   scope,
   series,
-  metric,
-  accentColor,
   enabled,
+  volumeDisplayAs = 'chars',
 }: UseHistoryChartOptions) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -37,6 +41,7 @@ export function useHistoryChart({
     let retryFrame = 0;
     let resizeObserver: ResizeObserver | null = null;
     let cancelled = false;
+    const reducedMotion = prefersReducedMotion();
 
     const destroyChart = () => {
       chartRef.current?.destroy();
@@ -66,17 +71,20 @@ export function useHistoryChart({
 
       if (needsNewChart) {
         existingChart?.destroy();
-        chartRef.current = new Chart(context, buildLineChartConfig(series, metric, accentColor));
+        chartRef.current = new Chart(
+          context,
+          buildLineChartConfig(series, reducedMotion, volumeDisplayAs),
+        );
         scopeRef.current = scope;
       } else {
-        updateLineChart(existingChart, series, metric, accentColor);
+        updateLineChart(existingChart, series, reducedMotion, volumeDisplayAs);
       }
 
       const chart = chartRef.current;
       if (!chart) return;
 
       chart.resize();
-      chart.update('none');
+      chart.update(reducedMotion ? 'none' : undefined);
     };
 
     syncChart();
@@ -100,7 +108,7 @@ export function useHistoryChart({
       resizeObserver?.disconnect();
       destroyChart();
     };
-  }, [scope, series, metric, accentColor, enabled]);
+  }, [scope, series, enabled, volumeDisplayAs]);
 
   return { containerRef, canvasRef };
 }
