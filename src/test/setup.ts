@@ -1,5 +1,8 @@
 import '@testing-library/jest-dom/vitest';
-import { beforeEach } from 'vitest';
+import { expect, beforeEach } from 'vitest';
+import { toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
 
 const storage = new Map<string, string>();
 

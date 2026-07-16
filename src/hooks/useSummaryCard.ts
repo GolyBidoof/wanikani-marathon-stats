@@ -194,17 +194,6 @@ export function useSummaryDrawContext(
   );
 }
 
-/** @deprecated Use useSummaryCardVisibility + useSummaryDrawContext instead. */
-export function useSummaryCardData(allStats: AllStats, allUsers: string[]) {
-  const { exactUsername, effectiveUsername, isCardHidden } = useSummaryCardVisibility(
-    allStats,
-    allUsers,
-  );
-  const profileKey = effectiveUsername || 'community';
-  const drawContext = useSummaryDrawContext(profileKey, allStats, allUsers);
-  return { exactUsername, isCardHidden, drawContext };
-}
-
 function createBackgroundCanvas() {
   return document.createElement('canvas');
 }
