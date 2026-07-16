@@ -250,8 +250,7 @@ function drawStatsRow(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawConte
     if (metric === 'chars') stats.push({ label: copy.chars, value: formatValue(state.chars) });
     if (metric === 'volume' && useVolume) {
       stats.push({
-        label:
-          volumeConversion.displayAs === 'pages' ? copy.volumePages : copy.volumeChars,
+        label: volumeConversion.displayAs === 'pages' ? copy.volumePages : copy.volumeChars,
         value: formatValue(state.volume ?? 0),
       });
     }
