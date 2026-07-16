@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { SITE } from '../constants';
+import i18n from '../i18n';
+import { useStore } from './StoreContext';
 
 function upsertMeta(selector: string, attributes: Record<string, string>) {
   let element = document.head.querySelector<HTMLMetaElement>(selector);
@@ -21,14 +22,20 @@ export function usePageMeta({
   username?: string;
   titleSuffix?: string;
 }) {
+  const appLanguage = useStore((state) => state.appLanguage);
+
   useEffect(() => {
-    const title = username ? `${username} · ${SITE.name}` : SITE.name;
-    document.title = titleSuffix ? `${title} — ${titleSuffix}` : title;
+    const title = username
+      ? i18n.t('meta.userTitle', { username, siteName: i18n.t('meta.siteName') })
+      : i18n.t('meta.siteTitle');
+    document.title = titleSuffix
+      ? i18n.t('meta.suffixedTitle', { title, suffix: titleSuffix })
+      : title;
 
     const description = username
-      ? `${username}'s WaniKani readathon statistics and achievement card.`
-      : SITE.description;
+      ? i18n.t('meta.userDescription', { username })
+      : i18n.t('meta.siteDescription');
 
     upsertMeta('meta[name="description"]', { name: 'description', content: description });
-  }, [username, titleSuffix]);
+  }, [appLanguage, username, titleSuffix]);
 }

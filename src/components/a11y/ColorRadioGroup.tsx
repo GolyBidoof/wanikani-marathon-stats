@@ -1,12 +1,13 @@
 import { useId } from 'react';
+import { useTranslation } from 'react-i18next';
 
-const COLOR_LABELS: Record<string, string> = {
-  '#ff00aa': 'Pink',
-  '#00aaff': 'Blue',
-  '#a100ff': 'Purple',
-  '#ff5f00': 'Orange',
-  '#00d47e': 'Green',
-  '#ffb800': 'Yellow',
+const COLOR_LABEL_KEYS: Record<string, string> = {
+  '#ff00aa': 'appearance.colors.pink',
+  '#00aaff': 'appearance.colors.blue',
+  '#a100ff': 'appearance.colors.purple',
+  '#ff5f00': 'appearance.colors.orange',
+  '#00d47e': 'appearance.colors.green',
+  '#ffb800': 'appearance.colors.yellow',
 };
 
 interface ColorRadioGroupProps {
@@ -17,6 +18,7 @@ interface ColorRadioGroupProps {
 }
 
 export default function ColorRadioGroup({ label, colors, value, onChange }: ColorRadioGroupProps) {
+  const { t } = useTranslation();
   const id = useId();
   const labelId = `${id}-label`;
 
@@ -25,7 +27,7 @@ export default function ColorRadioGroup({ label, colors, value, onChange }: Colo
       <span id={labelId}>{label}</span>
       <div id="colorPicker" className="color-picker" role="radiogroup" aria-label={label}>
         {colors.map((color) => {
-          const colorLabel = COLOR_LABELS[color.toLowerCase()] ?? color;
+          const colorLabel = t(COLOR_LABEL_KEYS[color.toLowerCase()] ?? color);
           const isSelected = value.toLowerCase() === color.toLowerCase();
 
           return (

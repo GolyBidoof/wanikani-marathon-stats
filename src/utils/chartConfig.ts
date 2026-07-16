@@ -1,6 +1,7 @@
 import type { ChartConfiguration, ChartDataset, ChartOptions, TooltipItem } from 'chart.js/auto';
 import { formatHours } from './helpers';
 import type { ChartMetric } from '../types';
+import i18n from '../i18n';
 
 export type ChartAxisFamily = 'time' | 'pages' | 'characters' | 'volume' | 'count' | 'normalized';
 
@@ -23,16 +24,12 @@ export interface MultiChartSeriesData {
   labels: string[];
   datasets: ChartDatasetSeries[];
   normalized: boolean;
+  language?: string;
 }
 
-export const CHART_METRIC_LABELS: Record<ChartMetric, string> = {
-  time: 'Time',
-  participants: 'Participants',
-  characters: 'Characters',
-  pages: 'Pages',
-  sources: 'Sources',
-  volume: 'Combined',
-};
+export function getChartMetricLabel(metric: ChartMetric, language?: string): string {
+  return i18n.t(`chart.metric.${metric}`, { lng: language });
+}
 
 const HIGH_CONTRAST_METRIC_COLORS: Record<ChartMetric, string> = {
   time: '#A78BFA',
@@ -100,15 +97,23 @@ export function axisIdForFamily(family: ChartAxisFamily): string {
   return `axis-${family}`;
 }
 
-function axisTitleForFamily(family: ChartAxisFamily, volumeDisplayAs: 'pages' | 'chars'): string {
-  if (family === 'normalized') return '% OF FIRST';
-  if (family === 'time') return 'TIME (h)';
-  if (family === 'pages') return 'PAGES';
-  if (family === 'characters') return 'CHARS';
+function axisTitleForFamily(
+  family: ChartAxisFamily,
+  volumeDisplayAs: 'pages' | 'chars',
+  language?: string,
+): string {
+  const lng = language ? { lng: language } : undefined;
+  if (family === 'normalized') return i18n.t('chart.axis.normalized', lng);
+  if (family === 'time') return i18n.t('chart.axis.time', lng);
+  if (family === 'pages') return i18n.t('chart.axis.pages', lng);
+  if (family === 'characters') return i18n.t('chart.axis.characters', lng);
   if (family === 'volume') {
-    return volumeDisplayAs === 'pages' ? 'COMBINED (pgs)' : 'COMBINED (chars)';
+    return i18n.t(
+      volumeDisplayAs === 'pages' ? 'chart.axis.combinedPages' : 'chart.axis.combinedCharacters',
+      lng,
+    );
   }
-  return 'COUNT';
+  return i18n.t('chart.axis.count', lng);
 }
 
 function formatAxisTick(family: ChartAxisFamily, value: string | number): string {
@@ -122,12 +127,12 @@ function formatAxisTick(family: ChartAxisFamily, value: string | number): string
 }
 
 function formatTooltipLabel(
+  metricLabel: string,
   metric: ChartMetric,
   value: number,
   normalized: boolean,
   rawValue?: number,
 ): string {
-  const label = CHART_METRIC_LABELS[metric];
   if (normalized) {
     const rawSuffix =
       rawValue == null
@@ -135,10 +140,10 @@ function formatTooltipLabel(
         : metric === 'time'
           ? ` (${formatHours(rawValue)})`
           : ` (${rawValue.toLocaleString()})`;
-    return `${label}: ${Math.round(value)}%${rawSuffix}`;
+    return `${metricLabel}: ${Math.round(value)}%${rawSuffix}`;
   }
-  if (metric === 'time') return `${label}: ${formatHours(value)}`;
-  return `${label}: ${value.toLocaleString()}`;
+  if (metric === 'time') return `${metricLabel}: ${formatHours(value)}`;
+  return `${metricLabel}: ${value.toLocaleString()}`;
 }
 
 function hexToRgba(hexColor: string, alpha: number): string {
@@ -151,11 +156,16 @@ function buildScaleOptions(
   series: MultiChartSeriesData,
   familiesInUse: ChartAxisFamily[],
   volumeDisplayAs: 'pages' | 'chars',
+  language?: string,
 ): NonNullable<ChartOptions<'line'>['scales']> {
   const scales: NonNullable<ChartOptions<'line'>['scales']> = {
     x: {
       grid: { color: 'rgba(255, 255, 255, 0.06)' },
-      title: { display: true, text: 'MARATHON', color: '#a8a8a8' },
+      title: {
+        display: true,
+        text: i18n.t('chart.axis.marathon', language ? { lng: language } : undefined),
+        color: '#a8a8a8',
+      },
       ticks: { color: '#a8a8a8', maxRotation: 0, autoSkip: true },
       border: { color: 'rgba(255, 255, 255, 0.08)' },
     },
@@ -184,7 +194,7 @@ function buildScaleOptions(
       border: { display: true, color: axisColor, width: 2 },
       title: {
         display: true,
-        text: axisTitleForFamily(family, volumeDisplayAs),
+        text: axisTitleForFamily(family, volumeDisplayAs, language),
         color: axisColor,
         font: { weight: 700, size: 11 },
       },
@@ -236,6 +246,7 @@ export function buildLineChartConfig(
   volumeDisplayAs: 'pages' | 'chars' = 'chars',
 ): ChartConfiguration<'line'> {
   const familiesInUse = [...new Set(series.datasets.map((dataset) => dataset.axisFamily))];
+  const language = series.language;
 
   return {
     type: 'line',
@@ -259,7 +270,7 @@ export function buildLineChartConfig(
             easing: 'easeOutQuart',
           },
       interaction: { mode: 'index', intersect: false },
-      scales: buildScaleOptions(series, familiesInUse, volumeDisplayAs),
+      scales: buildScaleOptions(series, familiesInUse, volumeDisplayAs, language),
       plugins: {
         legend: {
           display: series.datasets.length > 1,
@@ -286,6 +297,7 @@ export function buildLineChartConfig(
               if (!datasetSeries) return '';
               const pointIndex = context.dataIndex;
               return formatTooltipLabel(
+                datasetSeries.label,
                 datasetSeries.metric,
                 context.parsed.y ?? 0,
                 series.normalized,

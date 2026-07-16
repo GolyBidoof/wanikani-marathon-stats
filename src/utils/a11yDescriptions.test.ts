@@ -6,6 +6,7 @@ import {
 } from './a11yDescriptions';
 import type { SummaryDrawContext } from './drawSummaryCard';
 import type { MultiChartSeriesData } from './chartConfig';
+import i18n from '../i18n';
 
 describe('buildChartDescription', () => {
   it('reads metric points aloud for screen readers', () => {
@@ -42,6 +43,18 @@ describe('buildMultiChartDescription', () => {
     expect(buildMultiChartDescription(series)).toContain('normalized');
     expect(buildMultiChartDescription(series)).toContain('Pages');
     expect(buildMultiChartDescription(series)).toContain('100%');
+  });
+
+  it('uses the active language for chart descriptions', async () => {
+    await i18n.changeLanguage('ja');
+
+    expect(
+      buildMultiChartDescription({
+        labels: [],
+        datasets: [],
+        normalized: false,
+      }),
+    ).toBe('履歴チャート。データがありません。');
   });
 });
 

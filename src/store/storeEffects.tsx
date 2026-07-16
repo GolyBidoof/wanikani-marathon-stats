@@ -43,6 +43,7 @@ export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
   const summaryMetricsOrder = useAppStore((state) => state.summaryMetricsOrder);
   const showHistory = useAppStore((state) => state.showHistory);
   const filterTotals = useAppStore((state) => state.filterTotals);
+  const appLanguage = useAppStore((state) => state.appLanguage);
   const cardLanguage = useAppStore((state) => state.cardLanguage);
   const cardNicknameCase = useAppStore((state) => state.cardNicknameCase);
   const cardJaNumberStyle = useAppStore((state) => state.cardJaNumberStyle);
@@ -113,6 +114,7 @@ export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
       summaryMetricsOrder,
       showHistory,
       filterTotals,
+      appLanguage,
       cardLanguage,
       cardNicknameCase,
       cardJaNumberStyle,
@@ -129,6 +131,7 @@ export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
     summaryMetricsOrder,
     showHistory,
     filterTotals,
+    appLanguage,
     cardLanguage,
     cardNicknameCase,
     cardJaNumberStyle,

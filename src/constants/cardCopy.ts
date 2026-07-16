@@ -1,4 +1,5 @@
 import type { CardLanguage, JaCardNumberStyle, NicknameCase } from '../types';
+import i18n from '../i18n';
 
 // Matches the official readathon naming: equinoxes + solstices.
 const MARATHON_TERM_JA: Record<string, string> = {
@@ -102,62 +103,59 @@ function formatCardCount(
   );
 }
 
-export const cardCopy: Record<
-  CardLanguage,
-  {
-    tagline: string;
-    totalTimeRead: string;
-    averageTime: string;
-    marathons: string;
-    participants: string;
-    pages: string;
-    chars: string;
-    volume: string;
-    sources: string;
-    sidebarNone: string;
-    sidebarAllTime: string;
-    sidebarPastYear: string;
-    sidebarManual: string;
-    pagesUnit: (count: number, options?: CardNumberFormatOptions) => string;
-    charsUnit: (count: number, options?: CardNumberFormatOptions) => string;
-    sourcesUnit: (count: number, options?: CardNumberFormatOptions) => string;
-  }
-> = {
-  en: {
-    tagline: 'WaniKani Reading Marathon',
-    totalTimeRead: 'TOTAL TIME READ',
-    averageTime: 'avg',
-    marathons: 'MARATHONS',
-    participants: 'PARTICIPANTS',
-    pages: 'PAGES',
-    chars: 'CHARS',
-    volume: 'COMBINED',
-    sources: 'SOURCES',
-    sidebarNone: 'NONE',
-    sidebarAllTime: 'ALL TIME',
-    sidebarPastYear: 'PAST YEAR',
-    sidebarManual: 'MANUAL',
-    pagesUnit: (count, options) => `${formatCardCount(count, 'en', options)} pgs`,
-    charsUnit: (count, options) => `${formatCardCount(count, 'en', options)} chars`,
-    sourcesUnit: (count, options) => `${formatCardCount(count, 'en', options)} src`,
+type CardCopy = {
+  tagline: string;
+  totalTimeRead: string;
+  averageTime: string;
+  marathons: string;
+  participants: string;
+  pages: string;
+  chars: string;
+  volume: string;
+  sources: string;
+  sidebarNone: string;
+  sidebarAllTime: string;
+  sidebarPastYear: string;
+  sidebarManual: string;
+  pagesUnit: (count: number, options?: CardNumberFormatOptions) => string;
+  charsUnit: (count: number, options?: CardNumberFormatOptions) => string;
+  sourcesUnit: (count: number, options?: CardNumberFormatOptions) => string;
+};
+
+function buildCardCopy(language: CardLanguage): CardCopy {
+  const translate = (key: string, options?: Record<string, string>) =>
+    i18n.t(`card.${key}`, { lng: language, ...options });
+
+  return {
+    tagline: translate('tagline'),
+    totalTimeRead: translate('totalTimeRead'),
+    averageTime: translate('averageTime'),
+    marathons: translate('marathons'),
+    participants: translate('participants'),
+    pages: translate('pages'),
+    chars: translate('chars'),
+    volume: translate('volume'),
+    sources: translate('sources'),
+    sidebarNone: translate('sidebarNone'),
+    sidebarAllTime: translate('sidebarAllTime'),
+    sidebarPastYear: translate('sidebarPastYear'),
+    sidebarManual: translate('sidebarManual'),
+    pagesUnit: (count, options) =>
+      translate('pagesUnit', { count: formatCardCount(count, language, options) }),
+    charsUnit: (count, options) =>
+      translate('charsUnit', { count: formatCardCount(count, language, options) }),
+    sourcesUnit: (count, options) =>
+      translate('sourcesUnit', { count: formatCardCount(count, language, options) }),
+  };
+}
+
+/** Lazily resolved so strings always come from the current i18n catalogs. */
+export const cardCopy: Record<CardLanguage, CardCopy> = {
+  get en() {
+    return buildCardCopy('en');
   },
-  ja: {
-    tagline: 'WaniKani 読書マラソン',
-    totalTimeRead: '合計読書時間',
-    averageTime: '平均',
-    marathons: '参加回数',
-    participants: '参加者数',
-    pages: 'ページ数',
-    chars: '文字数',
-    volume: '換算合計',
-    sources: '作品数',
-    sidebarNone: 'なし',
-    sidebarAllTime: '全期間',
-    sidebarPastYear: '直近1年',
-    sidebarManual: '手動選択',
-    pagesUnit: (count, options) => `${formatCardCount(count, 'ja', options)}ページ`,
-    charsUnit: (count, options) => `${formatCardCount(count, 'ja', options)}文字`,
-    sourcesUnit: (count, options) => `${formatCardCount(count, 'ja', options)}作品`,
+  get ja() {
+    return buildCardCopy('ja');
   },
 };
 

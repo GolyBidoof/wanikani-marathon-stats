@@ -1,4 +1,5 @@
 import { gifBackgrounds, accentColors } from '../constants';
+import { detectBrowserLanguage, isAppLanguage, type AppLanguage } from '../i18n';
 import { DEFAULT_CHARS_PER_PAGE } from './volumeConversion';
 import type {
   CardLanguage,
@@ -29,33 +30,13 @@ export interface PersistedPreferences {
   summaryMetricsOrder: SummaryMetricName[];
   showHistory: boolean;
   filterTotals: boolean;
+  appLanguage: AppLanguage;
   cardLanguage: CardLanguage;
   cardNicknameCase: NicknameCase;
   cardJaNumberStyle: JaCardNumberStyle;
   cardRoundNumbers: boolean;
   volumeConversion: VolumeConversionConfig;
 }
-
-const DEFAULT_PREFS: PersistedPreferences = {
-  currentBg: gifBackgrounds[gifBackgrounds.length - 1] || gifBackgrounds[0] || '',
-  currentAccentColor: accentColors[0],
-  currentSortMode: 'chrono',
-  enabledMetrics: ['time'],
-  userMetricsOrder: ['time', 'pages', 'chars', 'sources'],
-  enabledSummaryMetrics: ['avgTime', 'pages', 'chars', 'sources'],
-  summaryMetricsOrder: ['avgTime', 'pages', 'chars', 'sources'],
-  showHistory: true,
-  filterTotals: false,
-  cardLanguage: 'en',
-  cardNicknameCase: 'uppercase',
-  cardJaNumberStyle: 'words',
-  cardRoundNumbers: false,
-  volumeConversion: {
-    enabled: false,
-    displayAs: 'chars',
-    charsPerPage: DEFAULT_CHARS_PER_PAGE,
-  },
-};
 
 const METRIC_NAMES: MetricName[] = ['time', 'pages', 'chars', 'sources', 'volume'];
 const SUMMARY_METRIC_NAMES: SummaryMetricName[] = [
@@ -70,6 +51,30 @@ const CARD_LANGUAGES: CardLanguage[] = ['en', 'ja'];
 const NICKNAME_CASES: NicknameCase[] = ['normal', 'uppercase'];
 const JA_NUMBER_STYLES: JaCardNumberStyle[] = ['words', 'numbers'];
 const VOLUME_UNITS: VolumeDisplayUnit[] = ['pages', 'chars'];
+
+function buildDefaultPreferences(language: AppLanguage = detectBrowserLanguage()): PersistedPreferences {
+  return {
+    currentBg: gifBackgrounds[gifBackgrounds.length - 1] || gifBackgrounds[0] || '',
+    currentAccentColor: accentColors[0],
+    currentSortMode: 'chrono',
+    enabledMetrics: ['time'],
+    userMetricsOrder: ['time', 'pages', 'chars', 'sources'],
+    enabledSummaryMetrics: ['avgTime', 'pages', 'chars', 'sources'],
+    summaryMetricsOrder: ['avgTime', 'pages', 'chars', 'sources'],
+    showHistory: true,
+    filterTotals: false,
+    appLanguage: language,
+    cardLanguage: language,
+    cardNicknameCase: 'uppercase',
+    cardJaNumberStyle: 'words',
+    cardRoundNumbers: false,
+    volumeConversion: {
+      enabled: false,
+      displayAs: 'chars',
+      charsPerPage: DEFAULT_CHARS_PER_PAGE,
+    },
+  };
+}
 
 function isMetricName(value: unknown): value is MetricName {
   return typeof value === 'string' && METRIC_NAMES.includes(value as MetricName);
@@ -91,65 +96,69 @@ function ensureSummaryMetricsOrder(order: SummaryMetricName[]): SummaryMetricNam
 }
 
 function sanitizePreferences(raw: unknown): PersistedPreferences {
-  if (!raw || typeof raw !== 'object') return DEFAULT_PREFS;
-  const data = raw as Partial<PersistedPreferences>;
+  const defaults = buildDefaultPreferences();
+  if (!raw || typeof raw !== 'object') return defaults;
+  const data = raw as Partial<PersistedPreferences> & { appLanguage?: unknown };
+
+  const appLanguage = isAppLanguage(data.appLanguage) ? data.appLanguage : defaults.appLanguage;
+  const cardLanguage = CARD_LANGUAGES.includes(data.cardLanguage as CardLanguage)
+    ? (data.cardLanguage as CardLanguage)
+    : appLanguage;
 
   return {
     currentBg:
       typeof data.currentBg === 'string' && gifBackgrounds.includes(data.currentBg)
         ? data.currentBg
-        : DEFAULT_PREFS.currentBg,
+        : defaults.currentBg,
     currentAccentColor:
       typeof data.currentAccentColor === 'string'
         ? data.currentAccentColor
-        : DEFAULT_PREFS.currentAccentColor,
+        : defaults.currentAccentColor,
     currentSortMode: SORT_MODES.includes(data.currentSortMode as SortMode)
       ? (data.currentSortMode as SortMode)
-      : DEFAULT_PREFS.currentSortMode,
+      : defaults.currentSortMode,
     enabledMetrics: Array.isArray(data.enabledMetrics)
       ? data.enabledMetrics.filter(isMetricName)
-      : DEFAULT_PREFS.enabledMetrics,
+      : defaults.enabledMetrics,
     userMetricsOrder: Array.isArray(data.userMetricsOrder)
       ? data.userMetricsOrder.filter(isMetricName)
-      : DEFAULT_PREFS.userMetricsOrder,
+      : defaults.userMetricsOrder,
     enabledSummaryMetrics: Array.isArray(data.enabledSummaryMetrics)
       ? data.enabledSummaryMetrics.filter(isSummaryMetricName)
-      : DEFAULT_PREFS.enabledSummaryMetrics,
+      : defaults.enabledSummaryMetrics,
     summaryMetricsOrder: ensureSummaryMetricsOrder(
       Array.isArray(data.summaryMetricsOrder)
         ? data.summaryMetricsOrder.filter(isSummaryMetricName)
-        : DEFAULT_PREFS.summaryMetricsOrder,
+        : defaults.summaryMetricsOrder,
     ),
-    showHistory:
-      typeof data.showHistory === 'boolean' ? data.showHistory : DEFAULT_PREFS.showHistory,
+    showHistory: typeof data.showHistory === 'boolean' ? data.showHistory : defaults.showHistory,
     filterTotals:
-      typeof data.filterTotals === 'boolean' ? data.filterTotals : DEFAULT_PREFS.filterTotals,
-    cardLanguage: CARD_LANGUAGES.includes(data.cardLanguage as CardLanguage)
-      ? (data.cardLanguage as CardLanguage)
-      : DEFAULT_PREFS.cardLanguage,
+      typeof data.filterTotals === 'boolean' ? data.filterTotals : defaults.filterTotals,
+    appLanguage,
+    cardLanguage,
     cardNicknameCase: NICKNAME_CASES.includes(data.cardNicknameCase as NicknameCase)
       ? (data.cardNicknameCase as NicknameCase)
-      : DEFAULT_PREFS.cardNicknameCase,
+      : defaults.cardNicknameCase,
     cardJaNumberStyle: JA_NUMBER_STYLES.includes(data.cardJaNumberStyle as JaCardNumberStyle)
       ? (data.cardJaNumberStyle as JaCardNumberStyle)
-      : DEFAULT_PREFS.cardJaNumberStyle,
+      : defaults.cardJaNumberStyle,
     cardRoundNumbers:
       typeof data.cardRoundNumbers === 'boolean'
         ? data.cardRoundNumbers
-        : DEFAULT_PREFS.cardRoundNumbers,
+        : defaults.cardRoundNumbers,
     volumeConversion: {
       enabled:
         typeof data.volumeConversion?.enabled === 'boolean'
           ? data.volumeConversion.enabled
-          : DEFAULT_PREFS.volumeConversion.enabled,
+          : defaults.volumeConversion.enabled,
       displayAs: VOLUME_UNITS.includes(data.volumeConversion?.displayAs as VolumeDisplayUnit)
         ? (data.volumeConversion!.displayAs as VolumeDisplayUnit)
-        : DEFAULT_PREFS.volumeConversion.displayAs,
+        : defaults.volumeConversion.displayAs,
       charsPerPage:
         Number.isFinite(data.volumeConversion?.charsPerPage) &&
         (data.volumeConversion?.charsPerPage ?? 0) > 0
           ? Math.round(data.volumeConversion!.charsPerPage)
-          : DEFAULT_PREFS.volumeConversion.charsPerPage,
+          : defaults.volumeConversion.charsPerPage,
     },
   };
 }
@@ -157,10 +166,10 @@ function sanitizePreferences(raw: unknown): PersistedPreferences {
 export function loadPreferences(): PersistedPreferences {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_PREFS;
+    if (!raw) return buildDefaultPreferences();
     return sanitizePreferences(JSON.parse(raw));
   } catch {
-    return DEFAULT_PREFS;
+    return buildDefaultPreferences();
   }
 }
 
@@ -173,7 +182,7 @@ export function savePreferences(prefs: PersistedPreferences): void {
 }
 
 export function getDefaultPreferences(): PersistedPreferences {
-  return { ...DEFAULT_PREFS };
+  return buildDefaultPreferences();
 }
 
 function readPerUserStore(): Record<string, PerUserMarathonPrefs> {

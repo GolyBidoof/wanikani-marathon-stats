@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import i18n from '../i18n';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -27,20 +28,18 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     if (this.state.hasError) {
       return (
         <main id="main-content" className="container error-boundary">
-          <h1>Something went wrong</h1>
-          <p className="error-boundary-message">
-            The stats explorer hit an unexpected error. You can try again or reload the page.
-          </p>
+          <h1>{i18n.t('errors.unexpectedTitle')}</h1>
+          <p className="error-boundary-message">{i18n.t('errors.unexpectedMessage')}</p>
           <div className="error-boundary-actions">
             <button type="button" className="action-btn" onClick={this.handleRetry}>
-              Try again
+              {i18n.t('errors.tryAgain')}
             </button>
             <button
               type="button"
               className="action-btn action-btn-secondary"
               onClick={() => window.location.reload()}
             >
-              Reload page
+              {i18n.t('errors.reloadPage')}
             </button>
           </div>
         </main>

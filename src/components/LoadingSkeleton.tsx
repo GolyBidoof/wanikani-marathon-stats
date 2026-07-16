@@ -1,11 +1,15 @@
+import { useTranslation } from 'react-i18next';
+
 export default function LoadingSkeleton() {
+  const { t } = useTranslation();
+
   return (
     <div
       className="loading-skeleton"
       role="status"
       aria-live="polite"
       aria-busy="true"
-      aria-label="Loading statistics"
+      aria-label={t('a11y.loadingStatistics')}
     >
       <div className="skeleton-block skeleton-search" aria-hidden="true" />
 

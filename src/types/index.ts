@@ -1,4 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
+import type { AppLanguage } from '../i18n';
+
+export type { AppLanguage };
 
 export interface ParticipantEntry {
   user: string;
@@ -59,6 +62,8 @@ export interface StoreContextType {
   setShowHistory: (show: boolean) => void;
   filterTotals: boolean;
   setFilterTotals: (filter: boolean) => void;
+  appLanguage: AppLanguage;
+  setAppLanguage: (language: AppLanguage) => void;
   cardLanguage: CardLanguage;
   setCardLanguage: (language: CardLanguage) => void;
   cardNicknameCase: NicknameCase;

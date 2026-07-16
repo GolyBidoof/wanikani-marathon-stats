@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildMultiChartSeries,
   computeCommunityTotals,
   computeUserTotals,
   findUserEntry,
@@ -80,5 +81,22 @@ describe('sortMarathonNames', () => {
     });
 
     expect(sorted[0]).toBe('Summer 2025');
+  });
+});
+
+describe('buildMultiChartSeries', () => {
+  it('localizes marathon labels and metric names for the chart language', () => {
+    const series = buildMultiChartSeries(sampleStats, ['pages'], {
+      username: 'Alice',
+      filterTotals: false,
+      excludedMarathons: new Set(),
+      accentColor: '#ff00aa',
+      normalized: false,
+      language: 'ja',
+    });
+
+    expect(series.labels).toEqual(['2025年夏至', '2025年冬至']);
+    expect(series.datasets[0]?.label).toBe('ページ');
+    expect(series.language).toBe('ja');
   });
 });

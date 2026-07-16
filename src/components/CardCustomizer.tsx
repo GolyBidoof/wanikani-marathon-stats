@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '../hooks/StoreContext';
 import { useCardCustomizerData } from '../hooks/useCardCustomizer';
 import { useAchievementCardVisible } from '../hooks/useAchievementCardVisible';
@@ -16,13 +17,13 @@ import type {
   VolumeDisplayUnit,
 } from '../types';
 
-const METRIC_LABELS: Record<MetricName | SummaryMetricName, string> = {
-  time: 'Time',
-  pages: 'Pages',
-  chars: 'Chars',
-  sources: 'Sources',
-  volume: 'Combined',
-  avgTime: 'Average time',
+const METRIC_LABEL_KEYS: Record<MetricName | SummaryMetricName, string> = {
+  time: 'customizer.metrics.time',
+  pages: 'customizer.metrics.pages',
+  chars: 'customizer.metrics.chars',
+  sources: 'customizer.metrics.sources',
+  volume: 'customizer.metrics.volume',
+  avgTime: 'customizer.metrics.avgTime',
 };
 
 const CUSTOMIZER_CONTENT_ID = 'customizer-content';
@@ -36,6 +37,7 @@ export default function CardCustomizer({
   expanded: boolean;
   onExpandedChange: (expanded: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const isCardVisible = useAchievementCardVisible(allStats, allUsers);
   const {
     hasUserControls,
@@ -73,16 +75,24 @@ export default function CardCustomizer({
   } = useStore();
 
   const headerSummary = useMemo(() => {
-    const languageLabel = cardLanguage === 'ja' ? 'Japanese' : 'English';
+    const languageLabel = t(
+      cardLanguage === 'ja'
+        ? 'customizer.summary.languageJapanese'
+        : 'customizer.summary.languageEnglish',
+    );
     const numberStyleLabel =
       cardLanguage === 'ja'
         ? cardJaNumberStyle === 'words'
-          ? 'word-style numbers'
-          : 'standard numerals'
+          ? t('customizer.summary.wordStyleNumbers')
+          : t('customizer.summary.standardNumerals')
         : null;
-    const displayLabel = cardRoundNumbers ? 'rounded numbers' : 'exact numbers';
+    const displayLabel = t(
+      cardRoundNumbers ? 'customizer.summary.roundedNumbers' : 'customizer.summary.exactNumbers',
+    );
     const volumeLabel =
-      hasUserControls && volumeConversion.enabled ? 'combined pages & characters' : null;
+      hasUserControls && volumeConversion.enabled
+        ? t('customizer.summary.combinedPagesAndCharacters')
+        : null;
 
     return [languageLabel, numberStyleLabel, displayLabel, volumeLabel].filter(Boolean).join(' · ');
   }, [
@@ -91,6 +101,7 @@ export default function CardCustomizer({
     cardRoundNumbers,
     hasUserControls,
     volumeConversion.enabled,
+    t,
   ]);
 
   useEffect(() => {
@@ -102,7 +113,7 @@ export default function CardCustomizer({
       show={isCardVisible}
       as="section"
       className={`customizer-card ${expanded ? 'expanded' : ''}`}
-      aria-label="Achievement card customization"
+      aria-label={t('customizer.sectionLabel')}
     >
       <button
         type="button"
@@ -110,12 +121,12 @@ export default function CardCustomizer({
         aria-expanded={expanded}
         aria-controls={CUSTOMIZER_CONTENT_ID}
         aria-label={
-          expanded ? undefined : `Customize achievement card. Current settings: ${headerSummary}`
+          expanded ? undefined : t('customizer.collapsedAriaLabel', { settings: headerSummary })
         }
         onClick={() => onExpandedChange(!expanded)}
       >
         <div className="customizer-header-text">
-          <span className="customizer-header-title">Customize Achievement Card</span>
+          <span className="customizer-header-title">{t('customizer.title')}</span>
           {!expanded && (
             <span className="customizer-header-summary" aria-hidden="true">
               {headerSummary}
@@ -139,20 +150,18 @@ export default function CardCustomizer({
       {expanded && (
         <div id={CUSTOMIZER_CONTENT_ID} className="customizer-content">
           <div className="customizer-section customizer-section-first">
-            <h2 className="customizer-section-label">Look &amp; language</h2>
+            <h2 className="customizer-section-label">{t('customizer.lookAndLanguage')}</h2>
             <CardFormatSettings showNickname={hasUserControls} />
           </div>
 
           {hasUserControls && (
             <>
               <div className="customizer-section">
-                <h2 className="customizer-section-label">Numbers on the card</h2>
-                <p className="customizer-section-hint">
-                  Choose which totals appear under the reading time.
-                </p>
+                <h2 className="customizer-section-label">{t('customizer.numbersOnCard')}</h2>
+                <p className="customizer-section-hint">{t('customizer.numbersHint')}</p>
                 <MetricChecklist
-                  label="Shown totals"
-                  ariaLabel="Totals on card"
+                  label={t('customizer.shownTotals')}
+                  ariaLabel={t('customizer.totalsOnCard')}
                   metrics={summaryMetricsOrder}
                   enabledMetrics={enabledSummaryMetrics}
                   volumeConversionEnabled={volumeConversion.enabled}
@@ -170,10 +179,8 @@ export default function CardCustomizer({
               </div>
 
               <div className="customizer-section">
-                <h2 className="customizer-section-label">History sidebar</h2>
-                <p className="customizer-section-hint">
-                  Controls the list of marathons on the right side of the card.
-                </p>
+                <h2 className="customizer-section-label">{t('customizer.historySidebar')}</h2>
+                <p className="customizer-section-hint">{t('customizer.historyHint')}</p>
                 <div className="customizer-controls">
                   <div className="customizer-column">
                     <HistoryOptions
@@ -186,8 +193,8 @@ export default function CardCustomizer({
                     />
                     <SortModeToggle value={currentSortMode} onChange={setCurrentSortMode} />
                     <MetricChecklist
-                      label="Per-marathon details"
-                      ariaLabel="Metrics in history"
+                      label={t('customizer.perMarathonDetails')}
+                      ariaLabel={t('customizer.metricsInHistory')}
                       metrics={userMetricsOrder}
                       enabledMetrics={enabledMetrics}
                       volumeConversionEnabled={volumeConversion.enabled}
@@ -218,7 +225,7 @@ export default function CardCustomizer({
               className="customizer-reset-btn"
               onClick={resetAchievementCardSettings}
             >
-              Reset to defaults
+              {t('customizer.reset')}
             </button>
           </div>
         </div>
@@ -228,6 +235,7 @@ export default function CardCustomizer({
 }
 
 function CardFormatSettings({ showNickname }: { showNickname: boolean }) {
+  const { t } = useTranslation();
   const {
     cardLanguage,
     setCardLanguage,
@@ -242,32 +250,32 @@ function CardFormatSettings({ showNickname }: { showNickname: boolean }) {
   return (
     <div className="customizer-format-grid">
       <ToggleGroup
-        label="Card language"
+        label={t('customizer.cardLanguage')}
         value={cardLanguage}
         options={[
-          { value: 'en', label: 'English' },
-          { value: 'ja', label: '日本語' },
+          { value: 'en', label: t('customizer.languageEnglish') },
+          { value: 'ja', label: t('customizer.languageJapanese') },
         ]}
         onChange={setCardLanguage}
       />
 
       <ToggleGroup
-        label="Number display"
+        label={t('customizer.numberDisplay')}
         value={cardRoundNumbers ? 'rounded' : 'exact'}
         options={[
-          { value: 'exact', label: 'Exact' },
-          { value: 'rounded', label: 'Rounded' },
+          { value: 'exact', label: t('customizer.exact') },
+          { value: 'rounded', label: t('customizer.rounded') },
         ]}
         onChange={(value) => setCardRoundNumbers(value === 'rounded')}
       />
 
       {cardLanguage === 'ja' && (
         <ToggleGroup
-          label="Number style"
+          label={t('customizer.numberStyle')}
           value={cardJaNumberStyle}
           options={[
-            { value: 'words', label: 'Words' },
-            { value: 'numbers', label: 'Numbers' },
+            { value: 'words', label: t('customizer.words') },
+            { value: 'numbers', label: t('customizer.numbers') },
           ]}
           onChange={setCardJaNumberStyle}
         />
@@ -293,6 +301,7 @@ function VolumeConversionSettings({
   onDisplayAsChange: (displayAs: VolumeDisplayUnit) => void;
   onCharsPerPageChange: (charsPerPage: number) => void;
 }) {
+  const { t } = useTranslation();
   const [ratioDraft, setRatioDraft] = useState(String(charsPerPage));
   const ratioInputId = useId();
   const ratioHintId = useId();
@@ -320,38 +329,37 @@ function VolumeConversionSettings({
 
   return (
     <div className="volume-conversion-advanced">
-      <h3 className="customizer-subsection-label">Combine pages &amp; characters</h3>
+      <h3 className="customizer-subsection-label">{t('customizer.combinePagesAndCharacters')}</h3>
       <label className="checkbox-label">
         <input
           type="checkbox"
           checked={enabled}
           onChange={(event) => onEnabledChange(event.target.checked)}
         />
-        Merge into one combined total
+        {t('customizer.mergeCombinedTotal')}
       </label>
       {!enabled && (
         <p className="volume-conversion-hint" id={ratioHintId}>
-          Tracked pages in one marathon, characters in another? Set a ratio and we&apos;ll merge
-          them.
+          {t('customizer.conversionHint')}
         </p>
       )}
 
       {enabled && (
         <div className="volume-conversion-options">
           <ToggleGroup
-            label="Show combined as"
+            label={t('customizer.showCombinedAs')}
             value={displayAs}
             options={[
-              { value: 'chars', label: 'Characters' },
-              { value: 'pages', label: 'Pages' },
+              { value: 'chars', label: t('customizer.characters') },
+              { value: 'pages', label: t('customizer.pages') },
             ]}
             onChange={onDisplayAsChange}
           />
 
           <div className="customizer-group">
-            <span id={`${ratioInputId}-label`}>Conversion ratio</span>
+            <span id={`${ratioInputId}-label`}>{t('customizer.conversionRatio')}</span>
             <label className="volume-ratio-input" htmlFor={ratioInputId}>
-              <span>1 page =</span>
+              <span>{t('customizer.onePageEquals')}</span>
               <input
                 type="text"
                 id={ratioInputId}
@@ -372,10 +380,10 @@ function VolumeConversionSettings({
                   }
                 }}
               />
-              <span>characters</span>
+              <span>{t('customizer.charactersUnit')}</span>
             </label>
             <p className="sr-only" id={ratioHintId}>
-              Enter how many characters equal one page when combining totals.
+              {t('customizer.conversionRatioHelp')}
             </p>
           </div>
         </div>
@@ -391,13 +399,15 @@ function NicknameToggle({
   value: 'normal' | 'uppercase';
   onChange: (value: 'normal' | 'uppercase') => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <ToggleGroup
-      label="Nickname style"
+      label={t('customizer.nicknameStyle')}
       value={value}
       options={[
-        { value: 'normal', label: 'Regular' },
-        { value: 'uppercase', label: 'Uppercase' },
+        { value: 'normal', label: t('customizer.regular') },
+        { value: 'uppercase', label: t('customizer.uppercase') },
       ]}
       onChange={onChange}
     />
@@ -411,14 +421,16 @@ function SortModeToggle({
   value: 'chrono' | 'metric' | 'manual';
   onChange: (value: 'chrono' | 'metric' | 'manual') => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <ToggleGroup
-      label="Sort order"
+      label={t('customizer.sortOrder')}
       value={value}
       options={[
-        { value: 'chrono', label: 'Chrono' },
-        { value: 'metric', label: 'Metric' },
-        { value: 'manual', label: 'Manual' },
+        { value: 'chrono', label: t('customizer.sortChrono') },
+        { value: 'metric', label: t('customizer.sortMetric') },
+        { value: 'manual', label: t('customizer.sortManual') },
       ]}
       onChange={onChange}
     />
@@ -440,13 +452,15 @@ function HistoryOptions({
   onEnableDefaultMetric: () => void;
   hasEnabledMetrics: boolean;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div
       className="customizer-group customizer-options-group"
       role="group"
-      aria-label="History options"
+      aria-label={t('customizer.historyOptions')}
     >
-      <span>Options</span>
+      <span>{t('customizer.options')}</span>
       <label className="checkbox-label">
         <input
           type="checkbox"
@@ -458,7 +472,7 @@ function HistoryOptions({
             }
           }}
         />
-        Show marathon history
+        {t('customizer.showMarathonHistory')}
       </label>
       <label className="checkbox-label">
         <input
@@ -466,7 +480,7 @@ function HistoryOptions({
           checked={filterTotals}
           onChange={(event) => onFilterTotalsChange(event.target.checked)}
         />
-        Filter totals &amp; charts by checklist
+        {t('customizer.filterTotalsAndCharts')}
       </label>
     </div>
   );
@@ -489,6 +503,7 @@ function MetricChecklist<T extends MetricName | SummaryMetricName>({
   onToggle: (metric: T) => void;
   onReorder: (metric: T, direction: 'up' | 'down') => void;
 }) {
+  const { t } = useTranslation();
   const displayMetrics = metricsOrderForConversion(metrics, volumeConversionEnabled) as T[];
 
   return (
@@ -498,7 +513,7 @@ function MetricChecklist<T extends MetricName | SummaryMetricName>({
         {displayMetrics.map((metric) => (
           <CheckboxPill
             key={metric}
-            label={METRIC_LABELS[metric]}
+            label={t(METRIC_LABEL_KEYS[metric])}
             checked={enabledMetrics.has(metric)}
             dimmed={!enabledMetrics.has(metric)}
             onToggle={() => onToggle(metric)}
@@ -528,19 +543,25 @@ function MarathonChecklist({
   onReorder: (marathonName: string, direction: 'up' | 'down') => void;
   onQuickSelect: (type: 'all' | 'none' | 'year') => void;
 }) {
+  const { t } = useTranslation();
+
   return (
-    <div className="customizer-group" role="group" aria-label="Include marathons">
+    <div className="customizer-group" role="group" aria-label={t('customizer.includeMarathons')}>
       <div className="filter-header-row">
-        <span>Included marathons</span>
-        <div className="quick-select-buttons" role="group" aria-label="Quick select marathons">
+        <span>{t('customizer.includedMarathons')}</span>
+        <div
+          className="quick-select-buttons"
+          role="group"
+          aria-label={t('customizer.quickSelectMarathons')}
+        >
           <button type="button" className="quick-btn" onClick={() => onQuickSelect('all')}>
-            All
+            {t('customizer.all')}
           </button>
           <button type="button" className="quick-btn" onClick={() => onQuickSelect('year')}>
-            Last Year
+            {t('customizer.lastYear')}
           </button>
           <button type="button" className="quick-btn" onClick={() => onQuickSelect('none')}>
-            None
+            {t('customizer.none')}
           </button>
         </div>
       </div>
@@ -583,6 +604,8 @@ function CheckboxPill({
   onMoveUp: () => void;
   onMoveDown: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <label className={`checkbox-pill-label ${dimmed ? 'excluded' : ''}`}>
       <div className="checkbox-pill-content">
@@ -593,7 +616,7 @@ function CheckboxPill({
         <button
           type="button"
           className="arrow-btn"
-          aria-label={`Move ${label} up`}
+          aria-label={t('customizer.moveUp', { label })}
           onClick={(event) => {
             event.preventDefault();
             onMoveUp();
@@ -604,7 +627,7 @@ function CheckboxPill({
         <button
           type="button"
           className="arrow-btn"
-          aria-label={`Move ${label} down`}
+          aria-label={t('customizer.moveDown', { label })}
           onClick={(event) => {
             event.preventDefault();
             onMoveDown();

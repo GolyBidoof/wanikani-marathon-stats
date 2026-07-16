@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '../hooks/StoreContext';
 import { useExactUser } from '../hooks/useExactUser';
 import { useAchievementCardVisible } from '../hooks/useAchievementCardVisible';
@@ -10,6 +11,7 @@ import FadeSection from './FadeSection';
 import type { DataProps } from '../types';
 
 export default function AppearanceControls({ allStats, allUsers }: DataProps) {
+  const { t } = useTranslation();
   const {
     currentBg,
     setCurrentBg,
@@ -37,18 +39,23 @@ export default function AppearanceControls({ allStats, allUsers }: DataProps) {
       show={isCardVisible}
       as="section"
       className="appearance-controls"
-      aria-label="Card appearance"
+      aria-label={t('appearance.sectionLabel')}
     >
       <ColorRadioGroup
-        label="Accent Color"
+        label={t('appearance.accentColor')}
         colors={accentColors}
         value={currentAccentColor}
         onChange={setCurrentAccentColor}
       />
 
-      <div className="customizer-group" role="group" aria-label="Background theme">
-        <span>Background Theme</span>
-        <div id="bgButtons" className="bg-buttons" role="radiogroup" aria-label="Background theme">
+      <div className="customizer-group" role="group" aria-label={t('appearance.backgroundTheme')}>
+        <span>{t('appearance.backgroundTheme')}</span>
+        <div
+          id="bgButtons"
+          className="bg-buttons"
+          role="radiogroup"
+          aria-label={t('appearance.backgroundTheme')}
+        >
           {availableThemes.map((theme) => {
             const season = theme.name.split(' ')[0];
             const emoji = seasonEmojis[season] || '';

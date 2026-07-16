@@ -7,6 +7,7 @@ import {
   type ChangeEvent,
   type KeyboardEvent,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '../hooks/StoreContext';
 import { findCanonicalUsername } from '../utils/username';
 import { normalizeUsername } from '../utils/statsQueries';
@@ -17,6 +18,7 @@ import type { DataProps } from '../types';
 const SEARCH_DEBOUNCE_MS = 250;
 
 export default function SearchBar({ allUsers }: Pick<DataProps, 'allUsers'>) {
+  const { t } = useTranslation();
   const { currentQuery, setCurrentQuery, setSearchDraft } = useStore();
   const [inputValue, setInputValue] = useState('');
   const inputId = useId();
@@ -93,7 +95,7 @@ export default function SearchBar({ allUsers }: Pick<DataProps, 'allUsers'>) {
   return (
     <section className="search-section" aria-labelledby={headingId}>
       <h2 id={headingId} className="sr-only">
-        Search participants
+        {t('search.heading')}
       </h2>
       <div className={`search-box${hasQuery ? ' search-box--has-clear' : ''}`}>
         <div className="search-icon search-icon--leading" aria-hidden="true">
@@ -110,12 +112,12 @@ export default function SearchBar({ allUsers }: Pick<DataProps, 'allUsers'>) {
           </svg>
         </div>
         <label htmlFor={inputId} className="sr-only">
-          WaniKani username
+          {t('search.usernameLabel')}
         </label>
         <input
           type="text"
           id={inputId}
-          placeholder="Enter your WaniKani username..."
+          placeholder={t('search.placeholder')}
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
@@ -127,7 +129,7 @@ export default function SearchBar({ allUsers }: Pick<DataProps, 'allUsers'>) {
           <button
             type="button"
             className="search-clear"
-            aria-label="Clear search"
+            aria-label={t('search.clear')}
             onClick={handleClear}
           >
             <svg
@@ -144,10 +146,7 @@ export default function SearchBar({ allUsers }: Pick<DataProps, 'allUsers'>) {
             </svg>
           </button>
         )}
-        <SrOnly id={hintId}>
-          Type a username to view personal stats. Matching is not case-sensitive. Press Enter to
-          select the best match.
-        </SrOnly>
+        <SrOnly id={hintId}>{t('search.help')}</SrOnly>
       </div>
 
       {suggestions.length > 0 && (
@@ -155,7 +154,7 @@ export default function SearchBar({ allUsers }: Pick<DataProps, 'allUsers'>) {
           id={suggestionsId}
           className="search-suggestions"
           role="group"
-          aria-label="Matching usernames"
+          aria-label={t('search.suggestionsLabel')}
         >
           {suggestions.map((username) => (
             <button
@@ -172,7 +171,7 @@ export default function SearchBar({ allUsers }: Pick<DataProps, 'allUsers'>) {
 
       {showNoMatches && (
         <p className="search-status" role="status">
-          No users match &ldquo;{trimmedInput}&rdquo;. Check spelling or try a different name.
+          {t('search.noMatches', { query: trimmedInput })}
         </p>
       )}
     </section>

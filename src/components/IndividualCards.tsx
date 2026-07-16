@@ -1,4 +1,5 @@
 import { useMemo, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '../hooks/StoreContext';
 import { useExactUser } from '../hooks/useExactUser';
 import { seasonEmojis } from '../constants';
@@ -25,6 +26,7 @@ function isMissingStat(value: number | string | undefined): boolean {
 }
 
 export default function IndividualCards({ allStats, allUsers }: DataProps) {
+  const { t } = useTranslation();
   const {
     currentAccentColor,
     volumeConversion,
@@ -42,10 +44,11 @@ export default function IndividualCards({ allStats, allUsers }: DataProps) {
   const contentKey = `${searchQuery}:${resultsView}`;
 
   const sectionLabel = useMemo(() => {
-    if (resultsView === 'cards') return `Marathon history for ${searchQuery}`;
-    if (resultsView === 'no-results') return 'Search results';
-    return 'Marathon history';
-  }, [resultsView, searchQuery]);
+    if (resultsView === 'cards')
+      return t('individualCards.historyForUser', { username: searchQuery });
+    if (resultsView === 'no-results') return t('search.resultsRegion');
+    return t('individualCards.history');
+  }, [resultsView, searchQuery, t]);
 
   return (
     <KeyedFadeSection
@@ -90,6 +93,7 @@ function DisplayedResults({
   cardJaNumberStyle: JaCardNumberStyle;
   liveIsPartialSearch: boolean;
 }) {
+  const { t } = useTranslation();
   const { searchQuery, resultsView, userCards, isPartialSearch, isExactMatch } =
     useDisplayedIndividualCards(displayKey, allStats, allUsers);
   const volumeActive = isVolumeConversionActive(volumeConversion, isExactMatch);
@@ -98,11 +102,7 @@ function DisplayedResults({
   if (resultsView === 'placeholder') {
     return (
       <div className="placeholder" role="status">
-        <p>
-          {showPartialHint
-            ? 'Select a matching username above to see marathon history.'
-            : 'Search for a user to see their marathon history.'}
-        </p>
+        <p>{showPartialHint ? t('search.selectMatchHint') : t('search.promptHistory')}</p>
       </div>
     );
   }
@@ -139,7 +139,7 @@ function DisplayedResults({
 
   return (
     <div className="no-results" role="status">
-      No results found for &quot;{searchQuery}&quot;. Check spelling or try a different name.
+      {t('search.noResults', { query: searchQuery })}
     </div>
   );
 }
@@ -195,14 +195,18 @@ function UserMarathonCard({
   cardJaNumberStyle: JaCardNumberStyle;
   enterDelayMs: number;
 }) {
+  const { t } = useTranslation();
   const season = marathonName.split(' ')[0] ?? '';
   const year = marathonName.split(' ')[1] ?? '';
   const emoji = seasonEmojis[season] || '';
   const displayTitle = formatMarathonUiLabel(marathonName, cardLanguage, cardJaNumberStyle);
   const headingId = `marathon-${marathonName.replace(/\s+/g, '-').toLowerCase()}`;
   const statsId = `${headingId}-stats`;
-  const volumeLabel = volumeUnit === 'pages' ? 'Combined pages' : 'Combined characters';
-  const timeDisplay = time?.trim() ? time : '—';
+  const volumeLabel =
+    volumeUnit === 'pages'
+      ? t('individualCards.combinedPages')
+      : t('individualCards.combinedCharacters');
+  const timeDisplay = time?.trim() ? time : t('common.notAvailable');
   const hasLink = Boolean(url);
 
   const titleContent = (
@@ -246,7 +250,7 @@ function UserMarathonCard({
               className="marathon-name-link"
             >
               {titleContent}
-              <span className="sr-only"> — marathon thread (opens in a new tab)</span>
+              <span className="sr-only">{t('individualCards.marathonThreadNewTab')}</span>
             </a>
           ) : (
             titleContent
@@ -257,20 +261,26 @@ function UserMarathonCard({
       <div className="card-body">
         <dl id={statsId} className="stats-list">
           <div className="stat-item stat-item--primary">
-            <dt className="stat-label">Time</dt>
+            <dt className="stat-label">{t('individualCards.time')}</dt>
             <dd
               className="stat-value"
-              aria-label={timeDisplay === '—' ? 'Time not available' : undefined}
+              aria-label={
+                timeDisplay === t('common.notAvailable')
+                  ? t('individualCards.timeUnavailable')
+                  : undefined
+              }
             >
               {timeDisplay}
             </dd>
           </div>
           {showPages && (
             <div className="stat-item">
-              <dt className="stat-label">Pages</dt>
+              <dt className="stat-label">{t('individualCards.pages')}</dt>
               <dd
                 className="stat-value"
-                aria-label={isMissingStat(pages) ? 'Pages not available' : undefined}
+                aria-label={
+                  isMissingStat(pages) ? t('individualCards.pagesUnavailable') : undefined
+                }
               >
                 {formatStatValue(pages)}
               </dd>
@@ -278,11 +288,11 @@ function UserMarathonCard({
           )}
           {showCharacters && (
             <div className="stat-item">
-              <dt className="stat-label">Characters</dt>
+              <dt className="stat-label">{t('individualCards.characters')}</dt>
               <dd
                 className="stat-value"
                 aria-label={
-                  isMissingStat(characters) ? 'Characters not available' : undefined
+                  isMissingStat(characters) ? t('individualCards.charactersUnavailable') : undefined
                 }
               >
                 {formatStatValue(characters)}
@@ -292,17 +302,17 @@ function UserMarathonCard({
           {showCombined && unifiedVolume != null && (
             <div className="stat-item">
               <dt className="stat-label">{volumeLabel}</dt>
-              <dd className="stat-value">
-                {formatCombinedDisplay(unifiedVolume, volumeUnit)}
-              </dd>
+              <dd className="stat-value">{formatCombinedDisplay(unifiedVolume, volumeUnit)}</dd>
             </div>
           )}
           {showSources && (
             <div className="stat-item">
-              <dt className="stat-label">Sources</dt>
+              <dt className="stat-label">{t('individualCards.sources')}</dt>
               <dd
                 className="stat-value"
-                aria-label={isMissingStat(sources) ? 'Sources not available' : undefined}
+                aria-label={
+                  isMissingStat(sources) ? t('individualCards.sourcesUnavailable') : undefined
+                }
               >
                 {formatStatValue(sources)}
               </dd>
@@ -311,17 +321,12 @@ function UserMarathonCard({
         </dl>
 
         {hasLink && (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="card-link"
-          >
-            <span>View original post</span>
+          <a href={url} target="_blank" rel="noopener noreferrer" className="card-link">
+            <span>{t('individualCards.viewOriginalPost')}</span>
             <span className="card-link-arrow" aria-hidden="true">
               →
             </span>
-            <span className="sr-only">(opens in a new tab)</span>
+            <span className="sr-only">{t('individualCards.opensNewTab')}</span>
           </a>
         )}
       </div>

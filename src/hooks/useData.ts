@@ -3,6 +3,7 @@ import allStatsData from '../../data/all_stats.json';
 import allUsersData from '../../data/users.json';
 import dataMeta from '../../data/meta.json';
 import { parseAllStats, parseDataMeta, parseUsers } from '../schemas/data';
+import i18n from '../i18n';
 import type { AllStats } from '../types';
 
 interface UseDataResult {
@@ -28,7 +29,7 @@ export function useData(): UseDataResult {
       setLoading(false);
     } catch (err) {
       console.error('Error validating data:', err);
-      setError('Failed to load statistics data. The bundled data may be invalid.');
+      setError(i18n.t('errors.dataLoadFailed'));
       setLoading(false);
     }
   }, []);

@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '../hooks/StoreContext';
 import { useExactUser } from '../hooks/useExactUser';
 import { useChartMetricSelection } from '../hooks/useChartMetricSelection';
@@ -7,7 +8,7 @@ import { useChartMetricToggleKeyboard } from '../hooks/useChartMetricToggleKeybo
 import { useHistoryChart } from '../hooks/useHistoryChart';
 import { buildMultiChartSeries } from '../utils/statsQueries';
 import { buildMultiChartDescription } from '../utils/a11yDescriptions';
-import { chartMetricColor, CHART_METRIC_LABELS } from '../utils/chartConfig';
+import { chartMetricColor, getChartMetricLabel } from '../utils/chartConfig';
 import { isVolumeConversionActive } from '../utils/volumeConversion';
 import FadeSection from './FadeSection';
 import type { DataProps, ChartMetric } from '../types';
@@ -50,10 +51,11 @@ function ChartCanvas({
     enabled,
     volumeDisplayAs,
   });
-  const description = useMemo(() => buildMultiChartDescription(series), [series]);
+  const { t } = useTranslation();
+  const description = buildMultiChartDescription(series);
 
   return (
-    <div ref={containerRef} className={className} role="region" aria-label="History chart canvas">
+    <div ref={containerRef} className={className} role="region" aria-label={t('chart.canvasLabel')}>
       <p className="sr-only" id={descriptionId}>
         {description}
       </p>
@@ -69,6 +71,10 @@ function ChartCanvas({
 }
 
 export default function StatsChart({ allStats, allUsers }: DataProps) {
+  const {
+    t,
+    i18n: { language },
+  } = useTranslation();
   const { currentAccentColor, excludedMarathons, filterTotals, volumeConversion } = useStore();
   const { exactUsername, isExactMatch, isPartialSearch } = useExactUser(allUsers);
   const volumeActive = isVolumeConversionActive(volumeConversion, isExactMatch);
@@ -131,6 +137,7 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
         volumeDisplayAs: volumeConversion.displayAs,
         accentColor: currentAccentColor,
         normalized: normalizeShapes,
+        language,
       }),
     [
       allStats,
@@ -142,11 +149,12 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
       volumeConversion,
       currentAccentColor,
       normalizeShapes,
+      language,
     ],
   );
 
   const hasChartData = chartSeries.labels.length > 0 && chartSeries.datasets.length > 0;
-  const chartScope = `${exactUsername || 'community'}:${orderedSelectedMetrics.join(',')}:${normalizeShapes ? 'norm' : 'abs'}`;
+  const chartScope = `${exactUsername || 'community'}:${orderedSelectedMetrics.join(',')}:${normalizeShapes ? 'norm' : 'abs'}:${language}`;
   const handleMetricKeyDown = useChartMetricToggleKeyboard(availableMetrics, toggleMetric);
 
   if (!hasChartData) return null;
@@ -155,7 +163,7 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
     <div
       className="chart-controls"
       role="toolbar"
-      aria-label="Chart metrics"
+      aria-label={t('chart.metricsLabel')}
       onKeyDown={handleMetricKeyDown}
     >
       {availableMetrics.map((metric) => {
@@ -177,7 +185,7 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
             onClick={() => toggleMetric(metric)}
           >
             <span className="chart-metric-swatch" aria-hidden="true" />
-            {CHART_METRIC_LABELS[metric]}
+            {getChartMetricLabel(metric, language)}
           </button>
         );
       })}
@@ -190,7 +198,7 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
       as="section"
       id="chart-section"
       className="chart-section"
-      aria-label="Marathon history chart"
+      aria-label={t('chart.sectionLabel')}
     >
       <div className="chart-toolbar">
         {metricToolbar('chart')}
@@ -202,7 +210,7 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
               checked={normalizeShapes}
               onChange={(event) => setNormalizeShapes(event.target.checked)}
             />
-            <span>Compare shapes</span>
+            <span>{t('chart.compareShapes')}</span>
           </label>
           <button
             type="button"
@@ -210,15 +218,13 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
             onClick={() => setIsExpanded(true)}
             aria-haspopup="dialog"
           >
-            Expand
+            {t('chart.expand')}
           </button>
         </div>
       </div>
 
       <p className="chart-hint">
-        {normalizeShapes
-          ? 'Each line is scaled to its first marathon (100%). Tooltips still show real values.'
-          : 'Toggle multiple metrics. Each unit family gets its own color-matched axis.'}
+        {normalizeShapes ? t('chart.normalizedHint') : t('chart.defaultHint')}
       </p>
 
       <ChartCanvas
@@ -247,14 +253,14 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
               aria-labelledby={titleId}
             >
               <div className="chart-expand-header">
-                <h2 id={titleId}>Marathon history</h2>
+                <h2 id={titleId}>{t('chart.dialogTitle')}</h2>
                 <button
                   ref={closeButtonRef}
                   type="button"
                   className="chart-expand-close"
                   onClick={() => setIsExpanded(false)}
                 >
-                  Close
+                  {t('chart.close')}
                 </button>
               </div>
 
@@ -266,7 +272,7 @@ export default function StatsChart({ allStats, allUsers }: DataProps) {
                     checked={normalizeShapes}
                     onChange={(event) => setNormalizeShapes(event.target.checked)}
                   />
-                  <span>Compare shapes</span>
+                  <span>{t('chart.compareShapes')}</span>
                 </label>
               </div>
 

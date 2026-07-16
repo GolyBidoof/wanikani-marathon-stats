@@ -1,21 +1,27 @@
 import { getMarathonOrder, parseTimeToHours } from './helpers';
+import { formatMarathonUiLabel } from '../constants/cardCopy';
 import { getEntryUnifiedVolume, isVolumeConversionActive } from './volumeConversion';
 import {
   axisFamilyForMetric,
   axisIdForFamily,
   chartMetricColor,
-  CHART_METRIC_LABELS,
+  getChartMetricLabel,
   normalizeSeriesValues,
   type MultiChartSeriesData,
 } from './chartConfig';
 import type {
   AllStats,
+  CardLanguage,
   ChartMetric,
   MetricName,
   ParticipantEntry,
   SortMode,
   VolumeConversionConfig,
 } from '../types';
+
+function toCardLanguage(language?: string): CardLanguage {
+  return language === 'ja' ? 'ja' : 'en';
+}
 
 export function normalizeUsername(username: string): string {
   return username.toLowerCase().trim();
@@ -216,17 +222,19 @@ export function buildMultiChartSeries(
     volumeDisplayAs?: 'pages' | 'chars';
     accentColor: string;
     normalized: boolean;
+    language?: string;
   },
 ): MultiChartSeriesData {
   const labels: string[] = [];
   const rawByMetric = new Map<ChartMetric, number[]>(metrics.map((metric) => [metric, []]));
+  const labelLanguage = toCardLanguage(options.language);
 
   for (const marathonName of getMarathonOrder(allStats)) {
     if (!options.username) {
       const entries = allStats[marathonName] || [];
       if (entries.length === 0) continue;
 
-      labels.push(marathonName);
+      labels.push(formatMarathonUiLabel(marathonName, labelLanguage));
       for (const metric of metrics) {
         const values = rawByMetric.get(metric)!;
         if (metric === 'participants') {
@@ -252,7 +260,7 @@ export function buildMultiChartSeries(
     if (!entry) continue;
     if (options.filterTotals && options.excludedMarathons.has(marathonName)) continue;
 
-    labels.push(marathonName);
+    labels.push(formatMarathonUiLabel(marathonName, labelLanguage));
     for (const metric of metrics) {
       rawByMetric
         .get(metric)!
@@ -265,7 +273,7 @@ export function buildMultiChartSeries(
     const axisFamily = options.normalized ? ('normalized' as const) : axisFamilyForMetric(metric);
     return {
       metric,
-      label: CHART_METRIC_LABELS[metric],
+      label: getChartMetricLabel(metric, options.language),
       rawValues,
       values: options.normalized ? normalizeSeriesValues(rawValues) : rawValues,
       color: chartMetricColor(metric, options.accentColor),
@@ -278,6 +286,7 @@ export function buildMultiChartSeries(
     labels,
     datasets,
     normalized: options.normalized,
+    language: options.language,
   };
 }
 

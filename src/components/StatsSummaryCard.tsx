@@ -1,4 +1,5 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '../hooks/StoreContext';
 import {
   useSummaryCardVisibility,
@@ -82,6 +83,7 @@ export default function StatsSummaryCard({
   layoutAnchorRef?: RefObject<HTMLDivElement | null>;
   onPinnedHeightChange?: (height: number) => void;
 }) {
+  const { t } = useTranslation();
   const { currentBg } = useStore();
   const summaryRef = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -180,7 +182,7 @@ export default function StatsSummaryCard({
       setCopying(true);
       setTimeout(() => setCopying(false), 2000);
     } catch {
-      alert('Failed to copy image. Try downloading instead.');
+      alert(t('card.copyImageFailed'));
     }
   };
 
@@ -202,7 +204,7 @@ export default function StatsSummaryCard({
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
     } catch {
-      alert('Failed to copy link.');
+      alert(t('card.copyLinkFailed'));
     }
   };
 
@@ -334,7 +336,7 @@ export default function StatsSummaryCard({
       ]
         .filter(Boolean)
         .join(' ')}
-      aria-label="Achievement card"
+      aria-label={t('card.sectionLabel')}
       aria-hidden={isFullyHidden || undefined}
       onTransitionEnd={onTransitionEnd}
     >
@@ -360,17 +362,17 @@ export default function StatsSummaryCard({
         {isInitialLoad && (
           <div className="canvas-loading is-active" role="status" aria-live="polite">
             <div className="canvas-loading-shimmer" aria-hidden="true" />
-            <span>Loading background…</span>
+            <span>{t('card.loading')}</span>
           </div>
         )}
       </div>
 
-      <div className="button-group" role="group" aria-label="Achievement card actions">
+      <div className="button-group" role="group" aria-label={t('card.actionsLabel')}>
         <p className="sr-only" aria-live="polite" aria-atomic="true">
           {linkCopied
-            ? 'Profile link copied to clipboard.'
+            ? t('card.liveProfileLinkCopied')
             : copying
-              ? 'Achievement card image copied to clipboard.'
+              ? t('card.liveCardImageCopied')
               : ''}
         </p>
         {exactUsername && (
@@ -380,7 +382,7 @@ export default function StatsSummaryCard({
             onClick={copyProfileLink}
             disabled={actionsDisabled}
           >
-            {linkCopied ? 'Profile link copied!' : 'Copy profile link'}
+            {linkCopied ? t('card.profileLinkCopied') : t('card.copyProfileLink')}
           </button>
         )}
         <button
@@ -389,7 +391,7 @@ export default function StatsSummaryCard({
           onClick={copyCanvas}
           disabled={actionsDisabled}
         >
-          {copying ? 'Card image copied!' : 'Copy card image'}
+          {copying ? t('card.cardImageCopied') : t('card.copyCardImage')}
         </button>
         <button
           type="button"
@@ -397,7 +399,7 @@ export default function StatsSummaryCard({
           onClick={downloadCanvas}
           disabled={actionsDisabled}
         >
-          Download card image
+          {t('card.downloadCardImage')}
         </button>
       </div>
     </section>

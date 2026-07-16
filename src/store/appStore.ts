@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { SetStateAction } from 'react';
 import type {
+  AppLanguage,
   CardLanguage,
   JaCardNumberStyle,
   MetricName,
@@ -16,6 +17,7 @@ import {
   migrateEnabledMetricsForConversion,
 } from '../utils/volumeConversion';
 import { loadPreferences, getDefaultPreferences } from '../utils/preferences';
+import i18n, { setAppDocumentLang } from '../i18n';
 
 function createInitialAppearance() {
   const prefs = loadPreferences();
@@ -28,6 +30,9 @@ function createInitialAppearance() {
     new Set(prefs.enabledSummaryMetrics),
     conversionEnabled,
   ) as Set<SummaryMetricName>;
+
+  void i18n.changeLanguage(prefs.appLanguage);
+  setAppDocumentLang(prefs.appLanguage);
 
   return {
     currentBg: prefs.currentBg,
@@ -45,6 +50,7 @@ function createInitialAppearance() {
     ) as SummaryMetricName[],
     showHistory: prefs.showHistory,
     filterTotals: prefs.filterTotals,
+    appLanguage: prefs.appLanguage as AppLanguage,
     cardLanguage: prefs.cardLanguage as CardLanguage,
     cardNicknameCase: prefs.cardNicknameCase as NicknameCase,
     cardJaNumberStyle: prefs.cardJaNumberStyle as JaCardNumberStyle,
@@ -59,7 +65,7 @@ function applySet<T>(value: SetStateAction<T>, current: T): T {
   return typeof value === 'function' ? (value as (prev: T) => T)(current) : value;
 }
 
-export const useAppStore = create<StoreContextType>((set, _get) => ({
+export const useAppStore = create<StoreContextType>((set, get) => ({
   currentQuery: '',
   setCurrentQuery: (query) => {
     const trimmed = query.trim();
@@ -144,6 +150,13 @@ export const useAppStore = create<StoreContextType>((set, _get) => ({
   filterTotals: initial.filterTotals,
   setFilterTotals: (filter) => set({ filterTotals: filter }),
 
+  appLanguage: initial.appLanguage,
+  setAppLanguage: (language) => {
+    void i18n.changeLanguage(language);
+    setAppDocumentLang(language);
+    set({ appLanguage: language, cardLanguage: language });
+  },
+
   cardLanguage: initial.cardLanguage,
   setCardLanguage: (language) => set({ cardLanguage: language }),
 
@@ -199,7 +212,7 @@ export const useAppStore = create<StoreContextType>((set, _get) => ({
       summaryMetricsOrder: [...defaults.summaryMetricsOrder],
       showHistory: defaults.showHistory,
       filterTotals: defaults.filterTotals,
-      cardLanguage: defaults.cardLanguage,
+      cardLanguage: get().appLanguage,
       cardNicknameCase: defaults.cardNicknameCase,
       cardJaNumberStyle: defaults.cardJaNumberStyle,
       cardRoundNumbers: defaults.cardRoundNumbers,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatCardNumber, formatMarathonUiLabel, formatSeasonLabel } from './cardCopy';
+import { cardCopy, formatCardNumber, formatMarathonUiLabel, formatSeasonLabel } from './cardCopy';
 
 describe('formatCardNumber', () => {
   it('formats exact English numbers', () => {
@@ -40,5 +40,14 @@ describe('formatMarathonUiLabel', () => {
   it('formats Japanese marathon names with year and term', () => {
     expect(formatMarathonUiLabel('Summer 2025', 'ja')).toBe('2025年夏至');
     expect(formatMarathonUiLabel('Autumn 2025', 'ja', 'numbers')).toBe('2025秋分');
+  });
+});
+
+describe('cardCopy', () => {
+  it('uses locale-specific static copy and formatted unit counts', () => {
+    expect(cardCopy.en.tagline).toBe('WaniKani Reading Marathon');
+    expect(cardCopy.ja.tagline).toBe('WaniKani 読書マラソン');
+    expect(cardCopy.en.pagesUnit(1_250)).toBe('1,250 pgs');
+    expect(cardCopy.ja.pagesUnit(1_250)).toBe('1千250ページ');
   });
 });

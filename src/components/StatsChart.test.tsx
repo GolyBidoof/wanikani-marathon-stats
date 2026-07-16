@@ -5,6 +5,7 @@ import StatsChart from './StatsChart';
 import { StoreProvider } from '../hooks/StoreContext';
 import { useAppStore } from '../store/appStore';
 import type { AllStats } from '../types';
+import i18n from '../i18n';
 
 vi.mock('../hooks/useHistoryChart', () => ({
   useHistoryChart: () => ({
@@ -119,5 +120,23 @@ describe('StatsChart', () => {
 
     expect(container.querySelector('#chart-metric-volume')).toBeNull();
     expect(container.querySelector('#chart-metric-participants')).toBeTruthy();
+  });
+
+  it('updates chart controls when the app language changes', async () => {
+    const { rerender } = render(
+      <StoreProvider allUsers={['Alice']}>
+        <StatsChart allStats={sampleStats} allUsers={['Alice']} />
+      </StoreProvider>,
+    );
+
+    await i18n.changeLanguage('ja');
+    rerender(
+      <StoreProvider allUsers={['Alice']}>
+        <StatsChart allStats={sampleStats} allUsers={['Alice']} />
+      </StoreProvider>,
+    );
+
+    expect(screen.getByRole('toolbar', { name: 'チャートの指標' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '時間' })).toBeInTheDocument();
   });
 });

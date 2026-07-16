@@ -9,7 +9,8 @@ import {
 describe('loadPreferences', () => {
   it('returns defaults when storage is empty', () => {
     const prefs = loadPreferences();
-    expect(prefs.cardLanguage).toBe('en');
+    expect(prefs.appLanguage).toBe(getDefaultPreferences().appLanguage);
+    expect(prefs.cardLanguage).toBe(prefs.appLanguage);
     expect(prefs.enabledMetrics).toContain('time');
   });
 
@@ -17,6 +18,17 @@ describe('loadPreferences', () => {
     localStorage.setItem('wk-marathon-prefs-v1', '{"cardLanguage":"klingon"}');
     const prefs = loadPreferences();
     expect(prefs.cardLanguage).toBe(getDefaultPreferences().cardLanguage);
+    expect(prefs.appLanguage).toBe(getDefaultPreferences().appLanguage);
+  });
+
+  it('preserves saved card language when app language is missing', () => {
+    localStorage.setItem(
+      'wk-marathon-prefs-v1',
+      JSON.stringify({ cardLanguage: 'ja', enabledMetrics: ['time'] }),
+    );
+    const prefs = loadPreferences();
+    expect(prefs.cardLanguage).toBe('ja');
+    expect(prefs.appLanguage).toBe(getDefaultPreferences().appLanguage);
   });
 });
 
