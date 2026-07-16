@@ -47,6 +47,10 @@ describe('cardCopy', () => {
   it('uses locale-specific static copy and formatted unit counts', () => {
     expect(cardCopy.en.tagline).toBe('WaniKani Reading Marathon');
     expect(cardCopy.ja.tagline).toBe('WaniKani 読書マラソン');
+    expect(cardCopy.en.volumePages).toBe('COMB. PGS');
+    expect(cardCopy.en.volumeChars).toBe('COMB. CHARS');
+    expect(cardCopy.ja.volumePages).toBe('換算ページ');
+    expect(cardCopy.ja.volumeChars).toBe('換算文字');
     expect(cardCopy.en.pagesUnit(1_250)).toBe('1,250 pgs');
     expect(cardCopy.ja.pagesUnit(1_250)).toBe('1千250ページ');
   });

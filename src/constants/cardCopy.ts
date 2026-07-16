@@ -111,7 +111,8 @@ type CardCopy = {
   participants: string;
   pages: string;
   chars: string;
-  volume: string;
+  volumePages: string;
+  volumeChars: string;
   sources: string;
   sidebarNone: string;
   sidebarAllTime: string;
@@ -134,7 +135,8 @@ function buildCardCopy(language: CardLanguage): CardCopy {
     participants: translate('participants'),
     pages: translate('pages'),
     chars: translate('chars'),
-    volume: translate('volume'),
+    volumePages: translate('volumePages'),
+    volumeChars: translate('volumeChars'),
     sources: translate('sources'),
     sidebarNone: translate('sidebarNone'),
     sidebarAllTime: translate('sidebarAllTime'),

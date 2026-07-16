@@ -249,7 +249,11 @@ function drawStatsRow(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawConte
     if (metric === 'pages') stats.push({ label: copy.pages, value: formatValue(state.pages) });
     if (metric === 'chars') stats.push({ label: copy.chars, value: formatValue(state.chars) });
     if (metric === 'volume' && useVolume) {
-      stats.push({ label: copy.volume, value: formatValue(state.volume ?? 0) });
+      stats.push({
+        label:
+          volumeConversion.displayAs === 'pages' ? copy.volumePages : copy.volumeChars,
+        value: formatValue(state.volume ?? 0),
+      });
     }
     if (metric === 'sources') {
       stats.push({ label: copy.sources, value: formatValue(state.sources) });
