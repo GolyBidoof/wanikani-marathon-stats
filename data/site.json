@@ -1,7 +1,7 @@
 {
   "name": "WaniKani 24-hour Readathon Stats",
   "title": "WaniKani Readathon Stats Explorer",
-  "description": "A cozy little explorer for WaniKani 24-hour readathon stats — look up your history, celebrate the community, and share an achievement card.",
+  "description": "A stat tracker for the WaniKani 24-hour readathon. Find out how your reading improves over time!",
   "url": "https://golybidoof.github.io/wanikani-marathon-stats/",
   "forumsUrl": "https://community.wanikani.com/",
   "latestMarathon": {
