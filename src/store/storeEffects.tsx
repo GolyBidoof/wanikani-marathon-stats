@@ -6,6 +6,28 @@ import {
   savePreferences,
 } from '../utils/preferences';
 import { findCanonicalUsername } from '../utils/username';
+import cardPreviews from '../../data/card-previews.json';
+
+const SEASON_FALLBACKS: Record<string, string> = {
+  spring: '#ff00aa',
+  summer: '#ffb800',
+  winter: '#00aaff',
+  fall: '#ff5f00',
+  autumn: '#ff5f00',
+};
+
+function accentForBackground(gifFilename: string): string | null {
+  const previewAccent = (cardPreviews as Record<string, { accent?: string }>)[gifFilename]
+    ?.accent;
+  if (previewAccent) return previewAccent;
+
+  const lowerBg = gifFilename.toLowerCase();
+  if (lowerBg.startsWith('spring')) return SEASON_FALLBACKS.spring;
+  if (lowerBg.startsWith('summer')) return SEASON_FALLBACKS.summer;
+  if (lowerBg.startsWith('winter')) return SEASON_FALLBACKS.winter;
+  if (lowerBg.startsWith('fall') || lowerBg.startsWith('autumn')) return SEASON_FALLBACKS.fall;
+  return null;
+}
 
 export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
   const hasHydrated = useRef(false);
@@ -17,6 +39,8 @@ export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
   const currentSortMode = useAppStore((state) => state.currentSortMode);
   const enabledMetrics = useAppStore((state) => state.enabledMetrics);
   const userMetricsOrder = useAppStore((state) => state.userMetricsOrder);
+  const enabledSummaryMetrics = useAppStore((state) => state.enabledSummaryMetrics);
+  const summaryMetricsOrder = useAppStore((state) => state.summaryMetricsOrder);
   const showHistory = useAppStore((state) => state.showHistory);
   const filterTotals = useAppStore((state) => state.filterTotals);
   const cardLanguage = useAppStore((state) => state.cardLanguage);
@@ -37,13 +61,7 @@ export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
   }, [currentAccentColor]);
 
   useEffect(() => {
-    const lowerBg = currentBg.toLowerCase();
-    let seasonColor: string | null = null;
-    if (lowerBg.startsWith('spring')) seasonColor = '#ff00aa';
-    else if (lowerBg.startsWith('summer')) seasonColor = '#ffb800';
-    else if (lowerBg.startsWith('winter')) seasonColor = '#00aaff';
-    else if (lowerBg.startsWith('fall') || lowerBg.startsWith('autumn')) seasonColor = '#ff5f00';
-
+    const seasonColor = accentForBackground(currentBg);
     if (seasonColor) setCurrentAccentColor(seasonColor);
   }, [currentBg, setCurrentAccentColor]);
 
@@ -91,6 +109,8 @@ export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
       currentSortMode,
       enabledMetrics: [...enabledMetrics],
       userMetricsOrder,
+      enabledSummaryMetrics: [...enabledSummaryMetrics],
+      summaryMetricsOrder,
       showHistory,
       filterTotals,
       cardLanguage,
@@ -105,6 +125,8 @@ export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
     currentSortMode,
     enabledMetrics,
     userMetricsOrder,
+    enabledSummaryMetrics,
+    summaryMetricsOrder,
     showHistory,
     filterTotals,
     cardLanguage,

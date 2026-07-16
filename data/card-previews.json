@@ -1,0 +1,47 @@
+{
+  "autumn2025.gif": {
+    "preview": "card-previews/autumn2025.webp",
+    "accent": "#ea8e34",
+    "extracted": "#e1a24a"
+  },
+  "fall2024.gif": {
+    "preview": "card-previews/fall2024.webp",
+    "accent": "#d77f81",
+    "extracted": "#c68db8"
+  },
+  "spring2025.gif": {
+    "preview": "card-previews/spring2025.webp",
+    "accent": "#dd3a8a",
+    "extracted": "#cf537c"
+  },
+  "spring2026.gif": {
+    "preview": "card-previews/spring2026.webp",
+    "accent": "#da3888",
+    "extracted": "#ca507a"
+  },
+  "summer2024.gif": {
+    "preview": "card-previews/summer2024.webp",
+    "accent": "#dc9f3c",
+    "extracted": "#cd9456"
+  },
+  "summer2025.gif": {
+    "preview": "card-previews/summer2025.webp",
+    "accent": "#74b59e",
+    "extracted": "#39b4e1"
+  },
+  "summer2026.gif": {
+    "preview": "card-previews/summer2026.webp",
+    "accent": "#9ea255",
+    "extracted": "#759879"
+  },
+  "winter2024.gif": {
+    "preview": "card-previews/winter2024.webp",
+    "accent": "#577374",
+    "extracted": "#7c5b39"
+  },
+  "winter2025.gif": {
+    "preview": "card-previews/winter2025.webp",
+    "accent": "#4f8fc2",
+    "extracted": "#847d99"
+  }
+}
