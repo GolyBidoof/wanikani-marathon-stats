@@ -4,6 +4,7 @@ import { useExactUser } from '../hooks/useExactUser';
 import { seasonEmojis } from '../constants';
 import { formatMarathonUiLabel } from '../constants/cardCopy';
 import { getMarathonAccentColor, getMarathonPreviewUrl } from '../utils/cardPreviews';
+import { getMarathonThreadUrl } from '../utils/marathonThreads';
 import { getEntryUnifiedVolume, isVolumeConversionActive } from '../utils/volumeConversion';
 import {
   getResultsViewForQuery,
@@ -120,6 +121,7 @@ function DisplayedResults({
             characters={data.characters}
             sources={data.sources}
             url={data.url}
+            threadUrl={getMarathonThreadUrl(marathonName)}
             showPages={enabledSummaryMetrics.has('pages')}
             showCharacters={enabledSummaryMetrics.has('chars')}
             showCombined={volumeActive && enabledSummaryMetrics.has('volume')}
@@ -163,6 +165,7 @@ function UserMarathonCard({
   characters,
   sources,
   url,
+  threadUrl,
   showPages,
   showCharacters,
   showCombined,
@@ -181,6 +184,7 @@ function UserMarathonCard({
   characters?: number | string;
   sources?: number | string;
   url?: string;
+  threadUrl: string | null;
   showPages: boolean;
   showCharacters: boolean;
   showCombined: boolean;
@@ -201,6 +205,24 @@ function UserMarathonCard({
   const timeDisplay = time?.trim() ? time : '—';
   const hasLink = Boolean(url);
 
+  const titleContent = (
+    <>
+      {emoji ? (
+        <span className="card-season-emoji" aria-hidden="true">
+          {emoji}
+        </span>
+      ) : null}
+      {cardLanguage === 'ja' ? (
+        <span className="card-season-text">{displayTitle}</span>
+      ) : (
+        <span className="card-season-text">
+          <span className="card-season">{season}</span>
+          {year ? <span className="card-year">{year}</span> : null}
+        </span>
+      )}
+    </>
+  );
+
   return (
     <article
       className={`card card-enter${previewUrl ? ' card--has-preview' : ''}`}
@@ -216,18 +238,18 @@ function UserMarathonCard({
     >
       <header className="card-header">
         <h3 id={headingId} className="marathon-name">
-          {emoji ? (
-            <span className="card-season-emoji" aria-hidden="true">
-              {emoji}
-            </span>
-          ) : null}
-          {cardLanguage === 'ja' ? (
-            <span className="card-season-text">{displayTitle}</span>
+          {threadUrl ? (
+            <a
+              href={threadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="marathon-name-link"
+            >
+              {titleContent}
+              <span className="sr-only"> — marathon thread (opens in a new tab)</span>
+            </a>
           ) : (
-            <span className="card-season-text">
-              <span className="card-season">{season}</span>
-              {year ? <span className="card-year">{year}</span> : null}
-            </span>
+            titleContent
           )}
         </h3>
       </header>

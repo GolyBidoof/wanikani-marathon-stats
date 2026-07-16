@@ -1160,6 +1160,10 @@ header h1 span {
   margin-bottom: 0;
 }
 
+.card-header:has(.marathon-name-link:hover) {
+  background: color-mix(in srgb, var(--card-accent) 26%, rgba(0, 0, 0, 0.35));
+}
+
 .card-body {
   position: relative;
   z-index: 1;
@@ -1183,6 +1187,27 @@ header h1 span {
   color: var(--text-primary);
   font-family: var(--font-ui), var(--font-ja), sans-serif;
   line-height: 1.2;
+}
+
+.marathon-name-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: -10px -12px;
+  padding: 10px 12px;
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.marathon-name-link:hover {
+  color: color-mix(in srgb, var(--card-accent) 55%, var(--text-primary));
+}
+
+.marathon-name-link:focus-visible {
+  outline: 2px solid var(--card-accent);
+  outline-offset: -2px;
 }
 
 .card-season-emoji {
