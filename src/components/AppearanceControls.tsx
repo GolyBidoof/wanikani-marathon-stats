@@ -3,13 +3,21 @@ import { useStore } from '../hooks/StoreContext';
 import { useExactUser } from '../hooks/useExactUser';
 import { useAchievementCardVisible } from '../hooks/useAchievementCardVisible';
 import { accentColors, seasonEmojis } from '../constants';
+import { formatMarathonUiLabel } from '../constants/cardCopy';
 import { getAvailableThemes } from '../utils/marathonTheme';
 import ColorRadioGroup from './a11y/ColorRadioGroup';
 import FadeSection from './FadeSection';
 import type { DataProps } from '../types';
 
 export default function AppearanceControls({ allStats, allUsers }: DataProps) {
-  const { currentBg, setCurrentBg, currentAccentColor, setCurrentAccentColor } = useStore();
+  const {
+    currentBg,
+    setCurrentBg,
+    currentAccentColor,
+    setCurrentAccentColor,
+    cardLanguage,
+    cardJaNumberStyle,
+  } = useStore();
   const { searchQuery, exactUsername } = useExactUser(allUsers);
   const isCardVisible = useAchievementCardVisible(allStats, allUsers);
 
@@ -44,6 +52,7 @@ export default function AppearanceControls({ allStats, allUsers }: DataProps) {
           {availableThemes.map((theme) => {
             const season = theme.name.split(' ')[0];
             const emoji = seasonEmojis[season] || '';
+            const label = formatMarathonUiLabel(theme.name, cardLanguage, cardJaNumberStyle);
             const isSelected = theme.gif === currentBg;
 
             return (
@@ -55,7 +64,7 @@ export default function AppearanceControls({ allStats, allUsers }: DataProps) {
                 className={`bg-btn ${isSelected ? 'active' : ''}`}
                 onClick={() => setCurrentBg(theme.gif)}
               >
-                {emoji} {theme.name}
+                {emoji} {label}
               </button>
             );
           })}
