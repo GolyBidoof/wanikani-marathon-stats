@@ -40,7 +40,7 @@ describe('chartConfig', () => {
     const { default: i18n } = await import('../i18n');
     await i18n.changeLanguage('ja');
 
-    expect(getChartMetricLabel('pages')).toBe('ページ');
+    expect(getChartMetricLabel('pages')).toBe('ページ数');
     expect(
       buildLineChartConfig({ ...sampleSeries(false), language: 'ja' }, true).options?.scales?.x
         ?.title,

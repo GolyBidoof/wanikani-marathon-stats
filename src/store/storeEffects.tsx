@@ -17,8 +17,7 @@ const SEASON_FALLBACKS: Record<string, string> = {
 };
 
 function accentForBackground(gifFilename: string): string | null {
-  const previewAccent = (cardPreviews as Record<string, { accent?: string }>)[gifFilename]
-    ?.accent;
+  const previewAccent = (cardPreviews as Record<string, { accent?: string }>)[gifFilename]?.accent;
   if (previewAccent) return previewAccent;
 
   const lowerBg = gifFilename.toLowerCase();

@@ -12,6 +12,7 @@ const en = {
     languageLabel: 'App language',
     languageEn: 'EN',
     languageJa: '日本語',
+    githubCta: 'Suggest improvements or translation updates on GitHub!',
   },
   info: {
     show: 'What is this?',

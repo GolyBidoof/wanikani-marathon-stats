@@ -96,7 +96,7 @@ describe('buildMultiChartSeries', () => {
     });
 
     expect(series.labels).toEqual(['2025年夏至', '2025年冬至']);
-    expect(series.datasets[0]?.label).toBe('ページ');
+    expect(series.datasets[0]?.label).toBe('ページ数');
     expect(series.language).toBe('ja');
   });
 });

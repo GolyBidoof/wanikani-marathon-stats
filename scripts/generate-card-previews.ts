@@ -122,13 +122,12 @@ async function processGif(filename: string): Promise<CardPreviewEntry> {
     .raw()
     .toBuffer({ resolveWithObject: true });
 
-  const sampled =
-    extractAccentFromRaw(
-      sample.data,
-      sample.info.width,
-      sample.info.height,
-      sample.info.channels,
-    ) ?? { hex: fallback, score: 0 };
+  const sampled = extractAccentFromRaw(
+    sample.data,
+    sample.info.width,
+    sample.info.height,
+    sample.info.channels,
+  ) ?? { hex: fallback, score: 0 };
 
   // Lean on the season fallback when the frame is muted / low-chroma.
   const extractedWeight = Math.min(0.7, Math.max(0.25, sampled.score / 3.2));

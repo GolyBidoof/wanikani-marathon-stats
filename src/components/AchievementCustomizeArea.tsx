@@ -88,7 +88,7 @@ export default function AchievementCustomizeArea({ allStats, allUsers }: DataPro
         expanded={customizerExpanded}
         onExpandedChange={setCustomizerExpanded}
       />
-      { (pinActive || pinSpacerHeight > 0) && (
+      {(pinActive || pinSpacerHeight > 0) && (
         <div
           ref={pinAnchorRef}
           className="summary-pin-spacer"

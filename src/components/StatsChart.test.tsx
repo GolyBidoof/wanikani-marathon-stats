@@ -137,6 +137,6 @@ describe('StatsChart', () => {
     );
 
     expect(screen.getByRole('toolbar', { name: 'チャートの指標' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '時間' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '読書時間' })).toBeInTheDocument();
   });
 });

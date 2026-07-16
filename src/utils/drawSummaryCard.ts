@@ -181,8 +181,7 @@ function drawHeaderSection(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDraw
 function drawCenterTime(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawContext) {
   const { state, cardLanguage, cardJaNumberStyle, accentColor, enabledSummaryMetrics } = ctx;
   const copy = cardCopy[cardLanguage];
-  const showAverage =
-    enabledSummaryMetrics.has('avgTime') && state.count > 0 && state.time > 0;
+  const showAverage = enabledSummaryMetrics.has('avgTime') && state.count > 0 && state.time > 0;
   const averageHours = showAverage ? state.time / state.count : 0;
 
   // Nudge the hero time up slightly when the average line is present.

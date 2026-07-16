@@ -52,7 +52,9 @@ const NICKNAME_CASES: NicknameCase[] = ['normal', 'uppercase'];
 const JA_NUMBER_STYLES: JaCardNumberStyle[] = ['words', 'numbers'];
 const VOLUME_UNITS: VolumeDisplayUnit[] = ['pages', 'chars'];
 
-function buildDefaultPreferences(language: AppLanguage = detectBrowserLanguage()): PersistedPreferences {
+function buildDefaultPreferences(
+  language: AppLanguage = detectBrowserLanguage(),
+): PersistedPreferences {
   return {
     currentBg: gifBackgrounds[gifBackgrounds.length - 1] || gifBackgrounds[0] || '',
     currentAccentColor: accentColors[0],

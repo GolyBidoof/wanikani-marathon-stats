@@ -1452,6 +1452,24 @@ footer {
   line-height: 1.6;
 }
 
+.footer-github {
+  font-size: 0.85rem;
+}
+
+.footer-github-link {
+  color: var(--accent-color, #ff00aa);
+  text-decoration: none;
+  font-weight: 500;
+  transition:
+    opacity 0.2s ease,
+    text-decoration 0.2s ease;
+}
+
+.footer-github-link:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
 .footer-meta {
   color: var(--text-secondary);
   font-size: 0.8rem;

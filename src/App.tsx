@@ -92,6 +92,16 @@ function AppContent({ allStats, allUsers, lastUpdated }: DataProps & { lastUpdat
       <IndividualCards allStats={allStats} allUsers={allUsers} />
       <footer>
         <p className="footer-credits">{t('header.footerCredits')}</p>
+        <p className="footer-github">
+          <a
+            href="https://github.com/GolyBidoof/wanikani-marathon-stats"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-github-link"
+          >
+            {t('header.githubCta')}
+          </a>
+        </p>
         <p className="footer-meta">
           {t('header.lastUpdated', {
             date: formatLastUpdated(lastUpdated, localeTagForLanguage(appLanguage)),
