@@ -72,8 +72,11 @@ export function useHistoryChart({
         updateLineChart(existingChart, series, metric, accentColor);
       }
 
-      chartRef.current.resize();
-      chartRef.current.update('none');
+      const chart = chartRef.current;
+      if (!chart) return;
+
+      chart.resize();
+      chart.update('none');
     };
 
     syncChart();
