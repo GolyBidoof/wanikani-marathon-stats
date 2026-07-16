@@ -6,6 +6,7 @@ import type {
   MetricName,
   NicknameCase,
   SortMode,
+  SummaryMetricName,
   VolumeConversionConfig,
   VolumeDisplayUnit,
 } from '../types';
@@ -24,6 +25,8 @@ export interface PersistedPreferences {
   currentSortMode: SortMode;
   enabledMetrics: MetricName[];
   userMetricsOrder: MetricName[];
+  enabledSummaryMetrics: SummaryMetricName[];
+  summaryMetricsOrder: SummaryMetricName[];
   showHistory: boolean;
   filterTotals: boolean;
   cardLanguage: CardLanguage;
@@ -39,6 +42,8 @@ const DEFAULT_PREFS: PersistedPreferences = {
   currentSortMode: 'chrono',
   enabledMetrics: ['time'],
   userMetricsOrder: ['time', 'pages', 'chars', 'sources'],
+  enabledSummaryMetrics: ['avgTime', 'pages', 'chars', 'sources'],
+  summaryMetricsOrder: ['avgTime', 'pages', 'chars', 'sources'],
   showHistory: true,
   filterTotals: false,
   cardLanguage: 'en',
@@ -53,6 +58,13 @@ const DEFAULT_PREFS: PersistedPreferences = {
 };
 
 const METRIC_NAMES: MetricName[] = ['time', 'pages', 'chars', 'sources', 'volume'];
+const SUMMARY_METRIC_NAMES: SummaryMetricName[] = [
+  'avgTime',
+  'pages',
+  'chars',
+  'sources',
+  'volume',
+];
 const SORT_MODES: SortMode[] = ['chrono', 'metric', 'manual'];
 const CARD_LANGUAGES: CardLanguage[] = ['en', 'ja'];
 const NICKNAME_CASES: NicknameCase[] = ['normal', 'uppercase'];
@@ -61,6 +73,21 @@ const VOLUME_UNITS: VolumeDisplayUnit[] = ['pages', 'chars'];
 
 function isMetricName(value: unknown): value is MetricName {
   return typeof value === 'string' && METRIC_NAMES.includes(value as MetricName);
+}
+
+function isSummaryMetricName(value: unknown): value is SummaryMetricName {
+  return typeof value === 'string' && SUMMARY_METRIC_NAMES.includes(value as SummaryMetricName);
+}
+
+function ensureSummaryMetricsOrder(order: SummaryMetricName[]): SummaryMetricName[] {
+  const result = order.filter((metric) => SUMMARY_METRIC_NAMES.includes(metric));
+  for (const metric of SUMMARY_METRIC_NAMES) {
+    if (!result.includes(metric)) {
+      if (metric === 'avgTime') result.unshift(metric);
+      else result.push(metric);
+    }
+  }
+  return result;
 }
 
 function sanitizePreferences(raw: unknown): PersistedPreferences {
@@ -85,6 +112,14 @@ function sanitizePreferences(raw: unknown): PersistedPreferences {
     userMetricsOrder: Array.isArray(data.userMetricsOrder)
       ? data.userMetricsOrder.filter(isMetricName)
       : DEFAULT_PREFS.userMetricsOrder,
+    enabledSummaryMetrics: Array.isArray(data.enabledSummaryMetrics)
+      ? data.enabledSummaryMetrics.filter(isSummaryMetricName)
+      : DEFAULT_PREFS.enabledSummaryMetrics,
+    summaryMetricsOrder: ensureSummaryMetricsOrder(
+      Array.isArray(data.summaryMetricsOrder)
+        ? data.summaryMetricsOrder.filter(isSummaryMetricName)
+        : DEFAULT_PREFS.summaryMetricsOrder,
+    ),
     showHistory:
       typeof data.showHistory === 'boolean' ? data.showHistory : DEFAULT_PREFS.showHistory,
     filterTotals:

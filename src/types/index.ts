@@ -12,7 +12,9 @@ export interface ParticipantEntry {
 export type AllStats = Record<string, ParticipantEntry[]>;
 
 export type MetricName = 'time' | 'pages' | 'chars' | 'sources' | 'volume';
-export type ChartMetric = 'time' | 'participants' | 'characters' | 'pages' | 'sources';
+export type SummaryMetricName = 'pages' | 'chars' | 'sources' | 'volume' | 'avgTime';
+export type ChartMetric = 'time' | 'participants' | 'characters' | 'pages' | 'sources' | 'volume';
+
 export type SortMode = 'chrono' | 'metric' | 'manual';
 export type CardLanguage = 'en' | 'ja';
 export type NicknameCase = 'normal' | 'uppercase';
@@ -43,11 +45,16 @@ export interface StoreContextType {
   enabledMetrics: Set<MetricName>;
   setEnabledMetrics: Dispatch<SetStateAction<Set<MetricName>>>;
   toggleMetric: (metric: MetricName) => void;
+  enabledSummaryMetrics: Set<SummaryMetricName>;
+  setEnabledSummaryMetrics: Dispatch<SetStateAction<Set<SummaryMetricName>>>;
+  toggleSummaryMetric: (metric: SummaryMetricName) => void;
   excludedMarathons: Set<string>;
   setExcludedMarathons: Dispatch<SetStateAction<Set<string>>>;
   toggleMarathon: (name: string) => void;
   userMetricsOrder: MetricName[];
   setUserMetricsOrder: (order: MetricName[]) => void;
+  summaryMetricsOrder: SummaryMetricName[];
+  setSummaryMetricsOrder: (order: SummaryMetricName[]) => void;
   showHistory: boolean;
   setShowHistory: (show: boolean) => void;
   filterTotals: boolean;
@@ -64,6 +71,7 @@ export interface StoreContextType {
   setVolumeConversionEnabled: (enabled: boolean) => void;
   setVolumeDisplayAs: (displayAs: VolumeDisplayUnit) => void;
   setVolumeCharsPerPage: (charsPerPage: number) => void;
+  resetAchievementCardSettings: () => void;
 }
 
 export interface AllStatsProps {

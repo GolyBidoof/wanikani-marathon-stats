@@ -12,13 +12,14 @@ import { findUserEntry } from './statsQueries';
 import {
   getUnifiedVolume,
   isVolumeConversionActive,
-  replacePagesCharsWithVolume,
+  metricsOrderForConversion,
 } from './volumeConversion';
 import type {
   AllStats,
   CardLanguage,
   JaCardNumberStyle,
   MetricName,
+  SummaryMetricName,
   NicknameCase,
   VolumeConversionConfig,
 } from '../types';
@@ -42,6 +43,8 @@ export interface SummaryDrawContext {
   showHistory: boolean;
   enabledMetrics: Set<MetricName>;
   metricsOrder: MetricName[];
+  enabledSummaryMetrics: Set<SummaryMetricName>;
+  summaryMetricsOrder: SummaryMetricName[];
   excludedMarathons: Set<string>;
   allStats: AllStats;
   cardLanguage: CardLanguage;
@@ -176,8 +179,15 @@ function drawHeaderSection(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDraw
 }
 
 function drawCenterTime(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawContext) {
-  const { state, cardLanguage, cardJaNumberStyle, accentColor } = ctx;
+  const { state, cardLanguage, cardJaNumberStyle, accentColor, enabledSummaryMetrics } = ctx;
   const copy = cardCopy[cardLanguage];
+  const showAverage =
+    enabledSummaryMetrics.has('avgTime') && state.count > 0 && state.time > 0;
+  const averageHours = showAverage ? state.time / state.count : 0;
+
+  // Nudge the hero time up slightly when the average line is present.
+  const timeY = showAverage ? 212 : 220;
+  const labelY = showAverage ? 242 : 250;
 
   canvasCtx.textAlign = 'center';
   canvasCtx.shadowBlur = 15;
@@ -186,13 +196,24 @@ function drawCenterTime(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawCon
   canvasCtx.fillText(
     formatHoursForCard(state.time, cardLanguage, cardJaNumberStyle),
     CANVAS_LAYOUT.width / 2,
-    220,
+    timeY,
   );
 
   canvasCtx.shadowBlur = 5;
   canvasCtx.font = withJapaneseFonts(CANVAS_LAYOUT.fontTimeSub, cardLanguage);
   canvasCtx.fillStyle = accentColor;
-  canvasCtx.fillText(copy.totalTimeRead, CANVAS_LAYOUT.width / 2, 250);
+  canvasCtx.fillText(copy.totalTimeRead, CANVAS_LAYOUT.width / 2, labelY);
+
+  if (showAverage) {
+    canvasCtx.shadowBlur = 0;
+    canvasCtx.font = withJapaneseFonts('600 15px Outfit, Open Sans, sans-serif', cardLanguage);
+    canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    canvasCtx.fillText(
+      `${copy.averageTime} ${formatHoursForCard(averageHours, cardLanguage, cardJaNumberStyle)}`,
+      CANVAS_LAYOUT.width / 2,
+      268,
+    );
+  }
 }
 
 function drawStatsRow(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawContext) {
@@ -202,38 +223,39 @@ function drawStatsRow(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawConte
     cardLanguage,
     cardJaNumberStyle,
     cardRoundNumbers,
+    enabledSummaryMetrics,
+    summaryMetricsOrder,
     volumeConversion,
   } = ctx;
   const copy = cardCopy[cardLanguage];
   const useVolume = isVolumeConversionActive(volumeConversion, Boolean(currentQuery));
+  const effectiveOrder = metricsOrderForConversion(
+    summaryMetricsOrder,
+    useVolume,
+  ) as SummaryMetricName[];
 
   const formatValue = (value: number) =>
     value > 0 ? formatCardNumber(value, cardLanguage, cardJaNumberStyle, cardRoundNumbers) : '–';
 
-  const stats = useVolume
-    ? [
-        {
-          label: copy.marathons,
-          value: formatValue(state.count),
-        },
-        {
-          label: volumeConversion.displayAs === 'pages' ? copy.pages : copy.chars,
-          value: formatValue(state.volume ?? 0),
-        },
-        {
-          label: copy.sources,
-          value: formatValue(state.sources),
-        },
-      ]
-    : [
-        {
-          label: currentQuery ? copy.marathons : copy.participants,
-          value: formatValue(state.count),
-        },
-        { label: copy.pages, value: formatValue(state.pages) },
-        { label: copy.chars, value: formatValue(state.chars) },
-        { label: copy.sources, value: formatValue(state.sources) },
-      ];
+  const stats: Array<{ label: string; value: string }> = [
+    {
+      label: currentQuery ? copy.marathons : copy.participants,
+      value: formatValue(state.count),
+    },
+  ];
+
+  for (const metric of effectiveOrder) {
+    if (!enabledSummaryMetrics.has(metric)) continue;
+    if (metric === 'avgTime') continue;
+    if (metric === 'pages') stats.push({ label: copy.pages, value: formatValue(state.pages) });
+    if (metric === 'chars') stats.push({ label: copy.chars, value: formatValue(state.chars) });
+    if (metric === 'volume' && useVolume) {
+      stats.push({ label: copy.volume, value: formatValue(state.volume ?? 0) });
+    }
+    if (metric === 'sources') {
+      stats.push({ label: copy.sources, value: formatValue(state.sources) });
+    }
+  }
 
   const columnDivisor = stats.length + 1;
   const columnSpacing = CANVAS_LAYOUT.width / columnDivisor;
@@ -267,9 +289,7 @@ function buildHistoryMetricLine(marathonName: string, ctx: SummaryDrawContext): 
 
   const numberOptions = { jaNumberStyle: cardJaNumberStyle, roundNumbers: cardRoundNumbers };
   const useVolume = isVolumeConversionActive(volumeConversion, Boolean(currentQuery));
-  const effectiveOrder = (
-    useVolume ? replacePagesCharsWithVolume(metricsOrder) : metricsOrder
-  ) as MetricName[];
+  const effectiveOrder = metricsOrderForConversion(metricsOrder, useVolume) as MetricName[];
   const parts: string[] = [];
 
   for (const metric of effectiveOrder) {
@@ -277,7 +297,7 @@ function buildHistoryMetricLine(marathonName: string, ctx: SummaryDrawContext): 
 
     if (metric === 'time' && entry.time) {
       parts.push(formatHoursForCard(parseTimeToHours(entry.time), cardLanguage, cardJaNumberStyle));
-    } else if (useVolume && metric === 'volume') {
+    } else if (metric === 'volume' && useVolume) {
       const volume = getUnifiedVolume(
         parseInt(String(entry.pages)) || 0,
         parseInt(String(entry.characters)) || 0,
@@ -291,9 +311,9 @@ function buildHistoryMetricLine(marathonName: string, ctx: SummaryDrawContext): 
             : copy.charsUnit(volume, numberOptions);
         parts.push(unit);
       }
-    } else if (!useVolume && metric === 'pages' && entry.pages) {
+    } else if (metric === 'pages' && entry.pages) {
       parts.push(copy.pagesUnit(parseInt(String(entry.pages)) || 0, numberOptions));
-    } else if (!useVolume && metric === 'chars' && entry.characters) {
+    } else if (metric === 'chars' && entry.characters) {
       parts.push(copy.charsUnit(parseInt(String(entry.characters)) || 0, numberOptions));
     } else if (metric === 'sources' && entry.sources) {
       parts.push(copy.sourcesUnit(parseInt(String(entry.sources)) || 0, numberOptions));
@@ -322,9 +342,7 @@ function drawHistorySidebar(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDra
   if (!showHistory || state.history.length === 0 || !currentQuery) return;
 
   const useVolume = isVolumeConversionActive(volumeConversion, Boolean(currentQuery));
-  const effectiveOrder = (
-    useVolume ? replacePagesCharsWithVolume(metricsOrder) : metricsOrder
-  ) as MetricName[];
+  const effectiveOrder = metricsOrderForConversion(metricsOrder, useVolume) as MetricName[];
 
   canvasCtx.textAlign = 'right';
   canvasCtx.shadowBlur = 0;

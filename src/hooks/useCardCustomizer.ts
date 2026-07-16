@@ -6,8 +6,8 @@ import {
   getLastYearMarathonNames,
   sortMarathonNames,
 } from '../utils/statsQueries';
-import { replacePagesCharsWithVolume } from '../utils/volumeConversion';
-import type { AllStats, MetricName } from '../types';
+import { metricsOrderForConversion } from '../utils/volumeConversion';
+import type { AllStats, MetricName, SummaryMetricName } from '../types';
 
 export function useCardCustomizerData(allStats: AllStats, allUsers: string[]) {
   const {
@@ -20,6 +20,8 @@ export function useCardCustomizerData(allStats: AllStats, allUsers: string[]) {
     enabledMetrics,
     userMetricsOrder,
     setUserMetricsOrder,
+    summaryMetricsOrder,
+    setSummaryMetricsOrder,
     setExcludedMarathons,
     volumeConversion,
   } = useStore();
@@ -49,9 +51,10 @@ export function useCardCustomizerData(allStats: AllStats, allUsers: string[]) {
   ]);
 
   const sortedUserMarathons = useMemo(() => {
-    const effectiveOrder = volumeConversion.enabled
-      ? (replacePagesCharsWithVolume(userMetricsOrder) as MetricName[])
-      : userMetricsOrder;
+    const effectiveOrder = metricsOrderForConversion(
+      userMetricsOrder,
+      volumeConversion.enabled,
+    ) as MetricName[];
     const sortMetric = effectiveOrder.find((metric) => enabledMetrics.has(metric));
 
     return sortMarathonNames(userMarathons, {
@@ -83,16 +86,23 @@ export function useCardCustomizerData(allStats: AllStats, allUsers: string[]) {
   };
 
   const reorderMetric = (metric: MetricName, direction: 'up' | 'down') => {
-    const targetMetric = metric === 'volume' ? 'pages' : metric;
-    const index = userMetricsOrder.indexOf(targetMetric);
-    if (index === -1 && metric === 'volume') {
-      const charsIndex = userMetricsOrder.indexOf('chars');
-      if (charsIndex === -1) return;
-      setUserMetricsOrder(moveItem(userMetricsOrder, charsIndex, direction));
-      return;
-    }
+    const workingOrder = metricsOrderForConversion(
+      userMetricsOrder,
+      volumeConversion.enabled,
+    ) as MetricName[];
+    const index = workingOrder.indexOf(metric);
     if (index === -1) return;
-    setUserMetricsOrder(moveItem(userMetricsOrder, index, direction));
+    setUserMetricsOrder(moveItem(workingOrder, index, direction));
+  };
+
+  const reorderSummaryMetric = (metric: SummaryMetricName, direction: 'up' | 'down') => {
+    const workingOrder = metricsOrderForConversion(
+      summaryMetricsOrder,
+      volumeConversion.enabled,
+    ) as SummaryMetricName[];
+    const index = workingOrder.indexOf(metric);
+    if (index === -1) return;
+    setSummaryMetricsOrder(moveItem(workingOrder, index, direction));
   };
 
   const reorderMarathon = (marathonName: string, direction: 'up' | 'down') => {
@@ -130,6 +140,7 @@ export function useCardCustomizerData(allStats: AllStats, allUsers: string[]) {
     hasUserControls: isExactMatch && hasUserControls,
     sortedUserMarathons,
     reorderMetric,
+    reorderSummaryMetric,
     reorderMarathon,
     applyQuickSelect,
   };

@@ -9,7 +9,7 @@ import {
 import {
   getUnifiedVolume,
   isVolumeConversionActive,
-  replacePagesCharsWithVolume,
+  metricsOrderForConversion,
 } from '../utils/volumeConversion';
 import { findMarathonByGif } from '../utils/marathonTheme';
 import { findCanonicalUsername } from '../utils/username';
@@ -76,6 +76,8 @@ export function useSummaryDrawContext(
     enabledMetrics,
     excludedMarathons,
     userMetricsOrder,
+    summaryMetricsOrder,
+    enabledSummaryMetrics,
     showHistory,
     filterTotals,
     cardLanguage,
@@ -110,9 +112,10 @@ export function useSummaryDrawContext(
 
   const sortedHistory = useMemo(() => {
     const visibleMarathons = totals.history.filter((name) => !excludedMarathons.has(name));
-    const effectiveOrder = volumeActive
-      ? (replacePagesCharsWithVolume(userMetricsOrder) as MetricName[])
-      : userMetricsOrder;
+    const effectiveOrder = metricsOrderForConversion(
+      userMetricsOrder,
+      volumeActive,
+    ) as MetricName[];
     const sortMetric = effectiveOrder.find((metric) => enabledMetrics.has(metric));
 
     return sortMarathonNames(visibleMarathons, {
@@ -164,6 +167,8 @@ export function useSummaryDrawContext(
       showHistory,
       enabledMetrics,
       metricsOrder: userMetricsOrder,
+      enabledSummaryMetrics,
+      summaryMetricsOrder,
       excludedMarathons,
       allStats,
       cardLanguage,
@@ -182,6 +187,8 @@ export function useSummaryDrawContext(
       showHistory,
       enabledMetrics,
       userMetricsOrder,
+      enabledSummaryMetrics,
+      summaryMetricsOrder,
       excludedMarathons,
       allStats,
       cardLanguage,

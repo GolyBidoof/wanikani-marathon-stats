@@ -3,40 +3,63 @@ import { useStore } from '../hooks/StoreContext';
 import { useCardCustomizerData } from '../hooks/useCardCustomizer';
 import { useAchievementCardVisible } from '../hooks/useAchievementCardVisible';
 import { seasonEmojis } from '../constants';
-import { replacePagesCharsWithVolume } from '../utils/volumeConversion';
+import { formatMarathonUiLabel } from '../constants/cardCopy';
+import { metricsOrderForConversion } from '../utils/volumeConversion';
 import ToggleGroup from './a11y/ToggleGroup';
 import FadeSection from './FadeSection';
-import type { DataProps, MetricName, VolumeDisplayUnit } from '../types';
+import type {
+  CardLanguage,
+  DataProps,
+  JaCardNumberStyle,
+  MetricName,
+  SummaryMetricName,
+  VolumeDisplayUnit,
+} from '../types';
 
-const METRIC_LABELS: Record<MetricName, string> = {
+const METRIC_LABELS: Record<MetricName | SummaryMetricName, string> = {
   time: 'Time',
   pages: 'Pages',
   chars: 'Chars',
   sources: 'Sources',
-  volume: 'Volume',
+  volume: 'Combined',
+  avgTime: 'Average time',
 };
 
 const CUSTOMIZER_CONTENT_ID = 'customizer-content';
 
-export default function CardCustomizer({ allStats, allUsers }: DataProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export default function CardCustomizer({
+  allStats,
+  allUsers,
+  expanded,
+  onExpandedChange,
+}: DataProps & {
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+}) {
   const isCardVisible = useAchievementCardVisible(allStats, allUsers);
-  const { hasUserControls, sortedUserMarathons, reorderMetric, reorderMarathon, applyQuickSelect } =
-    useCardCustomizerData(allStats, allUsers);
+  const {
+    hasUserControls,
+    sortedUserMarathons,
+    reorderMetric,
+    reorderSummaryMetric,
+    reorderMarathon,
+    applyQuickSelect,
+  } = useCardCustomizerData(allStats, allUsers);
 
   const {
     currentSortMode,
     setCurrentSortMode,
     enabledMetrics,
     setEnabledMetrics,
+    enabledSummaryMetrics,
+    toggleSummaryMetric,
     excludedMarathons,
     userMetricsOrder,
+    summaryMetricsOrder,
     showHistory,
     setShowHistory,
     filterTotals,
     setFilterTotals,
-    cardNicknameCase,
-    setCardNicknameCase,
     toggleMetric,
     toggleMarathon,
     volumeConversion,
@@ -46,6 +69,7 @@ export default function CardCustomizer({ allStats, allUsers }: DataProps) {
     cardLanguage,
     cardJaNumberStyle,
     cardRoundNumbers,
+    resetAchievementCardSettings,
   } = useStore();
 
   const headerSummary = useMemo(() => {
@@ -58,7 +82,7 @@ export default function CardCustomizer({ allStats, allUsers }: DataProps) {
         : null;
     const displayLabel = cardRoundNumbers ? 'rounded numbers' : 'exact numbers';
     const volumeLabel =
-      hasUserControls && volumeConversion.enabled ? 'combined reading volume' : null;
+      hasUserControls && volumeConversion.enabled ? 'combined pages & characters' : null;
 
     return [languageLabel, numberStyleLabel, displayLabel, volumeLabel].filter(Boolean).join(' · ');
   }, [
@@ -69,26 +93,30 @@ export default function CardCustomizer({ allStats, allUsers }: DataProps) {
     volumeConversion.enabled,
   ]);
 
+  useEffect(() => {
+    if (!isCardVisible && expanded) onExpandedChange(false);
+  }, [isCardVisible, expanded, onExpandedChange]);
+
   return (
     <FadeSection
       show={isCardVisible}
       as="section"
-      className={`customizer-card ${isExpanded ? 'expanded' : ''}`}
+      className={`customizer-card ${expanded ? 'expanded' : ''}`}
       aria-label="Achievement card customization"
     >
       <button
         type="button"
         className="customizer-header"
-        aria-expanded={isExpanded}
+        aria-expanded={expanded}
         aria-controls={CUSTOMIZER_CONTENT_ID}
         aria-label={
-          isExpanded ? undefined : `Customize achievement card. Current settings: ${headerSummary}`
+          expanded ? undefined : `Customize achievement card. Current settings: ${headerSummary}`
         }
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => onExpandedChange(!expanded)}
       >
         <div className="customizer-header-text">
           <span className="customizer-header-title">Customize Achievement Card</span>
-          {!isExpanded && (
+          {!expanded && (
             <span className="customizer-header-summary" aria-hidden="true">
               {headerSummary}
             </span>
@@ -108,65 +136,98 @@ export default function CardCustomizer({ allStats, allUsers }: DataProps) {
         </svg>
       </button>
 
-      {isExpanded && (
+      {expanded && (
         <div id={CUSTOMIZER_CONTENT_ID} className="customizer-content">
           <div className="customizer-section customizer-section-first">
-            <h2 className="customizer-section-label">Language &amp; Numbers</h2>
-            <CardFormatSettings />
+            <h2 className="customizer-section-label">Look &amp; language</h2>
+            <CardFormatSettings showNickname={hasUserControls} />
           </div>
 
           {hasUserControls && (
-            <div className="customizer-section">
-              <h2 className="customizer-section-label">Card Content</h2>
-              <div className="customizer-controls">
-                <div className="customizer-column">
-                  <NicknameToggle value={cardNicknameCase} onChange={setCardNicknameCase} />
-                  <SortModeToggle value={currentSortMode} onChange={setCurrentSortMode} />
-                  <HistoryOptions
-                    showHistory={showHistory}
-                    filterTotals={filterTotals}
-                    onShowHistoryChange={setShowHistory}
-                    onFilterTotalsChange={setFilterTotals}
-                    onEnableDefaultMetric={() => setEnabledMetrics(new Set(['time']))}
-                    hasEnabledMetrics={enabledMetrics.size > 0}
-                  />
-                  <MetricChecklist
-                    metrics={userMetricsOrder}
-                    enabledMetrics={enabledMetrics}
-                    volumeConversionEnabled={volumeConversion.enabled}
-                    onToggle={toggleMetric}
-                    onReorder={reorderMetric}
-                  />
-                </div>
-
-                <div className="customizer-column">
-                  <MarathonChecklist
-                    marathons={sortedUserMarathons}
-                    excludedMarathons={excludedMarathons}
-                    onToggle={toggleMarathon}
-                    onReorder={reorderMarathon}
-                    onQuickSelect={applyQuickSelect}
-                  />
-                </div>
+            <>
+              <div className="customizer-section">
+                <h2 className="customizer-section-label">Numbers on the card</h2>
+                <p className="customizer-section-hint">
+                  Choose which totals appear under the reading time.
+                </p>
+                <MetricChecklist
+                  label="Shown totals"
+                  ariaLabel="Totals on card"
+                  metrics={summaryMetricsOrder}
+                  enabledMetrics={enabledSummaryMetrics}
+                  volumeConversionEnabled={volumeConversion.enabled}
+                  onToggle={toggleSummaryMetric}
+                  onReorder={reorderSummaryMetric}
+                />
+                <VolumeConversionSettings
+                  enabled={volumeConversion.enabled}
+                  displayAs={volumeConversion.displayAs}
+                  charsPerPage={volumeConversion.charsPerPage}
+                  onEnabledChange={setVolumeConversionEnabled}
+                  onDisplayAsChange={setVolumeDisplayAs}
+                  onCharsPerPageChange={setVolumeCharsPerPage}
+                />
               </div>
 
-              <VolumeConversionSettings
-                enabled={volumeConversion.enabled}
-                displayAs={volumeConversion.displayAs}
-                charsPerPage={volumeConversion.charsPerPage}
-                onEnabledChange={setVolumeConversionEnabled}
-                onDisplayAsChange={setVolumeDisplayAs}
-                onCharsPerPageChange={setVolumeCharsPerPage}
-              />
-            </div>
+              <div className="customizer-section">
+                <h2 className="customizer-section-label">History sidebar</h2>
+                <p className="customizer-section-hint">
+                  Controls the list of marathons on the right side of the card.
+                </p>
+                <div className="customizer-controls">
+                  <div className="customizer-column">
+                    <HistoryOptions
+                      showHistory={showHistory}
+                      filterTotals={filterTotals}
+                      onShowHistoryChange={setShowHistory}
+                      onFilterTotalsChange={setFilterTotals}
+                      onEnableDefaultMetric={() => setEnabledMetrics(new Set(['time']))}
+                      hasEnabledMetrics={enabledMetrics.size > 0}
+                    />
+                    <SortModeToggle value={currentSortMode} onChange={setCurrentSortMode} />
+                    <MetricChecklist
+                      label="Per-marathon details"
+                      ariaLabel="Metrics in history"
+                      metrics={userMetricsOrder}
+                      enabledMetrics={enabledMetrics}
+                      volumeConversionEnabled={volumeConversion.enabled}
+                      onToggle={toggleMetric}
+                      onReorder={reorderMetric}
+                    />
+                  </div>
+
+                  <div className="customizer-column">
+                    <MarathonChecklist
+                      marathons={sortedUserMarathons}
+                      excludedMarathons={excludedMarathons}
+                      cardLanguage={cardLanguage}
+                      cardJaNumberStyle={cardJaNumberStyle}
+                      onToggle={toggleMarathon}
+                      onReorder={reorderMarathon}
+                      onQuickSelect={applyQuickSelect}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
           )}
+
+          <div className="customizer-footer">
+            <button
+              type="button"
+              className="customizer-reset-btn"
+              onClick={resetAchievementCardSettings}
+            >
+              Reset to defaults
+            </button>
+          </div>
         </div>
       )}
     </FadeSection>
   );
 }
 
-function CardFormatSettings() {
+function CardFormatSettings({ showNickname }: { showNickname: boolean }) {
   const {
     cardLanguage,
     setCardLanguage,
@@ -174,36 +235,24 @@ function CardFormatSettings() {
     setCardJaNumberStyle,
     cardRoundNumbers,
     setCardRoundNumbers,
+    cardNicknameCase,
+    setCardNicknameCase,
   } = useStore();
 
   return (
     <div className="customizer-format-grid">
-      <div className="customizer-format-language">
-        <ToggleGroup
-          label="Card Language"
-          value={cardLanguage}
-          options={[
-            { value: 'en', label: 'English' },
-            { value: 'ja', label: '日本語' },
-          ]}
-          onChange={setCardLanguage}
-        />
-
-        {cardLanguage === 'ja' && (
-          <ToggleGroup
-            label="Number Style"
-            value={cardJaNumberStyle}
-            options={[
-              { value: 'words', label: 'Words' },
-              { value: 'numbers', label: 'Numbers' },
-            ]}
-            onChange={setCardJaNumberStyle}
-          />
-        )}
-      </div>
+      <ToggleGroup
+        label="Card language"
+        value={cardLanguage}
+        options={[
+          { value: 'en', label: 'English' },
+          { value: 'ja', label: '日本語' },
+        ]}
+        onChange={setCardLanguage}
+      />
 
       <ToggleGroup
-        label="Number Display"
+        label="Number display"
         value={cardRoundNumbers ? 'rounded' : 'exact'}
         options={[
           { value: 'exact', label: 'Exact' },
@@ -211,6 +260,20 @@ function CardFormatSettings() {
         ]}
         onChange={(value) => setCardRoundNumbers(value === 'rounded')}
       />
+
+      {cardLanguage === 'ja' && (
+        <ToggleGroup
+          label="Number style"
+          value={cardJaNumberStyle}
+          options={[
+            { value: 'words', label: 'Words' },
+            { value: 'numbers', label: 'Numbers' },
+          ]}
+          onChange={setCardJaNumberStyle}
+        />
+      )}
+
+      {showNickname && <NicknameToggle value={cardNicknameCase} onChange={setCardNicknameCase} />}
     </div>
   );
 }
@@ -257,14 +320,14 @@ function VolumeConversionSettings({
 
   return (
     <div className="volume-conversion-advanced">
-      <h3 className="customizer-section-label">Pages &amp; Characters</h3>
+      <h3 className="customizer-subsection-label">Combine pages &amp; characters</h3>
       <label className="checkbox-label">
         <input
           type="checkbox"
           checked={enabled}
           onChange={(event) => onEnabledChange(event.target.checked)}
         />
-        Combine into one total
+        Merge into one combined total
       </label>
       {!enabled && (
         <p className="volume-conversion-hint" id={ratioHintId}>
@@ -276,7 +339,7 @@ function VolumeConversionSettings({
       {enabled && (
         <div className="volume-conversion-options">
           <ToggleGroup
-            label="Show as"
+            label="Show combined as"
             value={displayAs}
             options={[
               { value: 'chars', label: 'Characters' },
@@ -286,7 +349,7 @@ function VolumeConversionSettings({
           />
 
           <div className="customizer-group">
-            <span id={`${ratioInputId}-label`}>Ratio</span>
+            <span id={`${ratioInputId}-label`}>Conversion ratio</span>
             <label className="volume-ratio-input" htmlFor={ratioInputId}>
               <span>1 page =</span>
               <input
@@ -312,7 +375,7 @@ function VolumeConversionSettings({
               <span>characters</span>
             </label>
             <p className="sr-only" id={ratioHintId}>
-              Enter how many characters equal one page when combining reading volume.
+              Enter how many characters equal one page when combining totals.
             </p>
           </div>
         </div>
@@ -330,7 +393,7 @@ function NicknameToggle({
 }) {
   return (
     <ToggleGroup
-      label="Nickname"
+      label="Nickname style"
       value={value}
       options={[
         { value: 'normal', label: 'Regular' },
@@ -350,7 +413,7 @@ function SortModeToggle({
 }) {
   return (
     <ToggleGroup
-      label="Sort History"
+      label="Sort order"
       value={value}
       options={[
         { value: 'chrono', label: 'Chrono' },
@@ -381,7 +444,7 @@ function HistoryOptions({
     <div
       className="customizer-group customizer-options-group"
       role="group"
-      aria-label="Card options"
+      aria-label="History options"
     >
       <span>Options</span>
       <label className="checkbox-label">
@@ -409,33 +472,33 @@ function HistoryOptions({
   );
 }
 
-function MetricChecklist({
+function MetricChecklist<T extends MetricName | SummaryMetricName>({
+  label,
+  ariaLabel,
   metrics,
   enabledMetrics,
   volumeConversionEnabled,
   onToggle,
   onReorder,
 }: {
-  metrics: MetricName[];
-  enabledMetrics: Set<MetricName>;
+  label: string;
+  ariaLabel: string;
+  metrics: T[];
+  enabledMetrics: Set<T>;
   volumeConversionEnabled: boolean;
-  onToggle: (metric: MetricName) => void;
-  onReorder: (metric: MetricName, direction: 'up' | 'down') => void;
+  onToggle: (metric: T) => void;
+  onReorder: (metric: T, direction: 'up' | 'down') => void;
 }) {
-  const displayMetrics = volumeConversionEnabled
-    ? (replacePagesCharsWithVolume(metrics) as MetricName[])
-    : metrics.filter((metric) => metric !== 'volume');
-
-  const volumeLabel = volumeConversionEnabled ? METRIC_LABELS.volume : '';
+  const displayMetrics = metricsOrderForConversion(metrics, volumeConversionEnabled) as T[];
 
   return (
-    <div className="customizer-group" role="group" aria-label="Metrics in history">
-      <span>Metrics in History</span>
+    <div className="customizer-group" role="group" aria-label={ariaLabel}>
+      <span>{label}</span>
       <div className="marathon-checkboxes">
         {displayMetrics.map((metric) => (
           <CheckboxPill
             key={metric}
-            label={metric === 'volume' ? volumeLabel : METRIC_LABELS[metric]}
+            label={METRIC_LABELS[metric]}
             checked={enabledMetrics.has(metric)}
             dimmed={!enabledMetrics.has(metric)}
             onToggle={() => onToggle(metric)}
@@ -451,20 +514,24 @@ function MetricChecklist({
 function MarathonChecklist({
   marathons,
   excludedMarathons,
+  cardLanguage,
+  cardJaNumberStyle,
   onToggle,
   onReorder,
   onQuickSelect,
 }: {
   marathons: string[];
   excludedMarathons: Set<string>;
+  cardLanguage: CardLanguage;
+  cardJaNumberStyle: JaCardNumberStyle;
   onToggle: (marathonName: string) => void;
   onReorder: (marathonName: string, direction: 'up' | 'down') => void;
   onQuickSelect: (type: 'all' | 'none' | 'year') => void;
 }) {
   return (
-    <>
-      <div className="filter-header-row" role="group" aria-label="Include marathons">
-        <span>Include Marathons</span>
+    <div className="customizer-group" role="group" aria-label="Include marathons">
+      <div className="filter-header-row">
+        <span>Included marathons</span>
         <div className="quick-select-buttons" role="group" aria-label="Quick select marathons">
           <button type="button" className="quick-btn" onClick={() => onQuickSelect('all')}>
             All
@@ -481,12 +548,13 @@ function MarathonChecklist({
         {marathons.map((marathonName) => {
           const season = marathonName.split(' ')[0];
           const emoji = seasonEmojis[season] || '';
+          const label = formatMarathonUiLabel(marathonName, cardLanguage, cardJaNumberStyle);
           const isIncluded = !excludedMarathons.has(marathonName);
 
           return (
             <CheckboxPill
               key={marathonName}
-              label={`${emoji} ${marathonName}`}
+              label={`${emoji} ${label}`}
               checked={isIncluded}
               dimmed={!isIncluded}
               onToggle={() => onToggle(marathonName)}
@@ -496,7 +564,7 @@ function MarathonChecklist({
           );
         })}
       </div>
-    </>
+    </div>
   );
 }
 

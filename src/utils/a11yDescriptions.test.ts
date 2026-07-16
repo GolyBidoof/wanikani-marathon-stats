@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { buildAchievementCardDescription, buildChartDescription } from './a11yDescriptions';
+import {
+  buildAchievementCardDescription,
+  buildChartDescription,
+  buildMultiChartDescription,
+} from './a11yDescriptions';
 import type { SummaryDrawContext } from './drawSummaryCard';
+import type { MultiChartSeriesData } from './chartConfig';
 
 describe('buildChartDescription', () => {
   it('reads metric points aloud for screen readers', () => {
@@ -13,6 +18,30 @@ describe('buildChartDescription', () => {
     expect(buildChartDescription('Pages', [], [])).toBe(
       'Chart showing Pages across marathons. No data available.',
     );
+  });
+});
+
+describe('buildMultiChartDescription', () => {
+  it('summarizes multiple metrics and normalization mode', () => {
+    const series: MultiChartSeriesData = {
+      labels: ['Summer 2025', 'Winter 2025'],
+      normalized: true,
+      datasets: [
+        {
+          metric: 'pages',
+          label: 'Pages',
+          rawValues: [10, 20],
+          values: [100, 200],
+          color: '#00aaff',
+          axisId: 'axis-normalized',
+          axisFamily: 'normalized',
+        },
+      ],
+    };
+
+    expect(buildMultiChartDescription(series)).toContain('normalized');
+    expect(buildMultiChartDescription(series)).toContain('Pages');
+    expect(buildMultiChartDescription(series)).toContain('100%');
   });
 });
 

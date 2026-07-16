@@ -2,10 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   getEntryUnifiedVolume,
   getUnifiedVolume,
-  getVolumeChartMetric,
   isVolumeConversionActive,
+  metricsOrderForConversion,
   migrateEnabledMetricsForConversion,
-  replacePagesCharsWithVolume,
 } from './volumeConversion';
 
 describe('isVolumeConversionActive', () => {
@@ -39,30 +38,27 @@ describe('getEntryUnifiedVolume', () => {
   });
 });
 
-describe('getVolumeChartMetric', () => {
-  it('maps display unit to chart metric', () => {
-    expect(getVolumeChartMetric({ enabled: true, displayAs: 'pages', charsPerPage: 500 })).toBe(
-      'pages',
-    );
-    expect(getVolumeChartMetric({ enabled: true, displayAs: 'chars', charsPerPage: 500 })).toBe(
-      'characters',
-    );
-  });
-});
-
-describe('replacePagesCharsWithVolume', () => {
-  it('replaces pages and chars with a single volume metric', () => {
-    expect(replacePagesCharsWithVolume(['time', 'pages', 'chars', 'sources'])).toEqual([
+describe('metricsOrderForConversion', () => {
+  it('keeps pages and chars and inserts combined after them', () => {
+    expect(metricsOrderForConversion(['time', 'pages', 'chars', 'sources'], true)).toEqual([
       'time',
+      'pages',
+      'chars',
       'volume',
       'sources',
     ]);
   });
+
+  it('removes combined when conversion is off', () => {
+    expect(
+      metricsOrderForConversion(['time', 'pages', 'chars', 'volume', 'sources'], false),
+    ).toEqual(['time', 'pages', 'chars', 'sources']);
+  });
 });
 
 describe('migrateEnabledMetricsForConversion', () => {
-  it('swaps pages/chars for volume when enabling conversion', () => {
-    const enabled = new Set(['time', 'pages', 'sources']);
+  it('hides pages and chars by default when enabling conversion', () => {
+    const enabled = new Set(['time', 'pages', 'chars', 'sources']);
     const next = migrateEnabledMetricsForConversion(enabled, true);
 
     expect(next.has('volume')).toBe(true);
@@ -71,7 +67,7 @@ describe('migrateEnabledMetricsForConversion', () => {
   });
 
   it('restores pages and chars when disabling conversion', () => {
-    const enabled = new Set(['time', 'volume']);
+    const enabled = new Set(['time', 'volume', 'sources']);
     const next = migrateEnabledMetricsForConversion(enabled, false);
 
     expect(next.has('volume')).toBe(false);

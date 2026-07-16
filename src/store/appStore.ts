@@ -7,27 +7,42 @@ import type {
   NicknameCase,
   SortMode,
   StoreContextType,
+  SummaryMetricName,
   VolumeDisplayUnit,
 } from '../types';
 import {
   DEFAULT_CHARS_PER_PAGE,
+  metricsOrderForConversion,
   migrateEnabledMetricsForConversion,
 } from '../utils/volumeConversion';
-import { loadPreferences } from '../utils/preferences';
+import { loadPreferences, getDefaultPreferences } from '../utils/preferences';
 
 function createInitialAppearance() {
   const prefs = loadPreferences();
+  const conversionEnabled = prefs.volumeConversion.enabled;
   const enabledMetrics = migrateEnabledMetricsForConversion(
     new Set(prefs.enabledMetrics),
-    prefs.volumeConversion.enabled,
+    conversionEnabled,
   ) as Set<MetricName>;
+  const enabledSummaryMetrics = migrateEnabledMetricsForConversion(
+    new Set(prefs.enabledSummaryMetrics),
+    conversionEnabled,
+  ) as Set<SummaryMetricName>;
 
   return {
     currentBg: prefs.currentBg,
     currentAccentColor: prefs.currentAccentColor,
     currentSortMode: prefs.currentSortMode as SortMode,
     enabledMetrics,
-    userMetricsOrder: prefs.userMetricsOrder,
+    enabledSummaryMetrics,
+    userMetricsOrder: metricsOrderForConversion(
+      prefs.userMetricsOrder,
+      conversionEnabled,
+    ) as MetricName[],
+    summaryMetricsOrder: metricsOrderForConversion(
+      prefs.summaryMetricsOrder,
+      conversionEnabled,
+    ) as SummaryMetricName[],
     showHistory: prefs.showHistory,
     filterTotals: prefs.filterTotals,
     cardLanguage: prefs.cardLanguage as CardLanguage,
@@ -86,6 +101,23 @@ export const useAppStore = create<StoreContextType>((set, _get) => ({
       return { enabledMetrics: next };
     }),
 
+  enabledSummaryMetrics: initial.enabledSummaryMetrics,
+  setEnabledSummaryMetrics: (metrics) =>
+    set((state) => ({
+      enabledSummaryMetrics: applySet(
+        metrics,
+        state.enabledSummaryMetrics,
+      ) as Set<SummaryMetricName>,
+    })),
+
+  toggleSummaryMetric: (metric) =>
+    set((state) => {
+      const next = new Set(state.enabledSummaryMetrics);
+      if (next.has(metric)) next.delete(metric);
+      else next.add(metric);
+      return { enabledSummaryMetrics: next };
+    }),
+
   excludedMarathons: new Set<string>(),
   setExcludedMarathons: (marathons) =>
     set((state) => ({
@@ -102,6 +134,9 @@ export const useAppStore = create<StoreContextType>((set, _get) => ({
 
   userMetricsOrder: initial.userMetricsOrder,
   setUserMetricsOrder: (order) => set({ userMetricsOrder: order }),
+
+  summaryMetricsOrder: initial.summaryMetricsOrder,
+  setSummaryMetricsOrder: (order) => set({ summaryMetricsOrder: order }),
 
   showHistory: initial.showHistory,
   setShowHistory: (show) => set({ showHistory: show }),
@@ -129,6 +164,15 @@ export const useAppStore = create<StoreContextType>((set, _get) => ({
         state.enabledMetrics,
         enabled,
       ) as Set<MetricName>,
+      enabledSummaryMetrics: migrateEnabledMetricsForConversion(
+        state.enabledSummaryMetrics,
+        enabled,
+      ) as Set<SummaryMetricName>,
+      userMetricsOrder: metricsOrderForConversion(state.userMetricsOrder, enabled) as MetricName[],
+      summaryMetricsOrder: metricsOrderForConversion(
+        state.summaryMetricsOrder,
+        enabled,
+      ) as SummaryMetricName[],
     })),
 
   setVolumeDisplayAs: (displayAs: VolumeDisplayUnit) =>
@@ -144,4 +188,23 @@ export const useAppStore = create<StoreContextType>((set, _get) => ({
           : DEFAULT_CHARS_PER_PAGE;
       return { volumeConversion: { ...state.volumeConversion, charsPerPage: safeValue } };
     }),
+
+  resetAchievementCardSettings: () => {
+    const defaults = getDefaultPreferences();
+    set({
+      currentSortMode: defaults.currentSortMode,
+      enabledMetrics: new Set(defaults.enabledMetrics),
+      enabledSummaryMetrics: new Set(defaults.enabledSummaryMetrics),
+      userMetricsOrder: [...defaults.userMetricsOrder],
+      summaryMetricsOrder: [...defaults.summaryMetricsOrder],
+      showHistory: defaults.showHistory,
+      filterTotals: defaults.filterTotals,
+      cardLanguage: defaults.cardLanguage,
+      cardNicknameCase: defaults.cardNicknameCase,
+      cardJaNumberStyle: defaults.cardJaNumberStyle,
+      cardRoundNumbers: defaults.cardRoundNumbers,
+      volumeConversion: { ...defaults.volumeConversion },
+      excludedMarathons: new Set(),
+    });
+  },
 }));

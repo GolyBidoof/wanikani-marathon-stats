@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatCardNumber, formatSeasonLabel } from './cardCopy';
+import { formatCardNumber, formatMarathonUiLabel, formatSeasonLabel } from './cardCopy';
 
 describe('formatCardNumber', () => {
   it('formats exact English numbers', () => {
@@ -29,5 +29,16 @@ describe('formatSeasonLabel', () => {
 
   it('formats Japanese season labels', () => {
     expect(formatSeasonLabel('Summer', '2026', 'ja')).toBe('26年夏至');
+  });
+});
+
+describe('formatMarathonUiLabel', () => {
+  it('keeps English marathon names as-is', () => {
+    expect(formatMarathonUiLabel('Summer 2025', 'en')).toBe('Summer 2025');
+  });
+
+  it('formats Japanese marathon names with year and term', () => {
+    expect(formatMarathonUiLabel('Summer 2025', 'ja')).toBe('2025年夏至');
+    expect(formatMarathonUiLabel('Autumn 2025', 'ja', 'numbers')).toBe('2025秋分');
   });
 });

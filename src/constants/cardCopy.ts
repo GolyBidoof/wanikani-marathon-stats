@@ -107,10 +107,12 @@ export const cardCopy: Record<
   {
     tagline: string;
     totalTimeRead: string;
+    averageTime: string;
     marathons: string;
     participants: string;
     pages: string;
     chars: string;
+    volume: string;
     sources: string;
     sidebarNone: string;
     sidebarAllTime: string;
@@ -124,10 +126,12 @@ export const cardCopy: Record<
   en: {
     tagline: 'WaniKani Reading Marathon',
     totalTimeRead: 'TOTAL TIME READ',
+    averageTime: 'avg',
     marathons: 'MARATHONS',
     participants: 'PARTICIPANTS',
     pages: 'PAGES',
     chars: 'CHARS',
+    volume: 'COMBINED',
     sources: 'SOURCES',
     sidebarNone: 'NONE',
     sidebarAllTime: 'ALL TIME',
@@ -140,10 +144,12 @@ export const cardCopy: Record<
   ja: {
     tagline: 'WaniKani 読書マラソン',
     totalTimeRead: '合計読書時間',
+    averageTime: '平均',
     marathons: '参加回数',
     participants: '参加者数',
     pages: 'ページ数',
     chars: '文字数',
+    volume: '換算合計',
     sources: '作品数',
     sidebarNone: 'なし',
     sidebarAllTime: '全期間',
@@ -191,6 +197,18 @@ export function formatMarathonTitle(
   }
 
   return marathonName.toUpperCase();
+}
+
+/** UI label for a marathon (theme buttons, history cards). Keeps English casing natural. */
+export function formatMarathonUiLabel(
+  marathonName: string,
+  language: CardLanguage,
+  jaNumberStyle: JaCardNumberStyle = 'words',
+): string {
+  if (language === 'ja') {
+    return formatMarathonTitle(marathonName, language, jaNumberStyle);
+  }
+  return marathonName;
 }
 
 export function formatCardTitle(

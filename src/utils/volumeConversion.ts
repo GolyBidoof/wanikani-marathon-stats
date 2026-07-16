@@ -31,23 +31,33 @@ export function getEntryUnifiedVolume(
   return getUnifiedVolume(pages, chars, config.displayAs, config.charsPerPage);
 }
 
-export function getVolumeChartMetric(config: VolumeConversionConfig): 'pages' | 'characters' {
-  return config.displayAs === 'pages' ? 'pages' : 'characters';
-}
-
-export function replacePagesCharsWithVolume(metrics: Iterable<string>): string[] {
+export function metricsOrderForConversion(
+  metrics: Iterable<string>,
+  conversionEnabled: boolean,
+): string[] {
   const result: string[] = [];
-  let volumeAdded = false;
+  let volumeIncluded = false;
 
   for (const metric of metrics) {
-    if (metric === 'pages' || metric === 'chars') {
-      if (!volumeAdded) {
+    if (metric === 'volume') {
+      if (conversionEnabled && !volumeIncluded) {
         result.push('volume');
-        volumeAdded = true;
+        volumeIncluded = true;
       }
       continue;
     }
     result.push(metric);
+  }
+
+  if (conversionEnabled && !volumeIncluded) {
+    const charsIndex = result.indexOf('chars');
+    const pagesIndex = result.indexOf('pages');
+    const insertAt = Math.max(charsIndex, pagesIndex) + 1;
+    if (insertAt <= 0) {
+      result.push('volume');
+    } else {
+      result.splice(insertAt, 0, 'volume');
+    }
   }
 
   return result;
@@ -60,10 +70,9 @@ export function migrateEnabledMetricsForConversion(
   const next = new Set(enabled);
 
   if (conversionEnabled) {
-    const hadVolumeMetric = next.has('pages') || next.has('chars');
     next.delete('pages');
     next.delete('chars');
-    if (hadVolumeMetric) next.add('volume');
+    next.add('volume');
     return next;
   }
 
