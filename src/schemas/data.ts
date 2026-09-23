@@ -7,6 +7,8 @@ export const ParticipantEntrySchema = z.object({
   characters: z.union([z.number(), z.string()]).optional(),
   sources: z.union([z.number(), z.string()]).optional(),
   url: z.string().optional(),
+  emoji: z.string().optional(),
+  emojiImage: z.string().optional(),
 });
 
 export const AllStatsSchema = z.record(z.string(), z.array(ParticipantEntrySchema));

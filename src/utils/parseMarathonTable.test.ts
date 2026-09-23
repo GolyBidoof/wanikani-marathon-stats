@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  isSummaryRow,
   marathonNameToGifFilename,
+  parseBadgeCell,
   parseMarathonTable,
   parseNumericCell,
   parseTimeCell,
   parseUserCell,
+  splitTableRow,
 } from './parseMarathonTable';
 
 describe('parseUserCell', () => {
@@ -99,6 +102,63 @@ describe('parseMarathonTable', () => {
         sources: 9,
       },
     ]);
+  });
+
+  it('skips tally rows such as Total and Goal', () => {
+    const markdown = `
+| User | Time | Pages | Characters | Sources |  |
+|----|---:|---:|---:|---:|----|
+| Ditto20 | 5:00:00 |  | 81253 | 1 |  |
+| **Total**: | 5:00:00 |  | 81253 | 1 |  |
+| **Goal 1**: | ~~213:11:00~~ | ~~7396~~ | 555.4k |  |  |
+| **Goal 2**: | 318:45:00 | 12905 | 664.2k |  |  |
+| Cathm2 | 5:00:00 | 113 |  | 3 |  |
+`;
+
+    const { participants, warnings } = parseMarathonTable(markdown);
+
+    expect(warnings).toEqual([]);
+    expect(participants.map((participant) => participant.user)).toEqual(['Ditto20', 'Cathm2']);
+  });
+});
+
+describe('isSummaryRow', () => {
+  it('recognizes total and goal markers', () => {
+    expect(isSummaryRow(['**Total**:', '313:01:45', '11588'])).toBe(true);
+    expect(isSummaryRow(['Total', '313:01:45', '11588'])).toBe(true);
+    expect(isSummaryRow(['**Goal 2**:', '318:45:00'])).toBe(true);
+    expect(isSummaryRow(['Ditto20', '5:00:00'])).toBe(false);
+  });
+});
+
+describe('parseBadgeCell', () => {
+  it('keeps shortcodes and literal emoji', () => {
+    expect(parseBadgeCell(':ram:')).toEqual({ emoji: ':ram:' });
+    expect(parseBadgeCell('🐧')).toEqual({ emoji: '🐧' });
+    expect(parseBadgeCell(':herb: :strawberry:')).toEqual({ emoji: ':herb: :strawberry:' });
+  });
+
+  it('maps an inline image to a local badges/ path', () => {
+    expect(
+      parseBadgeCell(
+        '![trunky_rolling\\|690x448, 7%](https://global.discourse-cdn.com/x/031c6cea.gif)',
+      ),
+    ).toEqual({ emojiImage: 'badges/trunky_rolling.gif' });
+  });
+
+  it('treats empty and non-emoji cells as no badge', () => {
+    expect(parseBadgeCell('')).toEqual({});
+    expect(parseBadgeCell('-')).toEqual({});
+    expect(parseBadgeCell('trunky')).toEqual({});
+  });
+});
+
+describe('splitTableRow', () => {
+  it('keeps escaped pipes inside a single cell', () => {
+    const cells = splitTableRow(
+      '|trunklayer | 04:05:00 | 79 |  | 3 | ![trunky_rolling\\|690x448](https://cdn/x.gif) |  |  |',
+    );
+    expect(cells?.[5]).toBe('![trunky_rolling\\|690x448](https://cdn/x.gif)');
   });
 });
 

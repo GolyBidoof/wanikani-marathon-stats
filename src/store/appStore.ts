@@ -55,6 +55,7 @@ function createInitialAppearance() {
     cardNicknameCase: prefs.cardNicknameCase as NicknameCase,
     cardJaNumberStyle: prefs.cardJaNumberStyle as JaCardNumberStyle,
     cardRoundNumbers: prefs.cardRoundNumbers,
+    cardShowEmoji: prefs.cardShowEmoji,
     volumeConversion: prefs.volumeConversion,
   };
 }
@@ -169,6 +170,9 @@ export const useAppStore = create<StoreContextType>((set, get) => ({
   cardRoundNumbers: initial.cardRoundNumbers,
   setCardRoundNumbers: (round) => set({ cardRoundNumbers: round }),
 
+  cardShowEmoji: initial.cardShowEmoji,
+  setCardShowEmoji: (show) => set({ cardShowEmoji: show }),
+
   volumeConversion: initial.volumeConversion,
   setVolumeConversionEnabled: (enabled) =>
     set((state) => ({
@@ -216,6 +220,7 @@ export const useAppStore = create<StoreContextType>((set, get) => ({
       cardNicknameCase: defaults.cardNicknameCase,
       cardJaNumberStyle: defaults.cardJaNumberStyle,
       cardRoundNumbers: defaults.cardRoundNumbers,
+      cardShowEmoji: defaults.cardShowEmoji,
       volumeConversion: { ...defaults.volumeConversion },
       excludedMarathons: new Set(),
     });

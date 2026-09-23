@@ -10,6 +10,10 @@ export interface ParticipantEntry {
   characters?: number | string;
   sources?: number | string;
   url?: string;
+  /** The reader's badge from that marathon's results table (":ram:" or "🐧"). */
+  emoji?: string;
+  /** Badge drawn as an image instead of a character, relative to public/. */
+  emojiImage?: string;
 }
 
 export type AllStats = Record<string, ParticipantEntry[]>;
@@ -72,6 +76,8 @@ export interface StoreContextType {
   setCardJaNumberStyle: (style: JaCardNumberStyle) => void;
   cardRoundNumbers: boolean;
   setCardRoundNumbers: (round: boolean) => void;
+  cardShowEmoji: boolean;
+  setCardShowEmoji: (show: boolean) => void;
   volumeConversion: VolumeConversionConfig;
   setVolumeConversionEnabled: (enabled: boolean) => void;
   setVolumeDisplayAs: (displayAs: VolumeDisplayUnit) => void;

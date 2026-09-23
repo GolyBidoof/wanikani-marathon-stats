@@ -58,27 +58,55 @@ describe('buildMultiChartDescription', () => {
   });
 });
 
+function buildCardContext(overrides: Partial<SummaryDrawContext> = {}): SummaryDrawContext {
+  return {
+    state: {
+      name: 'Alice',
+      count: 2,
+      pages: 30,
+      chars: 3000,
+      volume: null,
+      sources: 3,
+      time: 3.5,
+      history: ['Summer 2025', 'Winter 2025'],
+      emoji: [],
+      emojiImage: null,
+    },
+    badgeImagePaths: [],
+    badgeLabel: null,
+    currentQuery: 'Alice',
+    cardLanguage: 'ja',
+    volumeConversion: { enabled: false, displayAs: 'chars', charsPerPage: 300 },
+    ...overrides,
+  } as SummaryDrawContext;
+}
+
 describe('buildAchievementCardDescription', () => {
   it('describes a user achievement card including Japanese mode', () => {
-    const drawContext = {
-      state: {
-        name: 'Alice',
-        count: 2,
-        pages: 30,
-        chars: 3000,
-        sources: 3,
-        time: 3.5,
-        history: ['Summer 2025', 'Winter 2025'],
-      },
-      currentQuery: 'Alice',
-      cardLanguage: 'ja',
-      volumeConversion: { enabled: false, displayAs: 'chars', charsPerPage: 300 },
-    } as SummaryDrawContext;
+    const drawContext = buildCardContext();
 
     expect(buildAchievementCardDescription(drawContext)).toContain(
       "Achievement card for Alice's readathon statistics",
     );
     expect(buildAchievementCardDescription(drawContext)).toContain('Card displayed in Japanese.');
     expect(buildAchievementCardDescription(drawContext)).toContain('Marathon history includes 2');
+  });
+
+  it('names the badge only when it is actually shown', () => {
+    const withBadge = buildCardContext();
+    withBadge.cardShowEmoji = true;
+    withBadge.state.emoji = ['🐏'];
+    withBadge.badgeLabel = 'ram';
+    expect(buildAchievementCardDescription(withBadge)).toContain('emoji badge (ram)');
+
+    const hidden = buildCardContext();
+    hidden.cardShowEmoji = false;
+    hidden.state.emoji = ['🐏'];
+    hidden.badgeLabel = 'ram';
+    expect(buildAchievementCardDescription(hidden)).not.toContain('emoji badge');
+
+    const noBadge = buildCardContext();
+    noBadge.cardShowEmoji = true;
+    expect(buildAchievementCardDescription(noBadge)).not.toContain('emoji badge');
   });
 });

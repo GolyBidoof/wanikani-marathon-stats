@@ -49,9 +49,14 @@ export function buildAchievementCardDescription(ctx: SummaryDrawContext): string
 
   const languageNote = cardLanguage === 'ja' ? ` ${i18n.t('a11y.cardDisplayedJapanese')}` : '';
 
+  const badgeNote =
+    ctx.cardShowEmoji && ctx.badgeLabel
+      ? ` ${i18n.t('a11y.badgeShown', { badge: ctx.badgeLabel })}`
+      : '';
+
   return i18n.t('a11y.achievementCardDescription', {
     subject,
-    stats: `${statParts.join('. ')}.${historyNote}${languageNote}`,
+    stats: `${statParts.join('. ')}.${historyNote}${languageNote}${badgeNote}`,
   });
 }
 

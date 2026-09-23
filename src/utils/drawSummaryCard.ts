@@ -33,6 +33,10 @@ export interface SummaryCardState {
   volume: number | null;
   sources: number;
   history: string[];
+  /** Resolved badge characters; empty when the reader has no text badge. */
+  emoji: string[];
+  /** Local badge image (relative to public/), used instead of a character. */
+  emojiImage: string | null;
 }
 
 export interface SummaryDrawContext {
@@ -45,12 +49,17 @@ export interface SummaryDrawContext {
   metricsOrder: MetricName[];
   enabledSummaryMetrics: Set<SummaryMetricName>;
   summaryMetricsOrder: SummaryMetricName[];
+  /** Local art for each badge slot, in draw order. */
+  badgeImagePaths: string[];
+  /** Name for the badge in screen-reader text, e.g. "ram" or "trunky rolling". */
+  badgeLabel: string | null;
   excludedMarathons: Set<string>;
   allStats: AllStats;
   cardLanguage: CardLanguage;
   cardNicknameCase: NicknameCase;
   cardJaNumberStyle: JaCardNumberStyle;
   cardRoundNumbers: boolean;
+  cardShowEmoji: boolean;
   volumeConversion: VolumeConversionConfig;
 }
 
@@ -154,28 +163,30 @@ function drawCardChrome(canvasCtx: CanvasRenderingContext2D, accentColor: string
   );
 }
 
-function drawHeaderSection(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawContext) {
+/** Draws the title and reports how wide it ended up, so the badge can follow it. */
+function drawHeaderSection(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawContext): number {
   const { state, currentQuery, cardLanguage, cardNicknameCase, cardJaNumberStyle } = ctx;
   const copy = cardCopy[cardLanguage];
 
   canvasCtx.textAlign = 'left';
+  canvasCtx.textBaseline = 'alphabetic';
   canvasCtx.font = withJapaneseFonts(CANVAS_LAYOUT.fontTitle, cardLanguage);
   canvasCtx.fillStyle = '#ffffff';
-  canvasCtx.fillText(
-    formatCardTitle(
-      state.name,
-      cardLanguage,
-      Boolean(currentQuery),
-      cardNicknameCase,
-      cardJaNumberStyle,
-    ),
-    CANVAS_LAYOUT.leftX,
-    85,
+  const title = formatCardTitle(
+    state.name,
+    cardLanguage,
+    Boolean(currentQuery),
+    cardNicknameCase,
+    cardJaNumberStyle,
   );
+  canvasCtx.fillText(title, CANVAS_LAYOUT.leftX, CANVAS_LAYOUT.titleBaselineY);
+  const titleWidth = canvasCtx.measureText(title).width;
 
   canvasCtx.font = withJapaneseFonts(CANVAS_LAYOUT.fontTagline, cardLanguage);
   canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-  canvasCtx.fillText(copy.tagline, CANVAS_LAYOUT.leftX, 110);
+  canvasCtx.fillText(copy.tagline, CANVAS_LAYOUT.leftX, CANVAS_LAYOUT.taglineBaselineY);
+
+  return titleWidth;
 }
 
 function drawCenterTime(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawContext) {
@@ -272,6 +283,117 @@ function drawStatsRow(canvasCtx: CanvasRenderingContext2D, ctx: SummaryDrawConte
     canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     canvasCtx.fillText(stat.label, x, CANVAS_LAYOUT.statY + 18);
   });
+}
+
+/** Just past the name, outlined along its own silhouette so it reads on any background. */
+function drawEmojiBadge(
+  canvasCtx: CanvasRenderingContext2D,
+  ctx: SummaryDrawContext,
+  badgeImages: Array<CanvasImageSource | null>,
+  titleWidth: number,
+) {
+  const { state, cardShowEmoji } = ctx;
+  if (!cardShowEmoji) return;
+
+  const slots: Array<{ char: string | null; image: CanvasImageSource | null }> = [];
+  if (state.emojiImage) {
+    slots.push({ char: null, image: badgeImages[0] ?? null });
+  } else {
+    state.emoji.forEach((char, index) => slots.push({ char, image: badgeImages[index] ?? null }));
+  }
+  if (slots.length === 0) return;
+
+  const { leftX, badgeGapX, badgeSlotSize, badgeSlotGap, badgeCenterOffsetY } = CANVAS_LAYOUT;
+  const startX = leftX + titleWidth + badgeGapX;
+  const centerY = CANVAS_LAYOUT.titleBaselineY + badgeCenterOffsetY;
+
+  canvasCtx.save();
+  canvasCtx.textAlign = 'center';
+  canvasCtx.textBaseline = 'middle';
+  canvasCtx.font = CANVAS_LAYOUT.fontBadge;
+  // The badge manages its own shadow; earlier sections leave one behind.
+  canvasCtx.shadowColor = 'transparent';
+  canvasCtx.shadowBlur = 0;
+  canvasCtx.shadowOffsetX = 0;
+  canvasCtx.shadowOffsetY = 0;
+
+  slots.forEach((slot, index) => {
+    const centerX = startX + index * (badgeSlotSize + badgeSlotGap) + badgeSlotSize / 2;
+
+    if (slot.image) {
+      const image = slot.image as HTMLImageElement;
+      const sourceWidth = image.naturalWidth || 1;
+      const sourceHeight = image.naturalHeight || 1;
+      const scale = Math.min(badgeSlotSize / sourceWidth, badgeSlotSize / sourceHeight);
+      const drawWidth = sourceWidth * scale;
+      const drawHeight = sourceHeight * scale;
+      const drawX = centerX - drawWidth / 2;
+      const drawY = centerY - drawHeight / 2;
+
+      const outline = badgeOutline(image, CANVAS_LAYOUT.badgeOutlineColor);
+      if (outline) {
+        for (const [offsetX, offsetY] of BADGE_OUTLINE_OFFSETS) {
+          canvasCtx.drawImage(
+            outline,
+            drawX + offsetX * CANVAS_LAYOUT.badgeOutlineWidth,
+            drawY + offsetY * CANVAS_LAYOUT.badgeOutlineWidth,
+            drawWidth,
+            drawHeight,
+          );
+        }
+      }
+
+      canvasCtx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+      return;
+    }
+
+    // Fallback while the vendored glyph loads (or if its asset is missing).
+    if (slot.char) {
+      canvasCtx.shadowColor = CANVAS_LAYOUT.badgeOutlineColor;
+      canvasCtx.shadowBlur = 6;
+      canvasCtx.fillStyle = '#ffffff';
+      canvasCtx.fillText(slot.char, centerX, centerY);
+      canvasCtx.shadowBlur = 0;
+    }
+  });
+
+  canvasCtx.restore();
+}
+
+const BADGE_OUTLINE_OFFSETS: Array<[number, number]> = [
+  [-1, 0],
+  [1, 0],
+  [0, -1],
+  [0, 1],
+  [-1, -1],
+  [1, -1],
+  [-1, 1],
+  [1, 1],
+];
+
+const badgeOutlineCache = new WeakMap<HTMLImageElement, HTMLCanvasElement>();
+
+function badgeOutline(image: HTMLImageElement, color: string): HTMLCanvasElement | null {
+  const cached = badgeOutlineCache.get(image);
+  if (cached) return cached;
+
+  const width = image.naturalWidth;
+  const height = image.naturalHeight;
+  if (width <= 0 || height <= 0) return null;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d');
+  if (!context) return null;
+
+  context.drawImage(image, 0, 0, width, height);
+  context.globalCompositeOperation = 'source-in';
+  context.fillStyle = color;
+  context.fillRect(0, 0, width, height);
+
+  badgeOutlineCache.set(image, canvas);
+  return canvas;
 }
 
 function buildHistoryMetricLine(marathonName: string, ctx: SummaryDrawContext): string {
@@ -403,6 +525,7 @@ export function drawSummaryCard(
   summaryCanvas: HTMLCanvasElement,
   bgImage: CanvasImageSource | null,
   ctx: SummaryDrawContext,
+  badgeImages: Array<CanvasImageSource | null> = [],
 ) {
   if (!ctx.state.name) return;
 
@@ -421,10 +544,11 @@ export function drawSummaryCard(
 
   drawBackgroundImage(canvasCtx, bgImage);
   drawCardChrome(canvasCtx, ctx.accentColor);
-  drawHeaderSection(canvasCtx, ctx);
+  const titleWidth = drawHeaderSection(canvasCtx, ctx);
   drawCenterTime(canvasCtx, ctx);
   drawStatsRow(canvasCtx, ctx);
   drawHistorySidebar(canvasCtx, ctx);
+  drawEmojiBadge(canvasCtx, ctx, badgeImages, titleWidth);
 
   canvasCtx.restore();
 }

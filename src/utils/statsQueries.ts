@@ -51,6 +51,24 @@ export function userParticipatedInMarathon(
   return Boolean(findUserEntry(allStats, marathonName, username));
 }
 
+/** A reader's badge is the most recent one they declared. */
+export function findLatestUserBadge(
+  allStats: AllStats,
+  username: string,
+): { emoji?: string; emojiImage?: string } | undefined {
+  if (!username) return undefined;
+
+  const marathons = getMarathonOrder(allStats);
+  for (let index = marathons.length - 1; index >= 0; index--) {
+    const entry = findUserEntry(allStats, marathons[index], username);
+    if (entry?.emoji || entry?.emojiImage) {
+      return { emoji: entry.emoji, emojiImage: entry.emojiImage };
+    }
+  }
+
+  return undefined;
+}
+
 export function getMetricValue(
   entry: ParticipantEntry | undefined,
   metric: MetricName | ChartMetric | undefined,

@@ -4,6 +4,11 @@
     "accent": "#ea8e34",
     "extracted": "#e1a24a"
   },
+  "autumn2026.gif": {
+    "preview": "card-previews/autumn2026.webp",
+    "accent": "#c59831",
+    "extracted": "#acb046"
+  },
   "fall2024.gif": {
     "preview": "card-previews/fall2024.webp",
     "accent": "#d77f81",

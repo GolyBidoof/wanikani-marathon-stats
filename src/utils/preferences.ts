@@ -35,6 +35,7 @@ export interface PersistedPreferences {
   cardNicknameCase: NicknameCase;
   cardJaNumberStyle: JaCardNumberStyle;
   cardRoundNumbers: boolean;
+  cardShowEmoji: boolean;
   volumeConversion: VolumeConversionConfig;
 }
 
@@ -70,6 +71,7 @@ function buildDefaultPreferences(
     cardNicknameCase: 'uppercase',
     cardJaNumberStyle: 'words',
     cardRoundNumbers: false,
+    cardShowEmoji: true,
     volumeConversion: {
       enabled: false,
       displayAs: 'chars',
@@ -148,6 +150,8 @@ function sanitizePreferences(raw: unknown): PersistedPreferences {
       typeof data.cardRoundNumbers === 'boolean'
         ? data.cardRoundNumbers
         : defaults.cardRoundNumbers,
+    cardShowEmoji:
+      typeof data.cardShowEmoji === 'boolean' ? data.cardShowEmoji : defaults.cardShowEmoji,
     volumeConversion: {
       enabled:
         typeof data.volumeConversion?.enabled === 'boolean'

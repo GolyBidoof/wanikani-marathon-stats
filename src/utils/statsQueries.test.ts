@@ -3,6 +3,7 @@ import {
   buildMultiChartSeries,
   computeCommunityTotals,
   computeUserTotals,
+  findLatestUserBadge,
   findUserEntry,
   normalizeUsername,
   sortMarathonNames,
@@ -98,5 +99,33 @@ describe('buildMultiChartSeries', () => {
     expect(series.labels).toEqual(['2025年夏至', '2025年冬至']);
     expect(series.datasets[0]?.label).toBe('ページ数');
     expect(series.language).toBe('ja');
+  });
+});
+
+describe('findLatestUserBadge', () => {
+  const badgeStats: AllStats = {
+    'Winter 2025': [{ user: 'Alice', emoji: ':eyes:', pages: 10 }],
+    'Summer 2025': [{ user: 'Alice', pages: 20 }],
+    'Autumn 2026': [{ user: 'Alice', emojiImage: 'badges/trunky_rolling.gif', pages: 30 }],
+  };
+
+  it('uses the most recent badge a reader declared', () => {
+    expect(findLatestUserBadge(badgeStats, 'Alice')).toEqual({
+      emoji: undefined,
+      emojiImage: 'badges/trunky_rolling.gif',
+    });
+  });
+
+  it('falls back to an earlier marathon when the latest has no badge', () => {
+    const stats: AllStats = {
+      'Winter 2025': [{ user: 'Alice', emoji: ':ram:', pages: 10 }],
+      'Summer 2025': [{ user: 'Alice', pages: 20 }],
+    };
+    expect(findLatestUserBadge(stats, 'Alice')).toEqual({ emoji: ':ram:', emojiImage: undefined });
+  });
+
+  it('is empty for readers without a badge or without a name', () => {
+    expect(findLatestUserBadge(badgeStats, 'Bob')).toBeUndefined();
+    expect(findLatestUserBadge(badgeStats, '')).toBeUndefined();
   });
 });

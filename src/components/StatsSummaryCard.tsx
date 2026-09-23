@@ -5,6 +5,7 @@ import {
   useSummaryCardVisibility,
   useSummaryDrawContext,
   useGifBackground,
+  useBadgeImages,
   HIDDEN_PROFILE_KEY,
 } from '../hooks/useSummaryCard';
 import { drawSummaryCard } from '../utils/drawSummaryCard';
@@ -114,6 +115,7 @@ export default function StatsSummaryCard({
   }
 
   const drawContext = useSummaryDrawContext(lastDrawKeyRef.current, allStats, allUsers);
+  const badgeImages = useBadgeImages(drawContext.badgeImagePaths);
   const { activeBgRef, isInitialLoad, bgEpoch, resumeAnimator, setOnFrame } =
     useGifBackground(currentBg);
 
@@ -130,8 +132,8 @@ export default function StatsSummaryCard({
     const backgroundCanvas = activeBgRef.current;
     if (!summaryCanvas || !backgroundCanvas || isInitialLoad) return;
     if (!drawContext.state.name || backgroundCanvas.width === 0) return;
-    drawSummaryCard(summaryCanvas, backgroundCanvas, drawContext);
-  }, [activeBgRef, drawContext, isInitialLoad]);
+    drawSummaryCard(summaryCanvas, backgroundCanvas, drawContext, badgeImages);
+  }, [activeBgRef, drawContext, isInitialLoad, badgeImages]);
 
   useLayoutEffect(() => {
     setOnFrame(() => {

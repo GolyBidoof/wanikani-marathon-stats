@@ -79,6 +79,9 @@ const ja: TranslationSchema = {
     nicknameStyle: 'ユーザー名の表記',
     regular: '通常',
     uppercase: '大文字',
+    emojiBadge: '絵文字バッジ',
+    shown: '表示',
+    hidden: '非表示',
     combinePagesAndCharacters: 'ページと文字を合算',
     mergeCombinedTotal: '合計値を1つに統合する',
     conversionHint:
@@ -123,6 +126,7 @@ const ja: TranslationSchema = {
       roundedNumbers: '四捨五入（概算）',
       exactNumbers: '正確な値',
       combinedPagesAndCharacters: 'ページと文字の合算値',
+      emojiHidden: '絵文字バッジ非表示',
     },
   },
   card: {
@@ -218,6 +222,7 @@ const ja: TranslationSchema = {
     perParticipant: '参加者1人',
     historyIncludes: 'マラソン履歴は{{count}}件のイベントを含みます。',
     cardDisplayedJapanese: 'カードは日本語で表示されています。',
+    badgeShown: 'ユーザー名の横に絵文字バッジ（{{badge}}）を表示しています。',
     chartNoData: '履歴チャート。データがありません。',
     chartSingleNoData: '{{metric}}のマラソン間チャート。データがありません。',
     chartSingleDescription: '{{count}}回のマラソンにおける{{metric}}の折れ線グラフ。{{points}}。',

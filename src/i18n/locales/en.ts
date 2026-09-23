@@ -75,6 +75,9 @@ const en = {
     nicknameStyle: 'Nickname style',
     regular: 'Regular',
     uppercase: 'Uppercase',
+    emojiBadge: 'Reader emoji',
+    shown: 'Shown',
+    hidden: 'Hidden',
     combinePagesAndCharacters: 'Combine pages & characters',
     mergeCombinedTotal: 'Merge into one combined total',
     conversionHint:
@@ -118,6 +121,7 @@ const en = {
       roundedNumbers: 'rounded numbers',
       exactNumbers: 'exact numbers',
       combinedPagesAndCharacters: 'combined pages & characters',
+      emojiHidden: 'emoji hidden',
     },
   },
   card: {
@@ -213,6 +217,7 @@ const en = {
     perParticipant: 'participant',
     historyIncludes: 'Marathon history includes {{count}} events.',
     cardDisplayedJapanese: 'Card displayed in Japanese.',
+    badgeShown: 'The reader’s emoji badge ({{badge}}) is shown next to their name.',
     chartNoData: 'History chart. No data available.',
     chartSingleNoData: 'Chart showing {{metric}} across marathons. No data available.',
     chartSingleDescription: 'Line chart of {{metric}} across {{count}} marathons. {{points}}.',

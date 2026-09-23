@@ -1,11 +1,13 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from './StoreContext';
 import { useExactUser } from './useExactUser';
 import {
   computeCommunityTotals,
   computeUserTotals,
+  findLatestUserBadge,
   sortMarathonNames,
 } from '../utils/statsQueries';
+import { describeBadge, emojiAssetPaths, resolveEmojiList } from '../constants/emoji';
 import {
   getUnifiedVolume,
   isVolumeConversionActive,
@@ -84,6 +86,7 @@ export function useSummaryDrawContext(
     cardNicknameCase,
     cardJaNumberStyle,
     cardRoundNumbers,
+    cardShowEmoji,
     volumeConversion,
   } = useStore();
 
@@ -140,6 +143,20 @@ export function useSummaryDrawContext(
   ]);
 
   const cardTitle = isExactMatch ? displayName : selectedMarathon;
+  const badge = useMemo(
+    () => (isExactMatch ? findLatestUserBadge(allStats, exactUsername) : undefined),
+    [isExactMatch, allStats, exactUsername],
+  );
+  const badgeEmoji = useMemo(() => resolveEmojiList(badge?.emoji), [badge]);
+  const badgeImage = badge?.emojiImage ?? null;
+  const badgeLabel = useMemo(
+    () => (badge ? describeBadge(badge.emoji, badge.emojiImage) : null),
+    [badge],
+  );
+  const badgeImagePaths = useMemo(
+    () => (badgeImage ? [badgeImage] : emojiAssetPaths(badge?.emoji ?? '')),
+    [badge, badgeImage],
+  );
   const unifiedVolume = volumeActive
     ? getUnifiedVolume(
         totals.pages,
@@ -160,7 +177,11 @@ export function useSummaryDrawContext(
         volume: unifiedVolume,
         sources: totals.sources,
         history: sortedHistory,
+        emoji: badgeEmoji,
+        emojiImage: badgeImage,
       },
+      badgeImagePaths,
+      badgeLabel,
       currentQuery: exactUsername,
       accentColor: currentAccentColor,
       sortMode: currentSortMode,
@@ -175,12 +196,17 @@ export function useSummaryDrawContext(
       cardNicknameCase,
       cardJaNumberStyle,
       cardRoundNumbers,
+      cardShowEmoji,
       volumeConversion,
     }),
     [
       cardTitle,
       totals,
       sortedHistory,
+      badgeEmoji,
+      badgeImage,
+      badgeImagePaths,
+      badgeLabel,
       exactUsername,
       currentAccentColor,
       currentSortMode,
@@ -195,6 +221,7 @@ export function useSummaryDrawContext(
       cardNicknameCase,
       cardJaNumberStyle,
       cardRoundNumbers,
+      cardShowEmoji,
       volumeConversion,
       unifiedVolume,
     ],
@@ -203,6 +230,64 @@ export function useSummaryDrawContext(
 
 function createBackgroundCanvas() {
   return document.createElement('canvas');
+}
+
+const badgeImageCache = new Map<string, HTMLImageElement>();
+
+function readyBadgeImage(path: string): HTMLImageElement | null {
+  const image = badgeImageCache.get(path);
+  return image && image.complete && image.naturalWidth > 0 ? image : null;
+}
+
+/** Loads a reader's badge art so the (synchronous) card draw can use it. */
+export function useBadgeImages(paths: string[]): Array<HTMLImageElement | null> {
+  const [images, setImages] = useState<Array<HTMLImageElement | null>>(() =>
+    paths.map(readyBadgeImage),
+  );
+
+  useEffect(() => {
+    if (paths.length === 0) {
+      setImages([]);
+      return;
+    }
+
+    let cancelled = false;
+    const loadedListeners: Array<{ image: HTMLImageElement; listener: () => void }> = [];
+    const refresh = () => {
+      if (cancelled) return;
+      setImages((previous) => {
+        const next = paths.map(readyBadgeImage);
+        const unchanged =
+          previous.length === next.length && previous.every((image, i) => image === next[i]);
+        return unchanged ? previous : next;
+      });
+    };
+
+    for (const path of paths) {
+      let image = badgeImageCache.get(path);
+      if (!image) {
+        image = new Image();
+        image.src = `${import.meta.env.BASE_URL}${path}`;
+        badgeImageCache.set(path, image);
+      }
+      if (image.complete && image.naturalWidth > 0) continue;
+
+      const listener = () => refresh();
+      image.addEventListener('load', listener);
+      loadedListeners.push({ image, listener });
+    }
+
+    refresh();
+
+    return () => {
+      cancelled = true;
+      for (const { image, listener } of loadedListeners) {
+        image.removeEventListener('load', listener);
+      }
+    };
+  }, [paths]);
+
+  return images;
 }
 
 export function useGifBackground(currentBg: string) {

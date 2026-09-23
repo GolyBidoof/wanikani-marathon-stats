@@ -41,18 +41,22 @@ export function latestMarathonThreadLabel(marathonName: string) {
   return `${marathonName} Readathon Thread`;
 }
 
+const README_LINKS_HEADING = '## Visit us and join the next one here!';
+
 export function syncReadmeLinks(site: SiteConfig = readJson(PATHS.site) as SiteConfig) {
   const readme = readFileSync(PATHS.readme, 'utf8');
   const threadLabel = latestMarathonThreadLabel(site.latestMarathon.name);
-  const linksSection = `## Come hang out
+  const linksSection = `${README_LINKS_HEADING}
 
 - [${threadLabel}](${site.latestMarathon.threadUrl})
 - [WaniKani Community Forums](${site.forumsUrl})
 `;
 
-  const linksSectionPattern = /## Come hang out\n\n(?:- .+\n)+/;
+  const linksSectionPattern = new RegExp(
+    `${README_LINKS_HEADING.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\n\\n(?:- .+\\n)+`,
+  );
   if (!linksSectionPattern.test(readme)) {
-    throw new Error('Could not find ## Come hang out section in README.md to update');
+    throw new Error(`Could not find "${README_LINKS_HEADING}" section in README.md to update`);
   }
 
   writeFileSync(PATHS.readme, readme.replace(linksSectionPattern, linksSection), 'utf8');

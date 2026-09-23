@@ -1,5 +1,9 @@
+// ".ts" is required: scripts/import-marathon.ts loads this via node --experimental-strip-types.
+import { isEmojiToken } from '../constants/emoji.ts';
+
 const EMPTY_CELL_PATTERN = /^(?:|-|–|—|n\/?a|\?|\\-)$/i;
 const MARKDOWN_LINK_PATTERN = /^\[([^\]]+)\]\(([^)]+)\)$/;
+const SHORTCODE_PATTERN = /^:[a-z0-9_+-]+:$/i;
 const THOUSANDS_PATTERN = /^(\d+(?:\.\d+)?)\s*k$/i;
 const NUMERIC_RANGE_PATTERN = /^(\d+)\s*[-–—]\s*(\d+)$/;
 
@@ -10,6 +14,8 @@ export interface ParsedParticipant {
   characters?: number;
   sources?: number;
   url?: string;
+  emoji?: string;
+  emojiImage?: string;
 }
 
 export interface ParsedNumericCell {
@@ -40,6 +46,44 @@ export function parseUserCell(cell: string): { user: string; url?: string } {
     return { user: markdownLink[1].trim(), url: markdownLink[2].trim() };
   }
   return { user: cellText };
+}
+
+const BADGE_IMAGE_PATTERN = /!\[([^\]]*)\]\(([^)\s]+)\)/;
+
+export interface ParsedBadge {
+  emoji?: string;
+  emojiImage?: string;
+}
+
+function slugifyBadgeFilename(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+/** Shortcode, literal emoji, or a custom image vendored under `public/badges/`. */
+export function parseBadgeCell(cell: string): ParsedBadge {
+  const cellText = normalizeCell(cell);
+  if (isEmptyCell(cellText)) return {};
+
+  const image = cellText.match(BADGE_IMAGE_PATTERN);
+  if (image) {
+    const altText = image[1].split(/\\\||\|/)[0];
+    const urlFilename = image[2].split('/').pop() ?? '';
+    const extension = urlFilename.includes('.') ? urlFilename.split('.').pop()! : 'gif';
+    const baseName =
+      slugifyBadgeFilename(altText) ||
+      slugifyBadgeFilename(urlFilename.replace(/\.[^.]+$/, '')) ||
+      'badge';
+    return { emojiImage: `badges/${baseName}.${extension.toLowerCase()}` };
+  }
+
+  const tokens = cellText
+    .split(/\s+/)
+    .filter((token) => SHORTCODE_PATTERN.test(token) || isEmojiToken(token));
+
+  return tokens.length > 0 ? { emoji: tokens.join(' ') } : {};
 }
 
 export function parseTimeCell(cell: string): ParsedTimeCell {
@@ -97,21 +141,32 @@ export function parseNumericCell(cell: string, fieldName: string): ParsedNumeric
   return { value: Math.round(numericValue) };
 }
 
+/** Stand-in for "\|" while a row is split, so escaped pipes stay inside one cell. */
+const ESCAPED_PIPE = '\u0001';
+
 export function splitTableRow(line: string): string[] | null {
   const trimmedLine = line.trim();
   if (!trimmedLine.startsWith('|')) return null;
 
-  const cellsBetweenPipes = trimmedLine
-    .split('|')
-    .slice(1, -1)
-    .map((cell) => cell.trim());
+  const protect = (value: string) => value.split('\\|').join(ESCAPED_PIPE);
+  const restore = (cells: string[]) => cells.map((cell) => cell.split(ESCAPED_PIPE).join('\\|'));
+
+  const safeLine = protect(trimmedLine);
+  const cellsBetweenPipes = restore(
+    safeLine
+      .split('|')
+      .slice(1, -1)
+      .map((cell) => cell.trim()),
+  );
   if (cellsBetweenPipes.length >= 5) return cellsBetweenPipes;
 
-  const cellsWithoutTrailingPipe = trimmedLine
-    .replace(/^\|/, '')
-    .replace(/\|$/, '')
-    .split('|')
-    .map((cell) => cell.trim());
+  const cellsWithoutTrailingPipe = restore(
+    safeLine
+      .replace(/^\|/, '')
+      .replace(/\|$/, '')
+      .split('|')
+      .map((cell) => cell.trim()),
+  );
 
   return cellsWithoutTrailingPipe.length >= 5 ? cellsWithoutTrailingPipe : null;
 }
@@ -125,6 +180,11 @@ export function isSeparatorRow(line: string): boolean {
 export function isHeaderRow(cells: string[]): boolean {
   const headerText = cells.map((cell) => cell.toLowerCase()).join(' ');
   return headerText.includes('user') && headerText.includes('time');
+}
+
+/** Rows such as "**Total**:" or "**Goal 2**:" are tallies, not participants. */
+export function isSummaryRow(cells: string[]): boolean {
+  return /^\*{0,2}(?:total|goals?)(?:\s*\d+)?\*{0,2}:?\*{0,2}$/i.test(normalizeCell(cells[0]));
 }
 
 export function parseMarathonTable(markdown: string): {
@@ -141,9 +201,9 @@ export function parseMarathonTable(markdown: string): {
 
   for (const line of tableLines) {
     const cells = splitTableRow(line);
-    if (!cells || isSeparatorRow(line) || isHeaderRow(cells)) continue;
+    if (!cells || isSeparatorRow(line) || isHeaderRow(cells) || isSummaryRow(cells)) continue;
 
-    const [userCell, timeCell, pagesCell, charactersCell, sourcesCell] = cells;
+    const [userCell, timeCell, pagesCell, charactersCell, sourcesCell, emojiCell] = cells;
     if (isEmptyCell(userCell)) {
       warnings.push(`Skipping row with empty user: ${line}`);
       continue;
@@ -173,6 +233,10 @@ export function parseMarathonTable(markdown: string): {
     const parsedSources = parseNumericCell(sourcesCell, 'sources');
     if (parsedSources.warning) warnings.push(`${user}: ${parsedSources.warning}`);
     if (parsedSources.value !== undefined) participant.sources = parsedSources.value;
+
+    const badge = parseBadgeCell(emojiCell ?? '');
+    if (badge.emoji) participant.emoji = badge.emoji;
+    if (badge.emojiImage) participant.emojiImage = badge.emojiImage;
 
     if (
       !participant.time &&

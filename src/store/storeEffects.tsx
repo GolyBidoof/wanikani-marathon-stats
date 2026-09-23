@@ -47,6 +47,7 @@ export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
   const cardNicknameCase = useAppStore((state) => state.cardNicknameCase);
   const cardJaNumberStyle = useAppStore((state) => state.cardJaNumberStyle);
   const cardRoundNumbers = useAppStore((state) => state.cardRoundNumbers);
+  const cardShowEmoji = useAppStore((state) => state.cardShowEmoji);
   const volumeConversion = useAppStore((state) => state.volumeConversion);
   const excludedMarathons = useAppStore((state) => state.excludedMarathons);
   const userMarathonsOrder = useAppStore((state) => state.userMarathonsOrder);
@@ -118,6 +119,7 @@ export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
       cardNicknameCase,
       cardJaNumberStyle,
       cardRoundNumbers,
+      cardShowEmoji,
       volumeConversion,
     });
   }, [
@@ -135,6 +137,7 @@ export default function StoreEffects({ allUsers }: { allUsers: string[] }) {
     cardNicknameCase,
     cardJaNumberStyle,
     cardRoundNumbers,
+    cardShowEmoji,
     volumeConversion,
   ]);
 

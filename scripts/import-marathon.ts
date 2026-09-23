@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { emojiAssetPaths } from '../src/constants/emoji.ts';
 import { marathonNameToGifFilename, parseMarathonTable } from '../src/utils/parseMarathonTable.ts';
-import { updateLatestMarathon, upsertMarathon, PATHS } from './lib/marathonData.ts';
+import { updateLatestMarathon, upsertMarathon, PATHS, PUBLIC_DIR } from './lib/marathonData.ts';
 
 function printHelp() {
   console.log(`Add a marathon from a forum results table.
@@ -19,6 +21,7 @@ Options:
   --help
 
 Drop the matching GIF in public/ as summer2026.gif (season + year, lowercase, no space).
+Reader badges come from the ":tada:" column; glyph art lives in public/badges/emoji/.
 `);
 }
 
@@ -77,6 +80,21 @@ function main() {
   if (warnings.length) {
     console.log('\nWarnings:');
     for (const warning of warnings) console.log(`  - ${warning}`);
+  }
+
+  const missingBadges = [
+    ...new Set(
+      participants
+        .flatMap((participant) => [
+          ...(participant.emojiImage ? [participant.emojiImage] : []),
+          ...emojiAssetPaths(participant.emoji ?? ''),
+        ])
+        .filter((asset) => !existsSync(join(PUBLIC_DIR, asset))),
+    ),
+  ];
+  if (missingBadges.length) {
+    console.log('\nMissing badge art (add under public/ so the card can draw it):');
+    for (const badge of missingBadges) console.log(`  - public/${badge}`);
   }
 
   if (parsedArguments.dryRun) {

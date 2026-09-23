@@ -243,6 +243,8 @@ function CardFormatSettings({ showNickname }: { showNickname: boolean }) {
     setCardJaNumberStyle,
     cardRoundNumbers,
     setCardRoundNumbers,
+    cardShowEmoji,
+    setCardShowEmoji,
     cardNicknameCase,
     setCardNicknameCase,
   } = useStore();
@@ -282,6 +284,16 @@ function CardFormatSettings({ showNickname }: { showNickname: boolean }) {
       )}
 
       {showNickname && <NicknameToggle value={cardNicknameCase} onChange={setCardNicknameCase} />}
+
+      <ToggleGroup
+        label={t('customizer.emojiBadge')}
+        value={cardShowEmoji ? 'shown' : 'hidden'}
+        options={[
+          { value: 'shown', label: t('customizer.shown') },
+          { value: 'hidden', label: t('customizer.hidden') },
+        ]}
+        onChange={(value) => setCardShowEmoji(value === 'shown')}
+      />
     </div>
   );
 }
