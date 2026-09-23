@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CANVAS_LAYOUT } from '../constants';
 import { drawSummaryCard, type SummaryDrawContext } from './drawSummaryCard';
+import { expandCombinedMetric, migrateEnabledMetricsForConversion } from './volumeConversion';
+import type { SummaryMetricName } from '../types';
 
 type RecordedOp =
   | { op: 'fill'; fillStyle: string }
@@ -225,6 +227,27 @@ describe('drawSummaryCard badge', () => {
     }
   });
 
+  it('keeps pages and characters on the marathon-totals card when combining is on', () => {
+    const { canvas, ops } = createMockCanvas();
+    const stored = migrateEnabledMetricsForConversion(
+      new Set<SummaryMetricName>(['pages', 'chars', 'sources']),
+      true,
+    ) as Set<SummaryMetricName>;
+    const storedOrder: SummaryMetricName[] = ['avgTime', 'volume', 'sources'];
+    const context = buildContext({
+      currentQuery: '',
+      volumeConversion: { enabled: true, displayAs: 'chars', charsPerPage: 400 },
+      enabledSummaryMetrics: new Set(expandCombinedMetric(stored, false)),
+      summaryMetricsOrder: expandCombinedMetric(storedOrder, false),
+    });
+
+    drawSummaryCard(canvas, null, context);
+
+    const labels = ops.filter((op) => op.op === 'fillText').map((op) => op.text);
+    expect(labels).toContain('PAGES');
+    expect(labels).toContain('CHARS');
+    expect(labels).not.toContain('COMB. CHARS');
+  });
 
   it('skips the badge when the reader has none', () => {
     stubOffscreenCanvas();

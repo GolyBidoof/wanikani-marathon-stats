@@ -9,6 +9,7 @@ import {
 } from '../utils/statsQueries';
 import { describeBadge, emojiAssetPaths, resolveEmojiList } from '../constants/emoji';
 import {
+  expandCombinedMetric,
   getUnifiedVolume,
   isVolumeConversionActive,
   metricsOrderForConversion,
@@ -112,6 +113,15 @@ export function useSummaryDrawContext(
   }, [allStats, exactUsername, isExactMatch, selectedMarathon, filterTotals, excludedMarathons]);
 
   const volumeActive = isVolumeConversionActive(volumeConversion, isExactMatch);
+  // Marathon totals never merge pages into characters; only a reader's own card does.
+  const viewSummaryMetrics = useMemo(
+    () => new Set(expandCombinedMetric(enabledSummaryMetrics, volumeActive)),
+    [enabledSummaryMetrics, volumeActive],
+  );
+  const viewSummaryOrder = useMemo(
+    () => expandCombinedMetric(summaryMetricsOrder, volumeActive),
+    [summaryMetricsOrder, volumeActive],
+  );
 
   const sortedHistory = useMemo(() => {
     const visibleMarathons = totals.history.filter((name) => !excludedMarathons.has(name));
@@ -188,8 +198,8 @@ export function useSummaryDrawContext(
       showHistory,
       enabledMetrics,
       metricsOrder: userMetricsOrder,
-      enabledSummaryMetrics,
-      summaryMetricsOrder,
+      summaryMetricsOrder: viewSummaryOrder,
+      enabledSummaryMetrics: viewSummaryMetrics,
       excludedMarathons,
       allStats,
       cardLanguage,
@@ -213,8 +223,8 @@ export function useSummaryDrawContext(
       showHistory,
       enabledMetrics,
       userMetricsOrder,
-      enabledSummaryMetrics,
-      summaryMetricsOrder,
+      viewSummaryOrder,
+      viewSummaryMetrics,
       excludedMarathons,
       allStats,
       cardLanguage,

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  expandCombinedMetric,
   getEntryUnifiedVolume,
   getUnifiedVolume,
   isVolumeConversionActive,
@@ -73,5 +74,44 @@ describe('migrateEnabledMetricsForConversion', () => {
     expect(next.has('volume')).toBe(false);
     expect(next.has('pages')).toBe(true);
     expect(next.has('chars')).toBe(true);
+  });
+});
+
+describe('expandCombinedMetric', () => {
+  it('leaves the list alone while the conversion applies', () => {
+    expect(expandCombinedMetric(['avgTime', 'volume', 'sources'], true)).toEqual([
+      'avgTime',
+      'volume',
+      'sources',
+    ]);
+  });
+
+  it('falls back to the two totals it merges in the marathon-totals view', () => {
+    expect(expandCombinedMetric(['avgTime', 'volume', 'sources'], false)).toEqual([
+      'avgTime',
+      'pages',
+      'chars',
+      'sources',
+    ]);
+  });
+
+  it('does not duplicate totals that are already listed', () => {
+    expect(expandCombinedMetric(['pages', 'volume', 'chars'], false)).toEqual(['pages', 'chars']);
+  });
+
+  it('keeps the marathon totals readable after the toggle strips the separate totals', () => {
+    const stored = migrateEnabledMetricsForConversion(new Set(['pages', 'chars', 'sources']), true);
+    expect(stored.has('volume')).toBe(true);
+    expect(stored.has('pages')).toBe(false);
+
+    const view = expandCombinedMetric(stored, false);
+    expect(view).toContain('pages');
+    expect(view).toContain('chars');
+    expect(view).not.toContain('volume');
+  });
+
+  it('restores both totals in the order they were merged from', () => {
+    const order = ['avgTime', 'volume', 'sources'];
+    expect(expandCombinedMetric(order, false)).toEqual(['avgTime', 'pages', 'chars', 'sources']);
   });
 });

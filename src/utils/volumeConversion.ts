@@ -31,6 +31,28 @@ export function getEntryUnifiedVolume(
   return getUnifiedVolume(pages, chars, config.displayAs, config.charsPerPage);
 }
 
+/** Per-reader metric; marathon totals fall back to separate pages and characters. */
+export function expandCombinedMetric<T extends string>(
+  metrics: Iterable<T>,
+  conversionActive: boolean,
+): T[] {
+  const result: T[] = [];
+  const add = (metric: T) => {
+    if (!result.includes(metric)) result.push(metric);
+  };
+
+  for (const metric of metrics) {
+    if (metric !== 'volume' || conversionActive) {
+      add(metric);
+      continue;
+    }
+    add('pages' as T);
+    add('chars' as T);
+  }
+
+  return result;
+}
+
 export function metricsOrderForConversion(
   metrics: Iterable<string>,
   conversionEnabled: boolean,

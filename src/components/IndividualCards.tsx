@@ -6,7 +6,11 @@ import { seasonEmojis } from '../constants';
 import { formatMarathonUiLabel } from '../constants/cardCopy';
 import { getMarathonAccentColor, getMarathonPreviewUrl } from '../utils/cardPreviews';
 import { getMarathonThreadUrl } from '../utils/marathonThreads';
-import { getEntryUnifiedVolume, isVolumeConversionActive } from '../utils/volumeConversion';
+import {
+  expandCombinedMetric,
+  getEntryUnifiedVolume,
+  isVolumeConversionActive,
+} from '../utils/volumeConversion';
 import { formatNumber } from '../utils/numberFormat';
 import {
   getResultsViewForQuery,
@@ -98,6 +102,11 @@ function DisplayedResults({
   const { searchQuery, resultsView, userCards, isPartialSearch, isExactMatch } =
     useDisplayedIndividualCards(displayKey, allStats, allUsers);
   const volumeActive = isVolumeConversionActive(volumeConversion, isExactMatch);
+  // Marathon totals never merge pages into characters; only a reader's own card does.
+  const visibleSummaryMetrics = useMemo(
+    () => new Set(expandCombinedMetric(enabledSummaryMetrics, volumeActive)),
+    [enabledSummaryMetrics, volumeActive],
+  );
   const showPartialHint = isPartialSearch || (liveIsPartialSearch && resultsView === 'placeholder');
 
   if (resultsView === 'placeholder') {
@@ -123,10 +132,10 @@ function DisplayedResults({
             sources={data.sources}
             url={data.url}
             threadUrl={getMarathonThreadUrl(marathonName)}
-            showPages={enabledSummaryMetrics.has('pages')}
-            showCharacters={enabledSummaryMetrics.has('chars')}
-            showCombined={volumeActive && enabledSummaryMetrics.has('volume')}
-            showSources={enabledSummaryMetrics.has('sources')}
+            showPages={visibleSummaryMetrics.has('pages')}
+            showCharacters={visibleSummaryMetrics.has('chars')}
+            showCombined={volumeActive && visibleSummaryMetrics.has('volume')}
+            showSources={visibleSummaryMetrics.has('sources')}
             unifiedVolume={volumeActive ? getEntryUnifiedVolume(data, volumeConversion) : null}
             volumeUnit={volumeConversion.displayAs}
             cardLanguage={cardLanguage}
