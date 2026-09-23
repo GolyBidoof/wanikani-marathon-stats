@@ -230,6 +230,24 @@ header h1 span {
   text-decoration: underline;
 }
 
+/* Low-key, but --text-secondary keeps it above 4.5:1 on the panel. */
+.info-content .info-footnote {
+  margin: 10px 0 0;
+}
+
+.info-link-subtle {
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.info-link-subtle:hover,
+.info-link-subtle:focus-visible {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -1455,6 +1473,8 @@ footer {
 
 .footer-credits {
   line-height: 1.6;
+  /* The credit copy carries an explicit line break before the data-credit line. */
+  white-space: pre-line;
 }
 
 .footer-github {

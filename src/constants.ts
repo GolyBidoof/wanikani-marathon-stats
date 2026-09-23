@@ -7,6 +7,7 @@ export const SITE = {
   description: site.description,
   url: site.url,
   forumsUrl: site.forumsUrl,
+  organizationUrl: site.organizationUrl,
   latestMarathon: site.latestMarathon,
 } as const;
 

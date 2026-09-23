@@ -9,7 +9,7 @@ const ja: TranslationSchema = {
     skipToMain: 'メインコンテンツへスキップ',
     loadingChart: 'チャートを読み込み中…',
     footerCredits:
-      'マラソン主催：soggyboy（発起人：taiyousea）。データ整備：GolyBidoof。※Tofugu LLC公式の関連サービスではありません。',
+      'マラソン主催：Midnightblueとリーダソン運営チーム（発起人：taiyousea、以前の主催：soggyboy）。\nデータ整備：GolyBidoof。※Tofugu LLC公式の関連サービスではありません。',
     lastUpdated: '最終更新：{{date}}',
     languageLabel: '表示言語',
     languageEn: 'EN',
@@ -20,10 +20,11 @@ const ja: TranslationSchema = {
     show: '24時間リーダソンとは？',
     hide: '説明を隠す',
     description:
-      '24時間リーダソンは、WaniKaniフォーラムで開催されているコミュニティイベントです（現在の主催者はsoggyboy、最初の8回はtaiyouseaが立ち上げと主催を務めました！）。参加者は24時間の中でできるだけ多くの日本語を読むことに挑戦し、読んだページ数や文字数、読書時間などを記録します。そしてイベント終了後に最終結果を報告し合い、みんなで達成した全体の成果を一緒にお祝いします！',
+      '24時間リーダソンは、WaniKaniフォーラムで開催されているコミュニティイベントです（現在の主催者はMidnightblueとリーダソン運営チーム、最初の8回はtaiyouseaが立ち上げと主催を務めました！）。参加者は24時間の中でできるだけ多くの日本語を読むことに挑戦し、読んだページ数や文字数、読書時間などを記録します。そしてイベント終了後に最終結果を報告し合い、みんなで達成した全体の成果を一緒にお祝いします！',
     contribution:
       'ブッククラブの課題本をしっかり読み進めるのも、ほんの数ページめくるだけでも大歓迎！一人ひとりの小さな積み重ねが、コミュニティ全体の記録を引き上げる力になります。',
     forumLink: 'WaniKaniフォーラムのスレッドで一緒に盛り上がりましょう！',
+    organizationLink: '運営について',
   },
   search: {
     heading: '参加者を検索',

@@ -2,7 +2,7 @@
 
 The source of truth and a little achievements portal for the WaniKani community’s **24-hour Readathons**, where we all try to read as much Japanese as we can in a day four times a year, then cheer each other on when the numbers come in.
 
-The tradition was started by **taiyousea**, and these days the events are organized by **soggyboy** on the forums. This stats page is just a friendly place to look back on our efforts to learn Japanese together: search for a username, look at the past marathons, and make a shareable achievement card if you like.
+The tradition was started by **taiyousea**, and these days the events are organized by **Midnightblue** on the forums. This stats page is just a friendly place to look back on our efforts to learn Japanese together: search for a username, look at the past marathons, and make a shareable achievement card if you like.
 
 ## Visit us and join the next one here!
 
@@ -20,7 +20,8 @@ Stats are curated by hand from each marathon thread, there's some cleanup from t
 
 ## Credits
 
-- **soggyboy** - keeps the readathons going
+- **Midnightblue** and the [readathon organization crew](https://community.wanikani.com/t/readathon-organisation/75645) - keep the readathons going
+- **soggyboy** - organized the readathons before that
 - **taiyousea** - started the whole tradition
 - **GolyBidoof** - built and tends this tracker.
 - **Twemoji** (CC-BY 4.0) - the reader badge emoji artwork in `public/badges/emoji`.

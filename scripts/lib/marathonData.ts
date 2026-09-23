@@ -23,6 +23,7 @@ export type SiteConfig = {
   description: string;
   url: string;
   forumsUrl: string;
+  organizationUrl: string;
   latestMarathon: {
     name: string;
     threadUrl: string;

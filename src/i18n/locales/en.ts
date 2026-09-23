@@ -7,7 +7,7 @@ const en = {
     skipToMain: 'Skip to main content',
     loadingChart: 'Loading chart…',
     footerCredits:
-      'Marathon organized by soggyboy (originally started by taiyousea). Data curated by GolyBidoof. Not affiliated with Tofugu LLC.',
+      'Marathon organized by Midnightblue and the readathon organization crew (started by taiyousea, previously run by soggyboy).\nData curated by GolyBidoof. Not affiliated with Tofugu LLC.',
     lastUpdated: 'Last updated {{date}}',
     languageLabel: 'App language',
     languageEn: 'EN',
@@ -18,10 +18,11 @@ const en = {
     show: 'What is this?',
     hide: 'Hide info',
     description:
-      'The 24-hour Readathon is a community event on the WaniKani forums, now organized by soggyboy. Taiyousea originally started and hosted the marathon for 8 instances! Participants attempt to read as much Japanese as they can within a 24-hour period, tracking pages, characters, or time. Participants then report their final numbers to the community. These stats are then tallied together to celebrate what we can accomplish as a group!',
+      'The 24-hour Readathon is a community event on the WaniKani forums, now organized by Midnightblue and the readathon organization crew. Taiyousea originally started and hosted the marathon for 8 instances! Participants attempt to read as much Japanese as they can within a 24-hour period, tracking pages, characters, or time. Participants then report their final numbers to the community. These stats are then tallied together to celebrate what we can accomplish as a group!',
     contribution:
       "Whether you're finishing a book club pick or just squeezing in a few pages, every contribution boosts our collective averages.",
     forumLink: 'Join the discussion on the WaniKani Forums!',
+    organizationLink: 'Who organizes the readathons?',
   },
   search: {
     heading: 'Search participants',

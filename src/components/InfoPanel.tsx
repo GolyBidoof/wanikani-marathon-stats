@@ -39,6 +39,16 @@ export default function InfoPanel() {
             >
               {t('info.forumLink')}
             </a>
+            <p className="info-footnote">
+              <a
+                href={SITE.organizationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="info-link info-link-subtle"
+              >
+                {t('info.organizationLink')}
+              </a>
+            </p>
           </div>
         </div>
       )}
