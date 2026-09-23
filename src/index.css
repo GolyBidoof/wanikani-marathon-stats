@@ -79,6 +79,11 @@ a:focus-visible {
   text-align: center;
 }
 
+/* The footer carries its own trailing space; the container's would leave a blank strip to scroll into. */
+.container:has(footer) {
+  padding-bottom: 0;
+}
+
 header h1 {
   font-size: 2.4rem;
   font-weight: 300;
@@ -1413,7 +1418,7 @@ header h1 span {
 
 footer {
   margin-top: 60px;
-  padding: 24px;
+  padding: 24px 24px 32px;
   border-top: 1px solid var(--border-color);
   color: var(--text-secondary);
   font-size: 0.85rem;
@@ -1794,7 +1799,7 @@ footer {
 
   footer {
     margin-top: 40px;
-    padding: 20px 8px;
+    padding: 20px 8px 28px;
   }
 }
 
