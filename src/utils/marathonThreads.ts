@@ -9,6 +9,7 @@ const MARATHON_THREAD_URLS: Record<string, string> = {
   'Winter 2025': 'https://community.wanikani.com/t/72793',
   'Spring 2026': 'https://community.wanikani.com/t/73789',
   'Summer 2026': 'https://community.wanikani.com/t/74572',
+  'Autumn 2026': 'https://community.wanikani.com/t/75644',
 };
 
 export function getMarathonThreadUrl(marathonName: string): string | null {

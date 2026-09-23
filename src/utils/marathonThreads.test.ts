@@ -6,6 +6,7 @@ describe('marathonThreads', () => {
     expect(getMarathonThreadUrl('Summer 2024')).toBe('https://community.wanikani.com/t/66274');
     expect(getMarathonThreadUrl('Spring 2026')).toBe('https://community.wanikani.com/t/73789');
     expect(getMarathonThreadUrl('Summer 2026')).toBe('https://community.wanikani.com/t/74572');
+    expect(getMarathonThreadUrl('Autumn 2026')).toBe('https://community.wanikani.com/t/75644');
   });
 
   it('returns null for unknown marathons', () => {
