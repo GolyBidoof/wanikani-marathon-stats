@@ -7,6 +7,7 @@ import { formatMarathonUiLabel } from '../constants/cardCopy';
 import { getMarathonAccentColor, getMarathonPreviewUrl } from '../utils/cardPreviews';
 import { getMarathonThreadUrl } from '../utils/marathonThreads';
 import { getEntryUnifiedVolume, isVolumeConversionActive } from '../utils/volumeConversion';
+import { formatNumber } from '../utils/numberFormat';
 import {
   getResultsViewForQuery,
   useDisplayedIndividualCards,
@@ -144,15 +145,15 @@ function DisplayedResults({
   );
 }
 
-function formatCombinedDisplay(value: number, unit: VolumeDisplayUnit): string {
-  if (unit === 'chars') return value.toLocaleString();
+function formatCombinedDisplay(value: number, unit: VolumeDisplayUnit, language: string): string {
+  if (unit === 'chars') return formatNumber(value, language);
   return String(Math.round(value * 10) / 10);
 }
 
-function formatStatValue(value: number | string | undefined): string {
+function formatStatValue(value: number | string | undefined, language: string): string {
   if (value == null || value === '') return '—';
   const asNumber = typeof value === 'number' ? value : Number(value);
-  if (Number.isFinite(asNumber)) return asNumber.toLocaleString();
+  if (Number.isFinite(asNumber)) return formatNumber(asNumber, language);
   return String(value);
 }
 
@@ -282,7 +283,7 @@ function UserMarathonCard({
                   isMissingStat(pages) ? t('individualCards.pagesUnavailable') : undefined
                 }
               >
-                {formatStatValue(pages)}
+                {formatStatValue(pages, cardLanguage)}
               </dd>
             </div>
           )}
@@ -295,14 +296,16 @@ function UserMarathonCard({
                   isMissingStat(characters) ? t('individualCards.charactersUnavailable') : undefined
                 }
               >
-                {formatStatValue(characters)}
+                {formatStatValue(characters, cardLanguage)}
               </dd>
             </div>
           )}
           {showCombined && unifiedVolume != null && (
             <div className="stat-item">
               <dt className="stat-label">{volumeLabel}</dt>
-              <dd className="stat-value">{formatCombinedDisplay(unifiedVolume, volumeUnit)}</dd>
+              <dd className="stat-value">
+                {formatCombinedDisplay(unifiedVolume, volumeUnit, cardLanguage)}
+              </dd>
             </div>
           )}
           {showSources && (
@@ -314,7 +317,7 @@ function UserMarathonCard({
                   isMissingStat(sources) ? t('individualCards.sourcesUnavailable') : undefined
                 }
               >
-                {formatStatValue(sources)}
+                {formatStatValue(sources, cardLanguage)}
               </dd>
             </div>
           )}

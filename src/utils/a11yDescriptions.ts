@@ -2,6 +2,7 @@ import type { SummaryDrawContext } from '../utils/drawSummaryCard';
 import type { MultiChartSeriesData } from '../utils/chartConfig';
 import { isVolumeConversionActive } from './volumeConversion';
 import i18n from '../i18n';
+import { formatNumber } from './numberFormat';
 
 export function buildAchievementCardDescription(ctx: SummaryDrawContext): string {
   const { state, currentQuery, cardLanguage, enabledSummaryMetrics, volumeConversion } = ctx;
@@ -65,7 +66,7 @@ export function buildChartDescription(
 
   const points = labels.map((label, index) => {
     const value = values[index] ?? 0;
-    return i18n.t('a11y.chartPoint', { label, value: value.toLocaleString() });
+    return i18n.t('a11y.chartPoint', { label, value: formatNumber(value, i18n.language) });
   });
 
   return i18n.t('a11y.chartSingleDescription', {
@@ -92,10 +93,13 @@ export function buildMultiChartDescription(series: MultiChartSeriesData): string
         return i18n.t('a11y.chartNormalizedPoint', {
           label,
           percent: Math.round(displayValue),
-          value: rawValue.toLocaleString(),
+          value: formatNumber(rawValue, series.language ?? i18n.language),
         });
       }
-      return i18n.t('a11y.chartPoint', { label, value: rawValue.toLocaleString() });
+      return i18n.t('a11y.chartPoint', {
+        label,
+        value: formatNumber(rawValue, series.language ?? i18n.language),
+      });
     });
     return `${dataset.label}: ${points.join(', ')}`;
   });

@@ -2,6 +2,7 @@ import type { ChartConfiguration, ChartDataset, ChartOptions, TooltipItem } from
 import { formatHours } from './helpers';
 import type { ChartMetric } from '../types';
 import i18n from '../i18n';
+import { formatNumber } from './numberFormat';
 
 export type ChartAxisFamily = 'time' | 'pages' | 'characters' | 'volume' | 'count' | 'normalized';
 
@@ -116,14 +117,18 @@ function axisTitleForFamily(
   return i18n.t('chart.axis.count', lng);
 }
 
-function formatAxisTick(family: ChartAxisFamily, value: string | number): string {
+function formatAxisTick(
+  family: ChartAxisFamily,
+  value: string | number,
+  language?: string,
+): string {
   const numericValue = Number(value);
   if (family === 'normalized') return `${Math.round(numericValue)}%`;
   if (family === 'time') return `${Math.floor(numericValue)}h`;
   if (numericValue >= 1000) {
     return `${Math.round(numericValue / 100) / 10}k`;
   }
-  return numericValue.toLocaleString();
+  return formatNumber(numericValue, language);
 }
 
 function formatTooltipLabel(
@@ -131,7 +136,8 @@ function formatTooltipLabel(
   metric: ChartMetric,
   value: number,
   normalized: boolean,
-  rawValue?: number,
+  rawValue: number | undefined,
+  language?: string,
 ): string {
   if (normalized) {
     const rawSuffix =
@@ -139,11 +145,11 @@ function formatTooltipLabel(
         ? ''
         : metric === 'time'
           ? ` (${formatHours(rawValue)})`
-          : ` (${rawValue.toLocaleString()})`;
+          : ` (${formatNumber(rawValue, language)})`;
     return `${metricLabel}: ${Math.round(value)}%${rawSuffix}`;
   }
   if (metric === 'time') return `${metricLabel}: ${formatHours(value)}`;
-  return `${metricLabel}: ${value.toLocaleString()}`;
+  return `${metricLabel}: ${formatNumber(value, language)}`;
 }
 
 function hexToRgba(hexColor: string, alpha: number): string {
@@ -202,7 +208,7 @@ function buildScaleOptions(
         color: axisColor,
         maxTicksLimit: familiesInUse.length >= 4 ? 4 : 5,
         precision: family === 'normalized' || family === 'time' ? 0 : undefined,
-        callback: (value) => formatAxisTick(family, value),
+        callback: (value) => formatAxisTick(family, value, language),
       },
     };
   });
@@ -302,6 +308,7 @@ export function buildLineChartConfig(
                 context.parsed.y ?? 0,
                 series.normalized,
                 datasetSeries.rawValues[pointIndex],
+                language,
               );
             },
           },
