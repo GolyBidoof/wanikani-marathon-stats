@@ -18,3 +18,4 @@ build/
 # Local development
 .env
 .env.local
+.aider*
